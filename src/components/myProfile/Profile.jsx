@@ -35,8 +35,9 @@ const Profile = () => {
   };
 
   return (
-    <Box className="min-h-screen bg-slate-50/50 p-4 md:p-8">
+    <Box sx={{ minHeight: '100vh', backgroundColor: '#f8fafc', p: { xs: 2, md: 4 } }}>
       <div className="max-w-5xl mx-auto">
+
         {/* Header Profile Card */}
         <Card className="overflow-hidden border-none shadow-xl rounded-2xl mb-8">
           <div className="h-48 bg-gradient-to-r from-blue-600 to-indigo-700 relative">

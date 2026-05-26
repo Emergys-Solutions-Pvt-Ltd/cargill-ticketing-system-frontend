@@ -7,17 +7,15 @@ import { Outlet } from "react-router-dom";
 function App() {
   return (
     <>
-      <Box>
+      <Box sx={{ minHeight: "100vh", backgroundColor: "#f8fafc" }}>
         <Navbar />
-        <Box sx={{ width: "20%", margin: 3 }}>
-          <LabelStepper />
-        </Box>
-        <Card variant="outlined" sx={{ margin: 3 }}>
+        <Box sx={{ width: "100%" }}>
           <Outlet />
-        </Card>
+        </Box>
       </Box>
     </>
   );
 }
+
 
 export default App;

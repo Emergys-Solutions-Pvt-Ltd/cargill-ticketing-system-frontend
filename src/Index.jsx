@@ -3,6 +3,7 @@ import App from "./App";
 import MyRequest from "./pages/MyRequest";
 import Profile from "./components/myProfile/Profile";
 import AdminRBAC from "./pages/AdminRBAC";
+import RequestList from "./pages/RequestList";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -14,6 +15,10 @@ const router = createBrowserRouter([
       },
       {
         path: "requests",
+        element: <RequestList />,
+      },
+      {
+        path: "requests/:requestId",
         element: <MyRequest />,
       },
       {
@@ -23,6 +28,7 @@ const router = createBrowserRouter([
     ],
   },
 ]);
+
 
 
 function Index() {
