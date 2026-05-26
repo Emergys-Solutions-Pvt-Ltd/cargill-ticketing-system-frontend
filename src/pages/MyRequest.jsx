@@ -1,18 +1,19 @@
-import { 
-  Box, 
-  Typography, 
-  Button, 
-  Breadcrumbs, 
-  Link, 
-  Chip, 
-  Grid, 
-  Card, 
+import {
+  Box,
+  Typography,
+  Button,
+  Breadcrumbs,
+  Link,
+  Chip,
+  Grid,
+  Card,
   CardContent,
   Avatar,
   Divider,
   Stack,
   IconButton
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import LabTabs from "../components/LabTabs";
 import { useParams, useNavigate, Link as RouterLink } from "react-router-dom";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -70,25 +71,43 @@ const dummyRequests = [
   },
 ];
 
-const getStatusColor = (status) => {
+const getStatusColor = (status, mode) => {
+  const isDark = mode === "dark";
   switch (status) {
-    case "Closed": return { bg: "#f1f5f9", text: "#475569" };
-    case "In Progress": return { bg: "#e0f2fe", text: "#0284c7" };
-    case "Pending": return { bg: "#fef3c7", text: "#d97706" };
-    case "Open": return { bg: "#dcfce7", text: "#16a34a" };
-    default: return { bg: "#f1f5f9", text: "#475569" };
+    case "Closed":
+      return isDark
+        ? { bg: "rgba(255, 255, 255, 0.08)", text: "#94a3b8" }
+        : { bg: "#f1f5f9", text: "#475569" };
+    case "In Progress":
+      return isDark
+        ? { bg: "rgba(2, 132, 199, 0.2)", text: "#38bdf8" }
+        : { bg: "#e0f2fe", text: "#0284c7" };
+    case "Pending":
+      return isDark
+        ? { bg: "rgba(217, 119, 6, 0.2)", text: "#fbbf24" }
+        : { bg: "#fef3c7", text: "#d97706" };
+    case "Open":
+      return isDark
+        ? { bg: "rgba(22, 163, 74, 0.2)", text: "#4ade80" }
+        : { bg: "#dcfce7", text: "#16a34a" };
+    default:
+      return isDark
+        ? { bg: "rgba(255, 255, 255, 0.08)", text: "#94a3b8" }
+        : { bg: "#f1f5f9", text: "#475569" };
   }
 };
 
 function MyRequest() {
   const { requestId } = useParams();
   const navigate = useNavigate();
-  
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
+
   const request = dummyRequests.find(r => r.id === requestId) || dummyRequests[0];
-  const statusColors = getStatusColor(request.status);
+  const statusColors = getStatusColor(request.status, theme.palette.mode);
 
   return (
-    <Box sx={{ width: "100%", minHeight: "100vh", backgroundColor: "#f8fafc", p: { xs: 2, md: 4 } }}>
+    <Box sx={{ width: "100%", minHeight: "100vh", backgroundColor: "background.default", p: { xs: 2, md: 4 } }}>
       {/* Breadcrumbs & Header */}
       <Box sx={{ mb: 4 }}>
         <Breadcrumbs
@@ -96,7 +115,7 @@ function MyRequest() {
           aria-label="breadcrumb"
           sx={{ mb: 2 }}
         >
-          <Link underline="hover" color="inherit" component={RouterLink} to="/">Home</Link>
+          <Link underline="hover" color="inherit" component={RouterLink} to="/requests">Home</Link>
           <Link underline="hover" color="inherit" component={RouterLink} to="/requests">My Requests</Link>
           <Typography color="text.primary" sx={{ fontWeight: 500 }}>{request.id}</Typography>
         </Breadcrumbs>
@@ -104,22 +123,22 @@ function MyRequest() {
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 2 }}>
           <Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-              <Typography variant="h4" sx={{ fontWeight: 800, color: "#1e293b", letterSpacing: "-0.02em" }}>
+              <Typography variant="h4" sx={{ fontWeight: 800, color: "text.primary", letterSpacing: "-0.02em" }}>
                 {request.id}
               </Typography>
-              <Chip 
-                label={request.status} 
-                sx={{ 
-                  backgroundColor: statusColors.bg, 
-                  color: statusColors.text, 
-                  fontWeight: 700, 
+              <Chip
+                label={request.status}
+                sx={{
+                  backgroundColor: statusColors.bg,
+                  color: statusColors.text,
+                  fontWeight: 700,
                   fontSize: '0.75rem',
                   borderRadius: '6px',
                   px: 1
-                }} 
+                }}
               />
             </Box>
-            <Typography variant="h6" sx={{ color: "#64748b", fontWeight: 500, maxWidth: "800px" }}>
+            <Typography variant="h6" sx={{ color: "text.secondary", fontWeight: 500, maxWidth: "800px" }}>
               {request.title}
             </Typography>
           </Box>
@@ -144,14 +163,14 @@ function MyRequest() {
           { label: "Priority", value: request.priority, icon: <AccessTimeIcon color="action" /> },
         ].map((item, idx) => (
           <Grid item xs={12} sm={6} md={3} key={idx}>
-            <Card variant="outlined" sx={{ borderRadius: 3, border: "1px solid #e2e8f0" }}>
+            <Card variant="outlined" sx={{ borderRadius: 3, border: "1px solid", borderColor: "divider" }}>
               <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2, py: "16px !important" }}>
-                <Avatar sx={{ bgcolor: "#eff6ff", color: "#3b82f6" }}>{item.icon}</Avatar>
+                <Avatar sx={{ bgcolor: isDark ? "rgba(59, 130, 246, 0.15)" : "#eff6ff", color: isDark ? "#60a5fa" : "#3b82f6" }}>{item.icon}</Avatar>
                 <Box>
-                  <Typography variant="caption" sx={{ color: "#94a3b8", fontWeight: 700, textTransform: 'uppercase' }}>
+                  <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700, textTransform: 'uppercase' }}>
                     {item.label}
                   </Typography>
-                  <Typography variant="body1" sx={{ fontWeight: 600, color: "#1e293b" }}>
+                  <Typography variant="body1" sx={{ fontWeight: 600, color: "text.primary" }}>
                     {item.value}
                   </Typography>
                 </Box>
@@ -164,7 +183,7 @@ function MyRequest() {
       {/* Layout Split */}
       <Grid container spacing={4}>
         <Grid item xs={12} lg={8}>
-          <Card variant="outlined" sx={{ borderRadius: 4, mb: 4, border: "1px solid #e2e8f0", overflow: 'visible' }}>
+          <Card variant="outlined" sx={{ borderRadius: 4, mb: 4, border: "1px solid", borderColor: "divider", overflow: 'visible' }}>
             <Box sx={{ p: 1 }}>
               <LabTabs />
             </Box>
@@ -172,30 +191,30 @@ function MyRequest() {
         </Grid>
 
         <Grid item xs={12} lg={4}>
-          <Card variant="outlined" sx={{ borderRadius: 4, border: "1px solid #e2e8f0", position: 'sticky', top: 24 }}>
+          <Card variant="outlined" sx={{ borderRadius: 4, border: "1px solid", borderColor: "divider", position: 'sticky', top: 24 }}>
             <CardContent sx={{ p: 3 }}>
-              <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, color: "#1e293b" }}>
+              <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, color: "text.primary" }}>
                 Request Details
               </Typography>
               <Stack spacing={3}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Avatar sx={{ bgcolor: "#f8fafc" }}><PersonOutlineIcon color="action" /></Avatar>
+                  <Avatar sx={{ bgcolor: "background.default" }}><PersonOutlineIcon color="action" /></Avatar>
                   <Box>
-                    <Typography variant="caption" sx={{ color: "#94a3b8", fontWeight: 700 }}>ASSIGNEE</Typography>
+                    <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700 }}>ASSIGNEE</Typography>
                     <Typography variant="body2" sx={{ fontWeight: 600 }}>{request.assignee}</Typography>
                   </Box>
                 </Box>
                 <Divider />
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Avatar sx={{ bgcolor: "#f8fafc" }}><CategoryIcon color="action" /></Avatar>
+                  <Avatar sx={{ bgcolor: "background.default" }}><CategoryIcon color="action" /></Avatar>
                   <Box>
-                    <Typography variant="caption" sx={{ color: "#94a3b8", fontWeight: 700 }}>CATEGORY</Typography>
+                    <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700 }}>CATEGORY</Typography>
                     <Typography variant="body2" sx={{ fontWeight: 600 }}>{request.category}</Typography>
                   </Box>
                 </Box>
                 <Divider />
                 <Box>
-                  <Typography variant="caption" sx={{ color: "#94a3b8", fontWeight: 700 }}>DEPARTMENT</Typography>
+                  <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700 }}>DEPARTMENT</Typography>
                   <Typography variant="body2" sx={{ fontWeight: 600 }}>{request.department}</Typography>
                 </Box>
               </Stack>

@@ -7,7 +7,7 @@ import { Outlet } from "react-router-dom";
 function App() {
   return (
     <>
-      <Box sx={{ minHeight: "100vh", backgroundColor: "#f8fafc" }}>
+      <Box sx={{ minHeight: "100vh", backgroundColor: "background.default" }}>
         <Navbar />
         <Box sx={{ width: "100%" }}>
           <Outlet />

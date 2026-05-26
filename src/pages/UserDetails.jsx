@@ -1,58 +1,92 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   Box,
-  Avatar,
   Typography,
-  Grid,
   Card,
   CardContent,
-  Divider,
+  Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
   Stack,
-  IconButton,
-  Tooltip,
+  Divider,
+  Snackbar,
+  Alert,
+  Grid,
+  Chip,
+  Avatar,
 } from "@mui/material";
 import {
-  Edit as EditIcon,
-  Email as EmailIcon,
-  Phone as PhoneIcon,
-  LocationOn as LocationIcon,
-  Language as LanguageIcon,
+  ArrowBack as ArrowBackIcon,
+  Shield as ShieldIcon,
+  CheckCircle as CheckCircleIcon,
+  Cancel as CancelIcon,
   AssignmentTurnedInOutlined as TicketIcon,
   CloudUploadOutlined as UploadIcon,
   ChatBubbleOutlineOutlined as CommentIcon,
   CheckCircleOutlineOutlined as ResolveIcon,
-  Shield as ShieldIcon,
-  CheckCircle as CheckCircleIcon,
-  Cancel as CancelIcon,
+  Email as EmailIcon,
+  Phone as PhoneIcon,
+  Language as LanguageIcon,
+  LocationOn as LocationIcon,
 } from "@mui/icons-material";
-import profileImg from "../../assets/profile_avatar.png";
-import { useAuth } from "../../context/AuthContext";
-import { getStoredRoles, systemPermissions } from "../../utils/rbacData";
+import {
+  getStoredUsers,
+  setStoredUsers,
+  getStoredRoles,
+  systemPermissions,
+} from "../utils/rbacData";
 
-const Profile = () => {
-  const { user: authUser } = useAuth();
-  const [roles, setRoles] = React.useState([]);
+const UserDetails = () => {
+  const { userId } = useParams();
+  const navigate = useNavigate();
+  const [users, setUsers] = useState([]);
+  const [roles, setRoles] = useState([]);
+  const [user, setUser] = useState(null);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
 
-  React.useEffect(() => {
-    setRoles(getStoredRoles());
-  }, []);
+  useEffect(() => {
+    const storedUsers = getStoredUsers();
+    const storedRoles = getStoredRoles();
+    setUsers(storedUsers);
+    setRoles(storedRoles);
 
-  // Dynamically map details based on logged-in user
+    const currentUser = storedUsers.find((u) => u.id === parseInt(userId, 10));
+    if (currentUser) {
+      setUser(currentUser);
+    }
+  }, [userId]);
+
+  const handleRoleChange = (event) => {
+    const newRole = event.target.value;
+    const updatedUser = { ...user, role: newRole };
+    setUser(updatedUser);
+
+    const updatedUsers = users.map((u) =>
+      u.id === user.id ? updatedUser : u
+    );
+    setUsers(updatedUsers);
+    setStoredUsers(updatedUsers);
+    setSnackbarMessage(`Role successfully updated to ${newRole}`);
+  };
+
+  // Dynamically map details based on viewed user
   const userDetails = React.useMemo(() => {
-    if (!authUser) {
+    if (!user) {
       return {
-        name: "Ashish Shende",
-        role: "Finance Executive",
+        name: "Guest User",
         location: "Pune, India",
-        email: "ashish.shende@cargill.com",
+        email: "guest@cargill.com",
         phone: "+91 98765 43210",
         website: "cargill.com",
-        bio: "Dedicated Finance Specialist at Cargill managing systems compliance and standard workflows.",
-        skills: ["React", "Compliance", "Finance", "Auditing"]
+        bio: "No details available.",
+        skills: ["Access Control"]
       };
     }
 
-    const email = authUser.email;
+    const email = user.email;
     const prefix = email.split("@")[0];
     const name = prefix
       .split(/[._-]/)
@@ -61,33 +95,32 @@ const Profile = () => {
 
     return {
       name,
-      role: authUser.role,
-      location: authUser.role === "Org Admin" ? "Minneapolis, USA" : "Pune, India",
+      location: user.role === "Org Admin" ? "Minneapolis, USA" : "Pune, India",
       email: email,
-      phone: authUser.role === "Org Admin" ? "+1 (952) 742-7575" : "+91 98765 43210",
+      phone: user.role === "Org Admin" ? "+1 (952) 742-7575" : "+91 98765 43210",
       website: "cargill.com",
-      bio: `Dedicated ${authUser.role} at Cargill. Managing support requests, reviewing compliance checkpoints, and auditing access policies.`,
-      skills: authUser.role === "Org Admin"
+      bio: `Dedicated ${user.role} at Cargill. Auditing access logs, managing permissions hierarchy, and ensuring system compliance.`,
+      skills: user.role === "Org Admin"
         ? ["Access Control", "System Administration", "Compliance Auditing", "Risk Assessment", "Operations Security"]
-        : authUser.role.includes("Admin")
+        : user.role.includes("Admin")
           ? ["Department Administration", "Access Control Management", "Ticket Workflows", "Team Leadership"]
           : ["Ticket Submission", "Vulnerability Review", "File Review", "Testing Support"]
     };
-  }, [authUser]);
+  }, [user]);
 
   // Dynamically compute stats depending on user profile
   const userStats = React.useMemo(() => {
-    if (!authUser) {
+    if (!user) {
       return {
-        tickets: 4,
-        files: 2,
-        comments: 3,
-        resolutionRate: 75,
-        statusSummary: { open: 1, inProgress: 1, pending: 1, closed: 1 }
+        tickets: 0,
+        files: 0,
+        comments: 0,
+        resolutionRate: 0,
+        statusSummary: { open: 0, inProgress: 0, pending: 0, closed: 0 }
       };
     }
 
-    const email = authUser.email.toLowerCase();
+    const email = user.email.toLowerCase();
     if (email.startsWith("admin")) {
       return {
         tickets: 14,
@@ -98,19 +131,19 @@ const Profile = () => {
       };
     } else if (email.startsWith("hr")) {
       return {
-        tickets: 4,
+        tickets: 5,
         files: 2,
-        comments: 6,
-        resolutionRate: 75,
-        statusSummary: { open: 1, inProgress: 1, pending: 1, closed: 1 }
+        comments: 8,
+        resolutionRate: 80,
+        statusSummary: { open: 1, inProgress: 1, pending: 0, closed: 3 }
       };
     } else if (email.startsWith("finance")) {
       return {
-        tickets: 6,
-        files: 3,
-        comments: 11,
-        resolutionRate: 66,
-        statusSummary: { open: 1, inProgress: 2, pending: 1, closed: 2 }
+        tickets: 8,
+        files: 4,
+        comments: 15,
+        resolutionRate: 70,
+        statusSummary: { open: 2, inProgress: 2, pending: 1, closed: 3 }
       };
     } else {
       return {
@@ -121,45 +154,60 @@ const Profile = () => {
         statusSummary: { open: 1, inProgress: 1, pending: 0, closed: 1 }
       };
     }
-  }, [authUser]);
+  }, [user]);
 
-  const userRole = React.useMemo(() => {
-    return roles.find((r) => r.name === userDetails.role) || { permissions: [] };
-  }, [roles, userDetails.role]);
+  if (!user) {
+    return (
+      <Box sx={{ p: 4, textAlign: "center" }}>
+        <Typography color="error">User not found.</Typography>
+        <Button startIcon={<ArrowBackIcon />} onClick={() => navigate("/admin")} sx={{ mt: 2 }}>
+          Back to Admin
+        </Button>
+      </Box>
+    );
+  }
+
+  const userRole = roles.find((r) => r.name === user.role) || { permissions: [] };
 
   return (
-    <Box sx={{ minHeight: "100vh", backgroundColor: "background.default", p: { xs: 2, md: 4 } }}>
+    <Box className="p-6 md:p-10 bg-slate-50 dark:bg-slate-950 min-h-screen text-slate-800 dark:text-slate-100 transition-colors duration-200">
       <div className="max-w-5xl mx-auto">
+        <Button
+          startIcon={<ArrowBackIcon />}
+          onClick={() => navigate("/admin")}
+          sx={{ mb: 4, textTransform: "none", fontWeight: "bold" }}
+        >
+          Back to Access Control
+        </Button>
+
         {/* Header Profile Card */}
         <Card
           className="overflow-hidden border-none shadow-xl rounded-2xl mb-8 bg-white dark:bg-slate-900"
           sx={{ backgroundImage: "none" }}
         >
           <div className="h-48 bg-gradient-to-r from-blue-600 to-indigo-700 relative">
-            <Tooltip title="Edit Cover Photo" arrow>
-              <IconButton
-                className="absolute top-4 right-4 bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm"
-                size="small"
-              >
-                <EditIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
+            {/* Cover Photo */}
           </div>
 
           <CardContent className="relative pt-0 pb-8 px-6 md:px-12">
             <div className="flex flex-col md:flex-row items-center md:items-end -mt-20 md:-mt-16 mb-6 gap-6">
               <div className="relative">
                 <Avatar
-                  src={profileImg}
                   sx={{
                     width: 160,
                     height: 160,
                     border: "5px solid white",
                     boxShadow:
                       "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
+                    fontSize: "3.5rem",
+                    fontWeight: "bold",
+                    bgcolor: "primary.main",
+                    color: "primary.contrastText"
                   }}
                   className="bg-white dark:bg-slate-800"
-                />
+                >
+                  {user.email.charAt(0).toUpperCase()}
+                </Avatar>
               </div>
 
               <div className="flex-1 text-center md:text-left mb-2">
@@ -173,7 +221,7 @@ const Profile = () => {
                   variant="subtitle1"
                   className="text-slate-500 dark:text-slate-400 font-medium flex items-center justify-center md:justify-start gap-1"
                 >
-                  {userDetails.role}
+                  {user.role}
                 </Typography>
                 <div className="flex items-center justify-center md:justify-start gap-3 mt-2 text-slate-400 dark:text-slate-500">
                   <div className="flex items-center gap-1 text-sm font-medium">
@@ -186,7 +234,6 @@ const Profile = () => {
           </CardContent>
         </Card>
 
-        {/* Main Content Grid: Stats and Personal Info Side-by-Side */}
         <Grid container spacing={4}>
           {/* Left Column: Tickets & System Stats + Roles & Permissions */}
           <Grid item xs={12} md={7}>
@@ -201,7 +248,7 @@ const Profile = () => {
                     variant="h6"
                     className="font-bold text-slate-800 dark:text-slate-100 mb-6"
                   >
-                    Account Activity & Ticket Stats
+                    User Activity & Ticket Stats
                   </Typography>
 
                   <Grid container spacing={3} sx={{ mb: 4 }}>
@@ -331,17 +378,45 @@ const Profile = () => {
                     <ShieldIcon color="primary" fontSize="large" />
                     <Box>
                       <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-                        Assigned Security Policy
+                        Role & Permissions Settings
                       </Typography>
                       <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                        {userDetails.role} (Inherited Permissions)
+                        {user.role} (Auditable & Editable Options)
                       </Typography>
                     </Box>
                   </Box>
                   <Divider sx={{ mb: 3 }} />
 
-                  <Typography variant="body2" sx={{ color: "text.secondary", mb: 3 }}>
-                    Below are the active security privileges authorized for your user role.
+                  {/* Role settings */}
+                  <Typography variant="subtitle2" className="font-bold mb-2 block">
+                    Role Allocation
+                  </Typography>
+                  <Box sx={{ mb: 4 }}>
+                    <FormControl size="small" fullWidth sx={{ mb: 1 }}>
+                      <InputLabel id="role-select-label">Assign Role</InputLabel>
+                      <Select
+                        labelId="role-select-label"
+                        value={user.role}
+                        label="Assign Role"
+                        onChange={handleRoleChange}
+                      >
+                        {roles.map((r) => (
+                          <MenuItem key={r.name} value={r.name}>
+                            {r.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                    <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                      Changing this role immediately updates the security privileges inherited by this account.
+                    </Typography>
+                  </Box>
+
+                  <Divider sx={{ mb: 3 }} />
+
+                  {/* Inherited permissions policy */}
+                  <Typography variant="subtitle2" sx={{ fontWeight: "bold", mb: 2.5, display: "flex", alignItems: "center", gap: 1 }}>
+                    <ShieldIcon color="primary" fontSize="small" /> Inherited Policy Permissions
                   </Typography>
 
                   <Stack spacing={3}>
@@ -527,8 +602,19 @@ const Profile = () => {
           </Grid>
         </Grid>
       </div>
+
+      <Snackbar
+        open={Boolean(snackbarMessage)}
+        autoHideDuration={4000}
+        onClose={() => setSnackbarMessage("")}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert severity="success" variant="filled" className="rounded-xl shadow-lg">
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
 
-export default Profile;
+export default UserDetails;

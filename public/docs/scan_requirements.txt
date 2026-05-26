@@ -1,0 +1,8 @@
+Cargill Ticketing System - Security Scan Requirements Checklist
+------------------------------------------------------------
+1. Verify CORS policies on all SXR QA endpoints.
+2. Run dynamic application scan against HTTP API.
+3. Validate session timeout parameters.
+4. Verify SSL/TLS cipher suites.
+5. Check RBAC roles for privilege escalation holes.
+6. Verify encryption settings for sensitive parameters.

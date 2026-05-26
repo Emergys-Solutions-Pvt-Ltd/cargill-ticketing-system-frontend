@@ -8,10 +8,17 @@ import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
+import Divider from "@mui/material/Divider";
 import { Link } from "react-router-dom";
+import { useThemeContext } from "../context/ThemeContext";
+import { useAuth } from "../context/AuthContext";
 
 export default function Navbar() {
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const { mode, toggleTheme } = useThemeContext();
+  const { user, logout } = useAuth();
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -29,7 +36,7 @@ export default function Navbar() {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static">
+      <AppBar position="static" color="primary" elevation={0} sx={{ borderBottom: "1px solid", borderColor: "divider" }}>
         <Toolbar>
           <IconButton
             size="large"
@@ -38,10 +45,13 @@ export default function Navbar() {
             aria-label="menu"
             sx={{ mr: 2 }}
           >
-            <MenuIcon />
+
           </IconButton>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Cargil
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: "bold" }}>
+
+            <Link to="/requests" style={linkStyle}>
+              Cargill
+            </Link>
           </Typography>
 
           <div
@@ -63,33 +73,54 @@ export default function Navbar() {
                   fontWeight: 500,
                 }}
               >
-                <li>
+                {/* <li>
                   <Link to="/" style={linkStyle}>
                     My Task
                   </Link>
-                </li>
+                </li> */}
                 <li>
                   <Link to="/requests" style={linkStyle}>
-                    My Request
+                    Requests
                   </Link>
                 </li>
                 <li>
-                  <Link to="/admin" style={linkStyle}>
-                    Admin
+                  <Link to="/uam" style={linkStyle}>
+                    User Access Management
                   </Link>
                 </li>
-                <li>
-                  <Link to="/" style={linkStyle}>
-                    My Favorites
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/" style={linkStyle}>
-                    Get Support
-                  </Link>
-                </li>
+
+
               </ul>
             </Box>
+            <IconButton
+              size="large"
+              aria-label="toggle dark and light theme"
+              onClick={toggleTheme}
+              color="inherit"
+              sx={{ mr: 1 }}
+            >
+              {mode === "dark" ? <LightModeIcon /> : <DarkModeIcon />}
+            </IconButton>
+            {user && (
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-end",
+                  mr: 1,
+                  cursor: "pointer",
+                  userSelect: "none"
+                }}
+                onClick={handleMenu}
+              >
+                <Typography variant="body2" sx={{ fontWeight: "bold", fontSize: "0.85rem", opacity: 0.9 }}>
+                  {user.email}
+                </Typography>
+                <Typography variant="caption" sx={{ fontSize: "0.7rem", opacity: 0.7, fontWeight: 600 }}>
+                  {user.role}
+                </Typography>
+              </Box>
+            )}
             <IconButton
               size="large"
               aria-label="account of current user"
@@ -104,7 +135,7 @@ export default function Navbar() {
               id="menu-appbar"
               anchorEl={anchorEl}
               anchorOrigin={{
-                vertical: "top",
+                vertical: "bottom",
                 horizontal: "right",
               }}
               keepMounted
@@ -114,11 +145,49 @@ export default function Navbar() {
               }}
               open={Boolean(anchorEl)}
               onClose={handleClose}
+              PaperProps={{
+                sx: {
+                  mt: 1.5,
+                  minWidth: "220px",
+                  borderRadius: "16px",
+                  boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+                  padding: "4px 0"
+                }
+              }}
             >
-              <MenuItem onClick={handleClose} component={Link} to="/">
-                Profile
+              {user && (
+                <Box sx={{ px: 2, py: 1.5, outline: "none" }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: "bold", color: "text.primary" }}>
+                    Signed in as
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis" }}>
+                    {user.email}
+                  </Typography>
+                  <Box sx={{ mt: 1 }}>
+                    <span className="inline-block px-2 py-0.5 text-xs font-bold rounded bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900">
+                      {user.role}
+                    </span>
+                  </Box>
+                </Box>
+              )}
+              <Divider />
+              <MenuItem
+                onClick={handleClose}
+                component={Link}
+                to="/profile"
+                sx={{ py: 1.25, fontWeight: 500, fontSize: "0.9rem" }}
+              >
+                My Profile
               </MenuItem>
-              <MenuItem onClick={handleClose}>My account</MenuItem>
+              <MenuItem
+                onClick={() => {
+                  handleClose();
+                  logout();
+                }}
+                sx={{ py: 1.25, color: "error.main", fontWeight: "bold", fontSize: "0.9rem" }}
+              >
+                Logout
+              </MenuItem>
             </Menu>
           </div>
         </Toolbar>

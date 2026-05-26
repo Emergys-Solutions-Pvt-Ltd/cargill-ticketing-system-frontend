@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Typography,
@@ -12,8 +12,14 @@ import {
   Chip,
   IconButton,
   Button,
+  TextField,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  InputAdornment,
 } from "@mui/material";
-import { Visibility as VisibilityIcon } from "@mui/icons-material";
+import { Visibility as VisibilityIcon, Search as SearchIcon } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 
 const dummyRequests = [
@@ -64,60 +70,115 @@ const getStatusColor = (status) => {
 
 const RequestList = () => {
   const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
+
+  const filteredRequests = dummyRequests.filter((row) => {
+    const matchesSearch =
+      row.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      row.title.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesStatus = statusFilter === "All" || row.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  });
 
   return (
-    <Box sx={{ width: "100%", minHeight: "100vh", backgroundColor: "#f8fafc", p: { xs: 2, md: 4 } }}>
+    <Box sx={{ width: "100%", minHeight: "100vh", backgroundColor: "background.default", p: { xs: 2, md: 4 } }}>
+      {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-
         <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-          My Requests
+          Requests
         </Typography>
-        <Button variant="contained" color="primary">
-          Create New Request
-        </Button>
       </Box>
-      <TableContainer component={Paper} sx={{ boxShadow: "0 4px 20px rgba(0,0,0,0.08)", borderRadius: 2 }}>
+
+      {/* Search & Filters */}
+      <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap', alignItems: 'center' }}>
+        <TextField
+          placeholder="Search by Request ID or Title..."
+          variant="outlined"
+          size="small"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          sx={{ flexGrow: 1, minWidth: '250px', maxWidth: '400px' }}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon color="action" fontSize="small" />
+                </InputAdornment>
+              ),
+            }
+          }}
+        />
+        <FormControl size="small" sx={{ minWidth: '150px' }}>
+          <InputLabel id="status-filter-label">Status</InputLabel>
+          <Select
+            labelId="status-filter-label"
+            value={statusFilter}
+            label="Status"
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <MenuItem value="All">All Statuses</MenuItem>
+            <MenuItem value="Open">Open</MenuItem>
+            <MenuItem value="In Progress">In Progress</MenuItem>
+            <MenuItem value="Pending">Pending</MenuItem>
+            <MenuItem value="Closed">Closed</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
+
+      {/* Table listing */}
+      <TableContainer component={Paper} sx={{ boxShadow: "0 4px 20px rgba(0,0,0,0.08)", borderRadius: 2, border: "1px solid", borderColor: "divider", backgroundImage: "none" }}>
         <Table sx={{ minWidth: 650 }} aria-label="requests table">
-          <TableHead sx={{ backgroundColor: "#f8fafc" }}>
+          <TableHead sx={{ backgroundColor: "action.hover" }}>
             <TableRow>
               <TableCell sx={{ fontWeight: 'bold' }}>Number</TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>Title</TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>Created</TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>Updated</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }} align="right">Action</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {dummyRequests.map((row) => (
+            {filteredRequests.map((row) => (
               <TableRow
                 key={row.id}
-                sx={{ "&:last-child td, &:last-child th": { border: 0 }, cursor: 'pointer', "&:hover": { backgroundColor: "#f1f5f9" } }}
+                sx={{
+                  "&:last-child td, &:last-child th": { border: 0 },
+                  cursor: 'pointer',
+                  "&:hover": { backgroundColor: "action.hover" }
+                }}
                 onClick={() => navigate(`/requests/${row.id}`)}
               >
-                <TableCell component="th" scope="row" sx={{ fontWeight: 'medium', color: '#3b82f6' }}>
+                <TableCell component="th" scope="row" sx={{ fontWeight: 'medium', color: 'primary.main' }}>
                   {row.id}
                 </TableCell>
                 <TableCell sx={{ maxWidth: 300, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {row.title}
                 </TableCell>
                 <TableCell>
-                  <Chip 
-                    label={row.status} 
-                    size="small" 
+                  <Chip
+                    label={row.status}
+                    size="small"
                     color={getStatusColor(row.status)}
                     sx={{ fontWeight: 'bold', fontSize: '0.75rem' }}
                   />
                 </TableCell>
                 <TableCell sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>{row.created}</TableCell>
                 <TableCell sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>{row.updated}</TableCell>
-                <TableCell align="right">
-                  <IconButton size="small" color="primary">
-                    <VisibilityIcon fontSize="small" />
-                  </IconButton>
-                </TableCell>
+
               </TableRow>
             ))}
+            {filteredRequests.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
+                  <Typography variant="body1" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
+                    No requests found matching the search criteria.
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </TableContainer>
