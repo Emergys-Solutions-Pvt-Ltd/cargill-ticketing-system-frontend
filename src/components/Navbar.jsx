@@ -49,7 +49,7 @@ export default function Navbar() {
           </IconButton>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: "bold" }}>
 
-            <Link to="/requests" style={linkStyle}>
+            <Link to="/" style={linkStyle}>
               Cargill
             </Link>
           </Typography>

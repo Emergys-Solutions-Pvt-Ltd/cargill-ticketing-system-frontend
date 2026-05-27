@@ -50,7 +50,7 @@ const Login = () => {
 
     const success = login(username, password);
     if (success) {
-      navigate("/requests", { replace: true });
+      navigate("/", { replace: true });
     } else {
       setError("Invalid username or password. Please try again.");
     }

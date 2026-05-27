@@ -7,6 +7,7 @@ import RequestList from "./pages/RequestList";
 import UserDetails from "./pages/UserDetails";
 import RoleDetails from "./pages/RoleDetails";
 import Login from "./pages/Login";
+import Home from "./pages/Home";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { ThemeContextProvider } from "./context/ThemeContext";
 import { AuthProvider } from "./context/AuthContext";
@@ -26,7 +27,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: "",
-        element: <MyRequest />,
+        element: <Home />,
       },
       {
         path: "requests",
