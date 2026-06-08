@@ -105,8 +105,8 @@ export default function BasicTimeline({ comments = [], onPreview }) {
                         onClick={() => onPreview && onPreview(file)}
                         variant="outlined"
                         size="small"
-                        sx={{ 
-                          borderRadius: "8px", 
+                        sx={{
+                          borderRadius: "8px",
                           py: 1.5,
                           height: "auto",
                           borderColor: "divider",

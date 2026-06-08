@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Box,
@@ -19,35 +19,32 @@ import {
 import {
   ArrowBack as ArrowBackIcon,
   Shield as ShieldIcon,
-  CheckCircle as CheckCircleIcon,
-  Cancel as CancelIcon,
 } from "@mui/icons-material";
 import {
   getStoredUsers,
   getStoredRoles,
   setStoredRoles,
   systemPermissions,
-} from "../utils/rbacData";
+} from "../../../../utils/rbacData";
 
 const RoleDetails = () => {
   const { roleName } = useParams();
   const navigate = useNavigate();
-  const [users, setUsers] = useState([]);
-  const [roles, setRoles] = useState([]);
-  const [role, setRole] = useState(null);
+  const [users] = useState(() => getStoredUsers());
+  const [roles, setRoles] = useState(() => getStoredRoles());
+  const [prevRoleName, setPrevRoleName] = useState(roleName);
+  const [role, setRole] = useState(() => {
+    const storedRoles = getStoredRoles();
+    return storedRoles.find((r) => r.name.toLowerCase() === roleName.toLowerCase()) || null;
+  });
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
-  useEffect(() => {
-    const storedUsers = getStoredUsers();
-    const storedRoles = getStoredRoles();
-    setUsers(storedUsers);
-    setRoles(storedRoles);
 
-    const currentRole = storedRoles.find((r) => r.name.toLowerCase() === roleName.toLowerCase());
-    if (currentRole) {
-      setRole(currentRole);
-    }
-  }, [roleName]);
+  if (roleName !== prevRoleName) {
+    setPrevRoleName(roleName);
+    const storedRoles = getStoredRoles();
+    setRole(storedRoles.find((r) => r.name.toLowerCase() === roleName.toLowerCase()) || null);
+  }
 
   const handlePermissionToggle = (permId) => {
     let updatedPermissions;
@@ -72,7 +69,7 @@ const RoleDetails = () => {
     return (
       <Box sx={{ p: 4, textAlign: "center" }}>
         <Typography color="error">Role not found.</Typography>
-        <Button startIcon={<ArrowBackIcon />} onClick={() => navigate("/admin")} sx={{ mt: 2 }}>
+        <Button startIcon={<ArrowBackIcon />} onClick={() => navigate("/uam")} sx={{ mt: 2 }}>
           Back to Admin
         </Button>
       </Box>
@@ -86,7 +83,7 @@ const RoleDetails = () => {
       <div className="max-w-4xl mx-auto">
         <Button
           startIcon={<ArrowBackIcon />}
-          onClick={() => navigate("/admin")}
+          onClick={() => navigate("/uam")}
           sx={{ mb: 4, textTransform: "none", fontWeight: "bold" }}
         >
           Back to Access Control
@@ -221,7 +218,7 @@ const RoleDetails = () => {
                       }}
                       onClick={() => navigate(`/admin/users/${u.id}`)}
                     >
-                      <div className="w-8 h-8 rounded-full bg-indigo-50 dark:bg-indigo-950/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold border border-indigo-100 dark:border-indigo-900">
+                      <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[#1B3D41] dark:text-[#81B563] font-bold border border-slate-200 dark:border-slate-700">
                         {u.email.charAt(0).toUpperCase()}
                       </div>
                       <Box sx={{ minWidth: 0, flexGrow: 1 }}>

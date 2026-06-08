@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -50,19 +50,13 @@ import {
   getStoredRoles,
   setStoredRoles,
   systemPermissions,
-} from "../utils/rbacData";
+} from "../../../../utils/rbacData";
 
-const AdminRBAC = () => {
+const UserList = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(0);
-  const [users, setUsers] = useState([]);
-  const [roles, setRoles] = useState([]);
-
-  // Load state from localStorage on mount
-  useEffect(() => {
-    setUsers(getStoredUsers());
-    setRoles(getStoredRoles());
-  }, []);
+  const [users, setUsers] = useState(() => getStoredUsers());
+  const [roles, setRoles] = useState(() => getStoredRoles());
 
   // User tab state
   const [email, setEmail] = useState("");
@@ -196,7 +190,7 @@ const AdminRBAC = () => {
         {/* Header */}
         <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-indigo-600 rounded-2xl text-white shadow-lg shadow-indigo-200 dark:shadow-none">
+            <div className="p-3 bg-[#1B3D41] rounded-2xl text-white shadow-md">
               <AdminIcon fontSize="large" />
             </div>
             <div>
@@ -278,7 +272,7 @@ const AdminRBAC = () => {
                     >
                       <TableCell className="p-5">
                         <Stack direction="row" spacing={2} alignItems="center">
-                          <div className="w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-950/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold border border-indigo-100 dark:border-indigo-900">
+                          <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[#1B3D41] dark:text-[#81B563] font-bold border border-slate-200 dark:border-slate-700">
                             {u.email.charAt(0).toUpperCase()}
                           </div>
                           <Typography variant="body2" className="font-semibold text-slate-700 dark:text-slate-200">
@@ -299,7 +293,7 @@ const AdminRBAC = () => {
                           <IconButton
                             size="small"
                             onClick={() => navigate(`/admin/users/${u.id}`)}
-                            className="text-slate-400 hover:text-indigo-600 mr-2"
+                            className="text-slate-400 hover:text-[#81B563] mr-2"
                           >
                             <ArrowForwardIcon fontSize="small" />
                           </IconButton>
@@ -612,55 +606,6 @@ const AdminRBAC = () => {
   );
 };
 
-// Simple Grid replacement if not using full context
-const Grid = ({
-  children,
-  container,
-  md,
-  spacing,
-  alignItems,
-  sx,
-}) => {
-  if (container) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          flexWrap: "wrap",
-          alignItems: alignItems === "flex-end" ? "flex-end" : "flex-start",
-          margin: spacing ? `-${spacing * 4}px` : 0,
-          ...sx,
-        }}
-      >
-        {children}
-      </Box>
-    );
-  }
-  return (
-    <Box
-      sx={{
-        width: "100%",
-        padding: spacing ? `${spacing * 2}px` : 0,
-        "@media (min-width: 900px)": {
-          width:
-            md === 3
-              ? "25%"
-              : md === 4
-                ? "33.33%"
-                : md === 5
-                  ? "41.66%"
-                  : md === 6
-                    ? "50%"
-                    : md === 7
-                      ? "58.33%"
-                      : "100%",
-        },
-        ...sx,
-      }}
-    >
-      {children}
-    </Box>
-  );
-};
 
-export default AdminRBAC;
+
+export default UserList;

@@ -1,21 +1,19 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useContext, useState } from "react";
 import { getStoredUsers } from "../utils/rbacData";
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
+  const [user, setUser] = useState(() => {
     const storedUser = localStorage.getItem("auth_user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-      setIsAuthenticated(true);
-    }
-    setLoading(false);
-  }, []);
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return !!localStorage.getItem("auth_user");
+  });
+  const loading = false;
+
 
   const login = (username, password) => {
     const uName = username.trim().toLowerCase();

@@ -25,17 +25,13 @@ import {
   CheckCircle as CheckCircleIcon,
   Cancel as CancelIcon,
 } from "@mui/icons-material";
-import profileImg from "../../assets/profile_avatar.png";
-import { useAuth } from "../../context/AuthContext";
-import { getStoredRoles, systemPermissions } from "../../utils/rbacData";
+import profileImg from "../../../assets/profile_avatar.png";
+import { useAuth } from "../../../context/AuthContext";
+import { getStoredRoles, systemPermissions } from "../../../utils/rbacData";
 
-const Profile = () => {
+const UserProfile = () => {
   const { user: authUser } = useAuth();
-  const [roles, setRoles] = React.useState([]);
-
-  React.useEffect(() => {
-    setRoles(getStoredRoles());
-  }, []);
+  const roles = React.useMemo(() => getStoredRoles(), []);
 
   // Dynamically map details based on logged-in user
   const userDetails = React.useMemo(() => {
@@ -135,7 +131,7 @@ const Profile = () => {
           className="overflow-hidden border-none shadow-xl rounded-2xl mb-8 bg-white dark:bg-slate-900"
           sx={{ backgroundImage: "none" }}
         >
-          <div className="h-48 bg-gradient-to-r from-blue-600 to-indigo-700 relative">
+          <div className="h-48 bg-gradient-to-r from-[#1B3D41] to-[#2E5E63] relative">
             <Tooltip title="Edit Cover Photo" arrow>
               <IconButton
                 className="absolute top-4 right-4 bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm"
@@ -503,24 +499,7 @@ const Profile = () => {
 
                   <Divider className="opacity-60" />
 
-                  <div className="space-y-4">
-                    <Typography
-                      variant="subtitle2"
-                      className="font-bold text-slate-800 dark:text-slate-100"
-                    >
-                      Skills
-                    </Typography>
-                    <div className="flex flex-wrap gap-2">
-                      {userDetails.skills.map((skill) => (
-                        <span
-                          key={skill}
-                          className="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold rounded-full border border-slate-200 dark:border-slate-700"
-                        >
-                          {skill}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
+
                 </Stack>
               </CardContent>
             </Card>
@@ -531,4 +510,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default UserProfile;

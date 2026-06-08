@@ -1,13 +1,13 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import App from "./App";
-import MyRequest from "./pages/MyRequest";
-import Profile from "./components/myProfile/Profile";
-import AdminRBAC from "./pages/AdminRBAC";
-import RequestList from "./pages/RequestList";
-import UserDetails from "./pages/UserDetails";
-import RoleDetails from "./pages/RoleDetails";
-import Login from "./pages/Login";
-import Home from "./pages/Home";
+import RequestDetails from "./pages/private/Requests/RequestDetails";
+import UserProfile from "./pages/private/Profile/UserProfile";
+import UserList from "./pages/private/UAM/User/UserList";
+import RequestList from "./pages/private/Requests/RequestList";
+import UserDetails from "./pages/private/UAM/User/UserDetails";
+import RoleDetails from "./pages/private/UAM/Roles/RoleDetails";
+import Login from "./pages/public/Login/Login";
+import Home from "./pages/private/Home/Home";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { ThemeContextProvider } from "./context/ThemeContext";
 import { AuthProvider } from "./context/AuthContext";
@@ -35,15 +35,15 @@ const router = createBrowserRouter([
       },
       {
         path: "requests/:requestId",
-        element: <MyRequest />,
+        element: <RequestDetails />,
       },
       {
         path: "profile",
-        element: <Profile />,
+        element: <UserProfile />,
       },
       {
         path: "admin",
-        element: <AdminRBAC />,
+        element: <UserList />,
       },
       {
         path: "admin/users/:userId",
@@ -55,7 +55,15 @@ const router = createBrowserRouter([
       },
       {
         path: "uam",
-        element: <AdminRBAC />,
+        element: <UserList />,
+      },
+      {
+        path: "uam/users/:userId",
+        element: <UserDetails />,
+      },
+      {
+        path: "uam/roles/:roleName",
+        element: <RoleDetails />,
       },
     ],
   },

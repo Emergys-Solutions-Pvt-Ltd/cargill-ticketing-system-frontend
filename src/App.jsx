@@ -1,6 +1,5 @@
-import { Box, Card } from "@mui/material";
+import { Box } from "@mui/material";
 import "./App.css";
-import LabelStepper from "./components/LabelStepper";
 import Navbar from "./components/Navbar";
 import { Outlet } from "react-router-dom";
 

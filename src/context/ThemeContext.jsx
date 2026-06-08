@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, useMemo } from "react";
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useContext, useState, useEffect, useMemo } from "react";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 
@@ -35,41 +36,41 @@ export const ThemeContextProvider = ({ children }) => {
         ...(mode === "light"
           ? {
               primary: {
-                main: "#4f46e5",
-                light: "#6366f1",
-                dark: "#4338ca",
+                main: "#1B3D41",
+                light: "#2E5E63",
+                dark: "#0E2325",
               },
               secondary: {
-                main: "#10b981",
+                main: "#81B563",
               },
               background: {
-                default: "#f8fafc",
+                default: "#F4F7F6",
                 paper: "#ffffff",
               },
               text: {
-                primary: "#0f172a",
-                secondary: "#475569",
+                primary: "#1A2526",
+                secondary: "#5E6E70",
               },
-              divider: "#e2e8f0",
+              divider: "#D8E1E0",
             }
           : {
               primary: {
-                main: "#818cf8",
-                light: "#a5b4fc",
-                dark: "#6366f1",
+                main: "#81B563",
+                light: "#A5D987",
+                dark: "#5C8E42",
               },
               secondary: {
-                main: "#34d399",
+                main: "#2C8F7A",
               },
               background: {
-                default: "#0b0f19",
-                paper: "#1e293b",
+                default: "#0B1112",
+                paper: "#152224",
               },
               text: {
-                primary: "#f8fafc",
-                secondary: "#94a3b8",
+                primary: "#E2ECEB",
+                secondary: "#94A4A6",
               },
-              divider: "rgba(255, 255, 255, 0.12)",
+              divider: "rgba(129, 181, 99, 0.15)",
             }),
       },
       typography: {

@@ -20,8 +20,8 @@ import {
   LockOutlined as LockIcon,
   AccountCircle as UserIcon,
 } from "@mui/icons-material";
-import { useAuth } from "../context/AuthContext";
-import { getStoredUsers } from "../utils/rbacData";
+import { useAuth } from "../../../context/AuthContext";
+import { getStoredUsers } from "../../../utils/rbacData";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -79,26 +79,42 @@ const Login = () => {
   }, []);
 
   return (
-    <Box className="flex items-center justify-center min-h-screen bg-slate-50 dark:bg-slate-950 px-4 transition-colors duration-200">
+    <Box 
+      sx={{
+        background: "linear-gradient(135deg, #1B3D41 0%, #0E2325 100%)",
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        px: 4,
+        py: 6
+      }}
+    >
       <div className="w-full max-w-md">
         {/* Brand Header */}
-        <Box className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-indigo-600 flex items-center justify-center text-white text-3xl font-extrabold shadow-xl shadow-indigo-200 dark:shadow-none mb-3">
-            C
-          </div>
-          <Typography variant="h4" className="font-extrabold text-slate-800 dark:text-slate-100">
-            Cargill
-          </Typography>
-          <Typography variant="body2" className="text-slate-500 dark:text-slate-400 font-medium mt-1">
-            Sign in to access your support ticketing portal
+        <Box className="flex flex-col items-center mb-6">
+          <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.5, mb: 1 }}>
+            <Typography variant="h3" sx={{ fontWeight: 400, color: "#ffffff", letterSpacing: "-1.5px" }}>
+              service
+            </Typography>
+            <Typography variant="h3" sx={{ fontWeight: 900, color: "#81B563", letterSpacing: "-1.5px" }}>
+              now
+            </Typography>
+          </Box>
+          <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.75)", fontWeight: 500 }}>
+            Enterprise Service Portal
           </Typography>
         </Box>
 
         <Card
           className="border-none shadow-2xl rounded-3xl overflow-hidden bg-white dark:bg-slate-900"
-          sx={{ backgroundImage: "none" }}
+          sx={{ backgroundImage: "none", boxShadow: "0 20px 40px rgba(0,0,0,0.3)" }}
         >
           <CardContent sx={{ p: 4 }}>
+            <Typography variant="h6" sx={{ fontWeight: "bold", mb: 3, textAlign: "center", color: "text.primary" }}>
+              Sign In
+            </Typography>
+
             {error && (
               <Alert severity="error" className="rounded-xl mb-4 font-medium">
                 {error}
@@ -120,6 +136,11 @@ const Login = () => {
                         <UserIcon className="text-slate-400 dark:text-slate-500" />
                       </InputAdornment>
                     ),
+                  }}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "12px",
+                    }
                   }}
                 />
 
@@ -149,6 +170,11 @@ const Login = () => {
                       </InputAdornment>
                     ),
                   }}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "12px",
+                    }
+                  }}
                 />
 
                 <Button
@@ -156,16 +182,17 @@ const Login = () => {
                   size="large"
                   type="submit"
                   variant="contained"
+                  color="primary"
                   sx={{
-                    borderRadius: "14px",
-                    height: "52px",
+                    borderRadius: "12px",
+                    height: "50px",
                     fontWeight: "bold",
                     textTransform: "none",
-                    fontSize: "1rem",
-                    boxShadow: "0 8px 16px rgba(79, 70, 229, 0.2)",
+                    fontSize: "0.95rem",
+                    boxShadow: "0 8px 16px rgba(129, 181, 99, 0.15)",
                   }}
                 >
-                  Sign In
+                  Log In
                 </Button>
               </Stack>
             </form>
@@ -175,11 +202,18 @@ const Login = () => {
         {/* Quick Login Helpers */}
         <Paper
           variant="outlined"
-          className="mt-6 p-4 rounded-2xl border-dashed bg-slate-50/50 dark:bg-slate-900/30 text-center hidden"
-          sx={{ borderColor: "divider" }}
+          sx={{ 
+            borderColor: "rgba(255, 255, 255, 0.15)", 
+            background: "rgba(255, 255, 255, 0.08)",
+            backdropFilter: "blur(10px)",
+            mt: 4,
+            p: 3,
+            borderRadius: "20px",
+            textAlign: "center"
+          }}
         >
-          <Typography variant="caption" className="font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2.5">
-            Quick-Login Profiles (Username = Password)
+          <Typography variant="caption" sx={{ fontWeight: "bold", color: "rgba(255, 255, 255, 0.7)", uppercase: true, tracking: "0.5px", display: "block", mb: 2 }}>
+            DEVELOPER QUICK-LOGIN PROFILES
           </Typography>
           <Box className="flex flex-wrap justify-center gap-2">
             {testAccounts.map((acc) => (
@@ -189,7 +223,18 @@ const Login = () => {
                 onClick={() => handleQuickLogin(acc.prefix)}
                 variant="outlined"
                 size="small"
-                className="cursor-pointer hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-950/50 dark:hover:text-indigo-400 border-slate-200 dark:border-slate-800 transition-colors font-medium rounded-lg"
+                sx={{
+                  color: "#ffffff",
+                  borderColor: "rgba(255,255,255,0.3)",
+                  cursor: "pointer",
+                  fontWeight: 600,
+                  fontSize: "0.75rem",
+                  borderRadius: "8px",
+                  "&:hover": {
+                    bgcolor: "rgba(255,255,255,0.15)",
+                    borderColor: "#81B563"
+                  }
+                }}
               />
             ))}
           </Box>

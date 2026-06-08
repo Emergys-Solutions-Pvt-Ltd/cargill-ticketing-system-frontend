@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Box,
@@ -40,28 +40,26 @@ import {
   setStoredUsers,
   getStoredRoles,
   systemPermissions,
-} from "../utils/rbacData";
+} from "../../../../utils/rbacData";
 
 const UserDetails = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
-  const [users, setUsers] = useState([]);
-  const [roles, setRoles] = useState([]);
-  const [user, setUser] = useState(null);
+  const [users, setUsers] = useState(() => getStoredUsers());
+  const roles = React.useMemo(() => getStoredRoles(), []);
+  const [prevUserId, setPrevUserId] = useState(userId);
+  const [user, setUser] = useState(() => {
+    const storedUsers = getStoredUsers();
+    return storedUsers.find((u) => u.id === parseInt(userId, 10)) || null;
+  });
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [activeTab, setActiveTab] = useState(0);
 
-  useEffect(() => {
+  if (userId !== prevUserId) {
+    setPrevUserId(userId);
     const storedUsers = getStoredUsers();
-    const storedRoles = getStoredRoles();
-    setUsers(storedUsers);
-    setRoles(storedRoles);
-
-    const currentUser = storedUsers.find((u) => u.id === parseInt(userId, 10));
-    if (currentUser) {
-      setUser(currentUser);
-    }
-  }, [userId]);
+    setUser(storedUsers.find((u) => u.id === parseInt(userId, 10)) || null);
+  }
 
   const handleRoleChange = (event) => {
     const newRole = event.target.value;
@@ -164,7 +162,7 @@ const UserDetails = () => {
     return (
       <Box sx={{ p: 4, textAlign: "center" }}>
         <Typography color="error">User not found.</Typography>
-        <Button startIcon={<ArrowBackIcon />} onClick={() => navigate("/admin")} sx={{ mt: 2 }}>
+        <Button startIcon={<ArrowBackIcon />} onClick={() => navigate("/uam")} sx={{ mt: 2 }}>
           Back to Admin
         </Button>
       </Box>
@@ -178,7 +176,7 @@ const UserDetails = () => {
       <div className="max-w-5xl mx-auto">
         <Button
           startIcon={<ArrowBackIcon />}
-          onClick={() => navigate("/admin")}
+          onClick={() => navigate("/uam")}
           sx={{ mb: 4, textTransform: "none", fontWeight: "bold" }}
         >
           Back to Access Control
@@ -189,7 +187,7 @@ const UserDetails = () => {
           className="overflow-hidden border-none shadow-xl rounded-2xl mb-8 bg-white dark:bg-slate-900"
           sx={{ backgroundImage: "none" }}
         >
-          <div className="h-48 bg-gradient-to-r from-blue-600 to-indigo-700 relative">
+          <div className="h-48 bg-gradient-to-r from-[#1B3D41] to-[#2E5E63] relative">
             {/* Cover Photo */}
           </div>
 
