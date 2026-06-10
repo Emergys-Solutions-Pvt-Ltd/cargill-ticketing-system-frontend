@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -19,7 +19,7 @@ import {
 } from "@mui/material";
 import { Search as SearchIcon } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import { getStoredTickets } from "../../../utils/rbacData";
+import { getStoredTickets, getStoredTicketsAsync } from "../../../utils/rbacData";
 
 const getStatusColor = (status) => {
   const s = status.toLowerCase();
@@ -58,9 +58,17 @@ const getPriorityColor = (priority) => {
 
 const RequestList = () => {
   const navigate = useNavigate();
-  const [tickets] = useState(() => getStoredTickets());
+  const [tickets, setTickets] = useState(() => getStoredTickets());
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
+
+  useEffect(() => {
+    if (tickets.length === 0) {
+      getStoredTicketsAsync().then((fetchedTickets) => {
+        setTickets(fetchedTickets);
+      });
+    }
+  }, [tickets]);
 
   const filteredRequests = tickets.filter((row) => {
     const matchesSearch =

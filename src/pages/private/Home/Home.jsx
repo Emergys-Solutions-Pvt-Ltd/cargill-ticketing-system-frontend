@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -36,12 +36,20 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import HistoryIcon from "@mui/icons-material/History";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { useAuth } from "../../../context/AuthContext";
-import { getStoredTickets, setStoredTickets } from "../../../utils/rbacData";
+import { getStoredTickets, getStoredTicketsAsync, setStoredTickets } from "../../../utils/rbacData";
 
 export default function Home() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [tickets, setTickets] = useState(() => getStoredTickets());
+
+  useEffect(() => {
+    if (tickets.length === 0) {
+      getStoredTicketsAsync().then((fetchedTickets) => {
+        setTickets(fetchedTickets);
+      });
+    }
+  }, [tickets]);
 
   // Search state
   const [searchQuery, setSearchQuery] = useState("");

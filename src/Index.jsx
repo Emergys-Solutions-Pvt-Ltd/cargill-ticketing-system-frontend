@@ -1,4 +1,6 @@
+import React, { useEffect, useState } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { Box, Typography } from "@mui/material";
 import App from "./App";
 import RequestDetails from "./pages/private/Requests/RequestDetails";
 import UserProfile from "./pages/private/Profile/UserProfile";
@@ -11,6 +13,7 @@ import Home from "./pages/private/Home/Home";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { ThemeContextProvider } from "./context/ThemeContext";
 import { AuthProvider } from "./context/AuthContext";
+import { initMockData } from "./utils/rbacData";
 
 const router = createBrowserRouter([
   {
@@ -70,6 +73,39 @@ const router = createBrowserRouter([
 ]);
 
 function Index() {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    initMockData().then(() => {
+      setLoading(false);
+    });
+  }, []);
+
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+          background: "linear-gradient(135deg, #1B3D41 0%, #0E2325 100%)",
+          color: "#ffffff",
+          fontFamily: "Outfit, Inter, sans-serif",
+          gap: 2
+        }}
+      >
+        <Typography variant="h4" sx={{ fontWeight: 300, letterSpacing: "-0.5px" }}>
+          Cargilll
+        </Typography>
+        <Typography variant="body2" sx={{ color: "rgba(255, 255, 255, 0.6)", fontWeight: 500 }}>
+          Initializing Enterprise Service Portal...
+        </Typography>
+      </Box>
+    );
+  }
+
   return (
     <ThemeContextProvider>
       <AuthProvider>

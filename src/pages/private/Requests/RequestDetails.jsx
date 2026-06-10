@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -23,7 +23,7 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutlined';
 import CategoryIcon from '@mui/icons-material/Category';
 import HelpOutlineIcon from '@mui/icons-material/Help';
-import { getStoredTickets, setStoredTickets } from "../../../utils/rbacData";
+import { getStoredTickets, getStoredTicketsAsync, setStoredTickets } from "../../../utils/rbacData";
 import { useAuth } from "../../../context/AuthContext";
 
 const getStatusColor = (status) => {
@@ -69,7 +69,26 @@ function RequestDetails() {
   const [tickets, setTickets] = useState(() => getStoredTickets());
   const [commentText, setCommentText] = useState("");
 
-  const request = tickets.find(r => r.id === requestId) || tickets[0];
+  useEffect(() => {
+    if (tickets.length === 0) {
+      getStoredTicketsAsync().then((fetchedTickets) => {
+        setTickets(fetchedTickets);
+      });
+    }
+  }, [tickets]);
+
+  const request = tickets.find(r => r.id === requestId) || {
+    id: requestId || "REQ0000000",
+    title: "Loading Ticket Details...",
+    status: "Open",
+    priority: "Medium",
+    created: "",
+    updated: "",
+    comments: [],
+    assignee: "Loading...",
+    category: "General Support",
+    department: "Enterprise Services"
+  };
   const statusColors = getStatusColor(request.status);
   const priorityColors = getPriorityColor(request.priority);
 

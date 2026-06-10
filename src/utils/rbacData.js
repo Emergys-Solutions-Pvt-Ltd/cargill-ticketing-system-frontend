@@ -1,14 +1,26 @@
+import { networkService } from "./network";
+
+export const initMockData = async () => {
+  try {
+    const mockData = await networkService.get("/mockData.json", { skipAuth: true });
+    if (!localStorage.getItem("rbac_users_v4") && mockData.users) {
+      localStorage.setItem("rbac_users_v4", JSON.stringify(mockData.users));
+    }
+    if (!localStorage.getItem("rbac_roles_v4") && mockData.roles) {
+      localStorage.setItem("rbac_roles_v4", JSON.stringify(mockData.roles));
+    }
+    if (!localStorage.getItem("service_now_tickets_v1") && mockData.tickets) {
+      localStorage.setItem("service_now_tickets_v1", JSON.stringify(mockData.tickets));
+    }
+  } catch (error) {
+    console.error("Failed to initialize mock data:", error);
+  }
+};
+
 export const getStoredUsers = () => {
   const data = localStorage.getItem("rbac_users_v4");
   if (data) return JSON.parse(data);
-  const defaultUsers = [
-    { id: 1, email: "admin@cargill.com", role: "Org Admin", status: "Active" },
-    { id: 2, email: "hr_admin@cargill.com", role: "HR Depart Admin", status: "Active" },
-    { id: 3, email: "finance_admin@cargill.com", role: "Finance Depart Admin", status: "Active" },
-    { id: 4, email: "user@cargill.com", role: "User", status: "Active" },
-  ];
-  localStorage.setItem("rbac_users_v4", JSON.stringify(defaultUsers));
-  return defaultUsers;
+  return [];
 };
 
 export const setStoredUsers = (users) => {
@@ -18,34 +30,7 @@ export const setStoredUsers = (users) => {
 export const getStoredRoles = () => {
   const data = localStorage.getItem("rbac_roles_v4");
   if (data) return JSON.parse(data);
-  const defaultRoles = [
-    {
-      name: "Org Admin",
-      permissions: ["manage_org", "manage_users", "manage_dept", "view_dept_analytics", "create_ticket", "edit_ticket", "comment_ticket", "preview_file", "download_file"],
-      isSystem: true,
-      level: 1
-    },
-    {
-      name: "HR Depart Admin",
-      permissions: ["manage_dept", "view_dept_analytics", "create_ticket", "edit_ticket", "comment_ticket", "preview_file", "download_file"],
-      isSystem: true,
-      level: 2
-    },
-    {
-      name: "Finance Depart Admin",
-      permissions: ["manage_dept", "view_dept_analytics", "create_ticket", "edit_ticket", "comment_ticket", "preview_file", "download_file"],
-      isSystem: true,
-      level: 2
-    },
-    {
-      name: "User",
-      permissions: ["create_ticket", "edit_ticket", "comment_ticket", "preview_file", "download_file"],
-      isSystem: true,
-      level: 3
-    }
-  ];
-  localStorage.setItem("rbac_roles_v4", JSON.stringify(defaultRoles));
-  return defaultRoles;
+  return [];
 };
 
 export const setStoredRoles = (roles) => {
@@ -72,80 +57,22 @@ export const systemPermissions = [
 export const getStoredTickets = () => {
   const data = localStorage.getItem("service_now_tickets_v1");
   if (data) return JSON.parse(data);
-  const defaultTickets = [
-    {
-      id: "REQ0001234",
-      title: "Request to initiate dynamic scan on SXR QA Environment",
-      status: "Closed",
-      created: "4 months ago",
-      updated: "4 minutes ago",
-      priority: "High",
-      assignee: "John Doe",
-      department: "Security Operations",
-      category: "Security Assessment",
-      urgency: "Medium",
-      impact: "Medium",
-      comments: [
-        {
-          id: 1,
-          author: "Ashish Shende",
-          avatar: "A",
-          time: "10 mins ago",
-          text: "I have uploaded the initial text guidelines, architectural diagram, and financial audit spreadsheets for review.",
-          attachments: [
-            { name: "scan_requirements.txt", size: "1.2 KB", type: "txt" },
-            { name: "architecture_diagram.pdf", size: "2.4 MB", type: "pdf" },
-            { name: "financial_report.xlsx", size: "850 KB", type: "xlsx" },
-            { name: "project_schedule.xls", size: "1.5 MB", type: "xls" }
-          ]
-        }
-      ]
-    },
-    {
-      id: "INC0010045",
-      title: "Access request for Production Database",
-      status: "In Progress",
-      created: "2 weeks ago",
-      updated: "1 hour ago",
-      priority: "Critical",
-      assignee: "Alice Smith",
-      department: "IT Infrastructure",
-      category: "Access Management",
-      urgency: "High",
-      impact: "High",
-      comments: []
-    },
-    {
-      id: "REQ0001235",
-      title: "Software installation: Adobe Creative Cloud",
-      status: "Pending",
-      created: "1 day ago",
-      updated: "10 minutes ago",
-      priority: "Medium",
-      assignee: "Bob Wilson",
-      department: "IT Support",
-      category: "Software Request",
-      urgency: "Medium",
-      impact: "Low",
-      comments: []
-    },
-    {
-      id: "INC0010046",
-      title: "Laptop replacement request",
-      status: "New",
-      created: "3 days ago",
-      updated: "2 hours ago",
-      priority: "Low",
-      assignee: "Sarah Johnson",
-      department: "HR Services",
-      category: "Hardware",
-      urgency: "Low",
-      impact: "Low",
-      comments: []
-    }
-  ];
-  localStorage.setItem("service_now_tickets_v1", JSON.stringify(defaultTickets));
-  return defaultTickets;
+  return [];
+};
+
+export const getStoredTicketsAsync = async () => {
+  const data = localStorage.getItem("service_now_tickets_v1");
+  if (data) return JSON.parse(data);
+
+  try {
+    const mockData = await networkService.get("/mockData.json", { skipAuth: true });
+    const defaultTickets = mockData.tickets || [];
+    localStorage.setItem("service_now_tickets_v1", JSON.stringify(defaultTickets));
+    return defaultTickets;
+  } catch (error) {
+    console.error("Failed to fetch default tickets from mockData.json:", error);
+    return [];
+  }
 };
 
 export const setStoredTickets = (tickets) => {

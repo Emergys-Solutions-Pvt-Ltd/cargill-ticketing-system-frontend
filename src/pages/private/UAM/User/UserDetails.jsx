@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Box,
@@ -41,6 +41,7 @@ import {
   getStoredRoles,
   systemPermissions,
 } from "../../../../utils/rbacData";
+import { networkService } from "../../../../utils/network";
 
 const UserDetails = () => {
   const { userId } = useParams();
@@ -54,6 +55,23 @@ const UserDetails = () => {
   });
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [activeTab, setActiveTab] = useState(0);
+  const [mockData, setMockData] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+    networkService.get("/mockData.json", { skipAuth: true })
+      .then((data) => {
+        if (active) {
+          setMockData(data);
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to fetch mock data in UserDetails:", error);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   if (userId !== prevUserId) {
     setPrevUserId(userId);
@@ -76,16 +94,18 @@ const UserDetails = () => {
 
   // Dynamically map details based on viewed user
   const userDetails = React.useMemo(() => {
+    const defaultDetails = {
+      name: "Guest User",
+      location: "Pune, India",
+      email: user?.email || "guest@cargill.com",
+      phone: "+91 98765 43210",
+      website: "cargill.com",
+      bio: "No details available.",
+      skills: ["Access Control"]
+    };
+
     if (!user) {
-      return {
-        name: "Guest User",
-        location: "Pune, India",
-        email: "guest@cargill.com",
-        phone: "+91 98765 43210",
-        website: "cargill.com",
-        bio: "No details available.",
-        skills: ["Access Control"]
-      };
+      return defaultDetails;
     }
 
     const email = user.email;
@@ -95,103 +115,68 @@ const UserDetails = () => {
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(" ");
 
+    if (!mockData) {
+      return { ...defaultDetails, name, email };
+    }
+
+    const profilesSource = mockData.profiles;
+    const key = email.toLowerCase().startsWith("admin")
+      ? "admin"
+      : email.toLowerCase().startsWith("hr")
+      ? "hr"
+      : email.toLowerCase().startsWith("finance")
+      ? "finance"
+      : "default";
+
+    const profile = profilesSource[key] || {};
     return {
+      ...defaultDetails,
+      ...profile,
       name,
-      location: user.role === "Org Admin" ? "Minneapolis, USA" : "Pune, India",
-      email: email,
-      phone: user.role === "Org Admin" ? "+1 (952) 742-7575" : "+91 98765 43210",
-      website: "cargill.com",
-      bio: `Dedicated ${user.role} at Cargill. Auditing access logs, managing permissions hierarchy, and ensuring system compliance.`,
-      skills: user.role === "Org Admin"
-        ? ["Access Control", "System Administration", "Compliance Auditing", "Risk Assessment", "Operations Security"]
-        : user.role.includes("Admin")
-          ? ["Department Administration", "Access Control Management", "Ticket Workflows", "Team Leadership"]
-          : ["Ticket Submission", "Vulnerability Review", "File Review", "Testing Support"]
+      email
     };
-  }, [user]);
+  }, [user, mockData]);
 
   // Dynamically compute stats depending on user profile
   const userStats = React.useMemo(() => {
-    if (!user) {
-      return {
-        tickets: 0,
-        files: 0,
-        comments: 0,
-        resolutionRate: 0,
-        statusSummary: { open: 0, inProgress: 0, pending: 0, closed: 0 }
-      };
+    const defaultStats = {
+      tickets: 0,
+      files: 0,
+      comments: 0,
+      resolutionRate: 0,
+      statusSummary: { open: 0, inProgress: 0, pending: 0, closed: 0 }
+    };
+    if (!user || !mockData) {
+      return defaultStats;
     }
 
     const email = user.email.toLowerCase();
-    if (email.startsWith("admin")) {
-      return {
-        tickets: 14,
-        files: 8,
-        comments: 24,
-        resolutionRate: 85,
-        statusSummary: { open: 3, inProgress: 4, pending: 2, closed: 5 }
-      };
-    } else if (email.startsWith("hr")) {
-      return {
-        tickets: 5,
-        files: 2,
-        comments: 8,
-        resolutionRate: 80,
-        statusSummary: { open: 1, inProgress: 1, pending: 0, closed: 3 }
-      };
-    } else if (email.startsWith("finance")) {
-      return {
-        tickets: 8,
-        files: 4,
-        comments: 15,
-        resolutionRate: 70,
-        statusSummary: { open: 2, inProgress: 2, pending: 1, closed: 3 }
-      };
-    } else {
-      return {
-        tickets: 3,
-        files: 2,
-        comments: 5,
-        resolutionRate: 50,
-        statusSummary: { open: 1, inProgress: 1, pending: 0, closed: 1 }
-      };
-    }
-  }, [user]);
+    const statsSource = mockData.stats;
+    const key = email.startsWith("admin")
+      ? "admin"
+      : email.startsWith("hr")
+      ? "hr"
+      : email.startsWith("finance")
+      ? "finance"
+      : "default";
+
+    return statsSource[key] || defaultStats;
+  }, [user, mockData]);
 
   const userActivities = React.useMemo(() => {
-    if (!user) return [];
+    if (!user || !mockData) return [];
     const email = user.email.toLowerCase();
+    const activitiesSource = mockData.activities;
+    const key = email.startsWith("admin")
+      ? "admin"
+      : email.startsWith("hr")
+      ? "hr"
+      : email.startsWith("finance")
+      ? "finance"
+      : "default";
 
-    if (email.startsWith("admin")) {
-      return [
-        { id: 1, action: "User Access Review", detail: "Reviewed and approved UAM roles for 4 team members", time: "2 hours ago", category: "Access Control", status: "Success", ip: "10.124.45.12" },
-        { id: 2, action: "Role Modified", detail: "Updated HR Depart Admin permissions policy", time: "1 day ago", category: "Security Policy", status: "Success", ip: "10.124.45.12" },
-        { id: 3, action: "Ticket Transferred", detail: "Assigned INC0010045 to Alice Smith", time: "3 days ago", category: "Ticket Assignment", status: "Success", ip: "10.124.45.18" },
-        { id: 4, action: "Security Audit", detail: "Exported Q2 UAM system logs for compliance verification", time: "1 week ago", category: "Compliance", status: "Success", ip: "10.124.45.12" },
-        { id: 5, action: "System Logged In", detail: "Session initiated via Single Sign-On (SSO)", time: "1 week ago", category: "Session", status: "Success", ip: "10.124.45.12" },
-      ];
-    } else if (email.startsWith("hr")) {
-      return [
-        { id: 1, action: "Ticket Created", detail: "Raised REQ0001235: Adobe Creative Cloud installation request", time: "1 day ago", category: "Ticket Management", status: "Success", ip: "192.168.22.4" },
-        { id: 2, action: "Comment Added", detail: "Commented on REQ0001234: 'Confirming requirement validation'", time: "2 days ago", category: "Ticket Management", status: "Success", ip: "192.168.22.4" },
-        { id: 3, action: "File Uploaded", detail: "Uploaded employee onboarding file: uam_guidelines.pdf", time: "4 days ago", category: "Attachments", status: "Success", ip: "192.168.22.9" },
-        { id: 4, action: "System Logged In", detail: "Session initiated via desktop agent", time: "5 days ago", category: "Session", status: "Success", ip: "192.168.22.4" },
-      ];
-    } else if (email.startsWith("finance")) {
-      return [
-        { id: 1, action: "File Uploaded", detail: "Uploaded scan_requirements.txt to REQ0001234", time: "10 mins ago", category: "Attachments", status: "Success", ip: "10.98.12.112" },
-        { id: 2, action: "Comment Added", detail: "Commented on REQ0001234 regarding spreadsheet architecture", time: "15 mins ago", category: "Ticket Management", status: "Success", ip: "10.98.12.112" },
-        { id: 3, action: "Ticket Created", detail: "Raised REQ0001234: Request to initiate QA environment scan", time: "4 months ago", category: "Ticket Management", status: "Success", ip: "10.98.10.45" },
-        { id: 4, action: "System Logged In", detail: "Session initiated via SSO", time: "4 months ago", category: "Session", status: "Success", ip: "10.98.10.45" },
-      ];
-    } else {
-      return [
-        { id: 1, action: "Ticket Update", detail: "Modified description for REQ0001235", time: "3 hours ago", category: "Ticket Management", status: "Success", ip: "172.16.14.8" },
-        { id: 2, action: "System Logged In", detail: "Session initiated via mobile app", time: "1 day ago", category: "Session", status: "Success", ip: "172.16.14.8" },
-        { id: 3, action: "Comment Added", detail: "Commented on incident regarding laptop battery swap status", time: "3 days ago", category: "Ticket Management", status: "Success", ip: "172.16.12.5" },
-      ];
-    }
-  }, [user]);
+    return activitiesSource[key] || [];
+  }, [user, mockData]);
 
   if (!user) {
     return (
@@ -413,8 +398,8 @@ const UserDetails = () => {
               </Box>
             )}
 
-            {/* Tab 2: Ticket Stats */}
-            {activeTab === 2 && (
+            {/* Tab 3: Ticket Stats */}
+            {activeTab === 3 && (
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: "bold", mb: 4, color: "text.primary" }}>
                   Ticket Stats
@@ -525,8 +510,8 @@ const UserDetails = () => {
               </Box>
             )}
 
-            {/* Tab 3: User Activity */}
-            {activeTab === 3 && (
+            {/* Tab 4: User Activity */}
+            {activeTab === 4 && (
               <Box>
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4 }}>
                   <Box>
@@ -626,8 +611,8 @@ const UserDetails = () => {
               </Box>
             )}
 
-            {/* Tab 4: Role & Permissions Settings */}
-            {activeTab === 4 && (
+            {/* Tab 2: Role & Permissions Settings */}
+            {activeTab === 2 && (
               <Box>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 3 }}>
                   <ShieldIcon color="primary" fontSize="large" />

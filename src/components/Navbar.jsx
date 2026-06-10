@@ -24,6 +24,7 @@ import BookIcon from "@mui/icons-material/Book";
 import { Link } from "react-router-dom";
 import { useThemeContext } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
+import cargillLogo from "../assets/cargill-logo.png";
 
 const kbArticles = [
   {
@@ -85,7 +86,7 @@ export default function Navbar() {
         <Toolbar sx={{ minHeight: "64px" }}>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1, display: "flex", alignItems: "center" }}>
             <Link to="/" style={{ ...linkStyle, display: "flex", alignItems: "center", gap: "4px" }}>
-              <span style={{ fontWeight: 400, letterSpacing: "-0.5px" }}>Cargill</span>
+              <Box component="img" src={cargillLogo} alt="Cargill Logo" sx={{ height: 24, display: "block" }} />
               <span style={{
                 fontSize: "0.75rem",
                 opacity: 0.8,

@@ -22,6 +22,7 @@ import {
 } from "@mui/icons-material";
 import { useAuth } from "../../../context/AuthContext";
 import { getStoredUsers } from "../../../utils/rbacData";
+import cargillLogo from "../../../assets/cargill-logo.png";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -79,7 +80,7 @@ const Login = () => {
   }, []);
 
   return (
-    <Box 
+    <Box
       sx={{
         background: "linear-gradient(135deg, #1B3D41 0%, #0E2325 100%)",
         minHeight: "100vh",
@@ -93,14 +94,7 @@ const Login = () => {
       <div className="w-full max-w-md">
         {/* Brand Header */}
         <Box className="flex flex-col items-center mb-6">
-          <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.5, mb: 1 }}>
-            <Typography variant="h3" sx={{ fontWeight: 400, color: "#ffffff", letterSpacing: "-1.5px" }}>
-              service
-            </Typography>
-            <Typography variant="h3" sx={{ fontWeight: 900, color: "#81B563", letterSpacing: "-1.5px" }}>
-              now
-            </Typography>
-          </Box>
+          <Box component="img" src={cargillLogo} alt="Cargill Logo" sx={{ height: 60, mb: 1.5, display: "block" }} />
           <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.75)", fontWeight: 500 }}>
             Enterprise Service Portal
           </Typography>
@@ -202,8 +196,8 @@ const Login = () => {
         {/* Quick Login Helpers */}
         <Paper
           variant="outlined"
-          sx={{ 
-            borderColor: "rgba(255, 255, 255, 0.15)", 
+          sx={{
+            borderColor: "rgba(255, 255, 255, 0.15)",
             background: "rgba(255, 255, 255, 0.08)",
             backdropFilter: "blur(10px)",
             mt: 4,
