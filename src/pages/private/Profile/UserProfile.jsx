@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Avatar,
@@ -10,6 +10,10 @@ import {
   Stack,
   IconButton,
   Tooltip,
+  Tabs,
+  Tab,
+  Paper,
+  Chip,
 } from "@mui/material";
 import {
   Edit as EditIcon,
@@ -32,6 +36,7 @@ import { getStoredRoles, systemPermissions } from "../../../utils/rbacData";
 const UserProfile = () => {
   const { user: authUser } = useAuth();
   const roles = React.useMemo(() => getStoredRoles(), []);
+  const [activeTab, setActiveTab] = useState(0);
 
   // Dynamically map details based on logged-in user
   const userDetails = React.useMemo(() => {
@@ -119,6 +124,40 @@ const UserProfile = () => {
     }
   }, [authUser]);
 
+  const userActivities = React.useMemo(() => {
+    const email = (authUser?.email || "finance_admin@cargill.com").toLowerCase();
+
+    if (email.startsWith("admin")) {
+      return [
+        { id: 1, action: "User Access Review", detail: "Reviewed and approved UAM roles for 4 team members", time: "2 hours ago", category: "Access Control", status: "Success", ip: "10.124.45.12" },
+        { id: 2, action: "Role Modified", detail: "Updated HR Depart Admin permissions policy", time: "1 day ago", category: "Security Policy", status: "Success", ip: "10.124.45.12" },
+        { id: 3, action: "Ticket Transferred", detail: "Assigned INC0010045 to Alice Smith", time: "3 days ago", category: "Ticket Assignment", status: "Success", ip: "10.124.45.18" },
+        { id: 4, action: "Security Audit", detail: "Exported Q2 UAM system logs for compliance verification", time: "1 week ago", category: "Compliance", status: "Success", ip: "10.124.45.12" },
+        { id: 5, action: "System Logged In", detail: "Session initiated via Single Sign-On (SSO)", time: "1 week ago", category: "Session", status: "Success", ip: "10.124.45.12" },
+      ];
+    } else if (email.startsWith("hr")) {
+      return [
+        { id: 1, action: "Ticket Created", detail: "Raised REQ0001235: Adobe Creative Cloud installation request", time: "1 day ago", category: "Ticket Management", status: "Success", ip: "192.168.22.4" },
+        { id: 2, action: "Comment Added", detail: "Commented on REQ0001234: 'Confirming requirement validation'", time: "2 days ago", category: "Ticket Management", status: "Success", ip: "192.168.22.4" },
+        { id: 3, action: "File Uploaded", detail: "Uploaded employee onboarding file: uam_guidelines.pdf", time: "4 days ago", category: "Attachments", status: "Success", ip: "192.168.22.9" },
+        { id: 4, action: "System Logged In", detail: "Session initiated via desktop agent", time: "5 days ago", category: "Session", status: "Success", ip: "192.168.22.4" },
+      ];
+    } else if (email.startsWith("finance") || email.includes("ashish")) {
+      return [
+        { id: 1, action: "File Uploaded", detail: "Uploaded scan_requirements.txt to REQ0001234", time: "10 mins ago", category: "Attachments", status: "Success", ip: "10.98.12.112" },
+        { id: 2, action: "Comment Added", detail: "Commented on REQ0001234 regarding spreadsheet architecture", time: "15 mins ago", category: "Ticket Management", status: "Success", ip: "10.98.12.112" },
+        { id: 3, action: "Ticket Created", detail: "Raised REQ0001234: Request to initiate QA environment scan", time: "4 months ago", category: "Ticket Management", status: "Success", ip: "10.98.10.45" },
+        { id: 4, action: "System Logged In", detail: "Session initiated via SSO", time: "4 months ago", category: "Session", status: "Success", ip: "10.98.10.45" },
+      ];
+    } else {
+      return [
+        { id: 1, action: "Ticket Update", detail: "Modified description for REQ0001235", time: "3 hours ago", category: "Ticket Management", status: "Success", ip: "172.16.14.8" },
+        { id: 2, action: "System Logged In", detail: "Session initiated via mobile app", time: "1 day ago", category: "Session", status: "Success", ip: "172.16.14.8" },
+        { id: 3, action: "Comment Added", detail: "Commented on incident regarding laptop battery swap status", time: "3 days ago", category: "Ticket Management", status: "Success", ip: "172.16.12.5" },
+      ];
+    }
+  }, [authUser]);
+
   const userRole = React.useMemo(() => {
     return roles.find((r) => r.name === userDetails.role) || { permissions: [] };
   }, [roles, userDetails.role]);
@@ -182,197 +221,426 @@ const UserProfile = () => {
           </CardContent>
         </Card>
 
-        {/* Main Content Grid: Stats and Personal Info Side-by-Side */}
-        <Grid container spacing={4}>
-          {/* Left Column: Tickets & System Stats + Roles & Permissions */}
-          <Grid item xs={12} md={7}>
-            <Stack spacing={4}>
-              {/* Activity Stats Card */}
-              <Card
-                className="border-none shadow-lg rounded-2xl bg-white dark:bg-slate-900"
-                sx={{ backgroundImage: "none", p: 3 }}
-              >
-                <CardContent sx={{ p: 1 }}>
-                  <Typography
-                    variant="h6"
-                    className="font-bold text-slate-800 dark:text-slate-100 mb-6"
-                  >
-                    Account Activity & Ticket Stats
-                  </Typography>
+        {/* Tabs Bar */}
+        <Paper
+          variant="outlined"
+          sx={{
+            borderRadius: 3,
+            mb: 4,
+            borderColor: "divider",
+            bgcolor: "background.paper",
+            overflow: "hidden",
+            backgroundImage: "none"
+          }}
+        >
+          <Tabs
+            value={activeTab}
+            onChange={(e, val) => setActiveTab(val)}
+            variant="scrollable"
+            scrollButtons="auto"
+            sx={{
+              borderBottom: 1,
+              borderColor: "divider",
+              "& .MuiTab-root": {
+                fontWeight: "bold",
+                textTransform: "none",
+                fontSize: "0.9rem",
+                py: 2,
+                px: 3
+              }
+            }}
+          >
+            <Tab label="Basic Info" />
+            <Tab label="Personal Information" />
+            <Tab label="Role & Permissions Settings" />
+            <Tab label="Ticket Stats" />
+            <Tab label="User Activity" />
+          </Tabs>
+        </Paper>
 
-                  <Grid container spacing={3} sx={{ mb: 4 }}>
-                    {[
-                      {
-                        label: "Total Tickets",
-                        value: userStats.tickets,
-                        icon: <TicketIcon fontSize="medium" />,
-                        color: "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400",
-                      },
-                      {
-                        label: "Files Uploaded",
-                        value: userStats.files,
-                        icon: <UploadIcon fontSize="medium" />,
-                        color: "bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400",
-                      },
-                      {
-                        label: "Comments Posted",
-                        value: userStats.comments,
-                        icon: <CommentIcon fontSize="medium" />,
-                        color: "bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400",
-                      },
-                      {
-                        label: "Resolution Rate",
-                        value: `${userStats.resolutionRate}%`,
-                        icon: <ResolveIcon fontSize="medium" />,
-                        color: "bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400",
-                      },
-                    ].map((stat, idx) => (
-                      <Grid item xs={6} key={idx}>
-                        <Box className="p-4 border border-slate-100 dark:border-slate-800 rounded-2xl flex items-center gap-3 bg-slate-50/50 dark:bg-slate-900/20">
-                          <div className={`p-3 rounded-xl ${stat.color} flex items-center justify-center`}>
-                            {stat.icon}
-                          </div>
-                          <div>
-                            <Typography
-                              variant="caption"
-                              className="text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block"
-                            >
-                              {stat.label}
-                            </Typography>
-                            <Typography
-                              variant="h5"
-                              className="font-extrabold text-slate-800 dark:text-slate-100 mt-0.5"
-                            >
-                              {stat.value}
-                            </Typography>
-                          </div>
-                        </Box>
-                      </Grid>
-                    ))}
+        {/* Tab Panel Card */}
+        <Card
+          variant="outlined"
+          sx={{
+            borderRadius: 4,
+            borderColor: "divider",
+            bgcolor: "background.paper",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.02)",
+            backgroundImage: "none",
+            mb: 4
+          }}
+        >
+          <CardContent sx={{ p: { xs: 3, md: 5 } }}>
+            {/* Tab 0: Basic Info */}
+            {activeTab === 0 && (
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: "bold", mb: 4, color: "text.primary" }}>
+                  Basic User Information
+                </Typography>
+                <Grid container spacing={4}>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px" }}>Full Name</Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 600, mt: 0.5, color: "text.primary" }}>{userDetails.name}</Typography>
                   </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px" }}>Email Address</Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 600, mt: 0.5, color: "text.primary", fontFamily: "monospace" }}>{userDetails.email}</Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px" }}>Work Location</Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 600, mt: 0.5, color: "text.primary" }}>{userDetails.location}</Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px" }}>Assigned Role</Typography>
+                    <Box sx={{ mt: 0.5 }}>
+                      <Chip label={userDetails.role} color="primary" size="small" sx={{ fontWeight: "bold" }} />
+                    </Box>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px" }}>System ID</Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 600, mt: 0.5, color: "text.primary" }}>USR-00{authUser?.id || 1}</Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px" }}>Department</Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 600, mt: 0.5, color: "text.primary" }}>Technology Services</Typography>
+                  </Grid>
+                </Grid>
+              </Box>
+            )}
 
-                  <Divider sx={{ my: 3 }} />
-
-                  <Typography
-                    variant="subtitle2"
-                    className="font-bold text-slate-800 dark:text-slate-100 mb-3 block"
-                  >
-                    Ticket Status Summary
-                  </Typography>
-                  <Stack spacing={2}>
-                    {[
-                      { label: "Open", count: userStats.statusSummary.open, color: "success" },
-                      { label: "In Progress", count: userStats.statusSummary.inProgress, color: "primary" },
-                      { label: "Pending", count: userStats.statusSummary.pending, color: "warning" },
-                      { label: "Closed", count: userStats.statusSummary.closed, color: "inherit" },
-                    ].map((status, idx) => {
-                      const total =
-                        userStats.statusSummary.open +
-                        userStats.statusSummary.inProgress +
-                        userStats.statusSummary.pending +
-                        userStats.statusSummary.closed;
-                      const pct = total > 0 ? (status.count / total) * 100 : 0;
-                      return (
-                        <Box key={idx}>
-                          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 0.5 }}>
-                            <Typography
-                              variant="body2"
-                              className="font-bold text-slate-600 dark:text-slate-300"
-                            >
-                              {status.label}
-                            </Typography>
-                            <Typography variant="caption" className="font-bold text-slate-500">
-                              {status.count} ({Math.round(pct)}%)
-                            </Typography>
-                          </Box>
-                          <Box
-                            sx={{
-                              width: "100%",
-                              height: "8px",
-                              bgcolor: "action.hover",
-                              borderRadius: "4px",
-                              overflow: "hidden",
-                            }}
-                          >
-                            <Box
-                              sx={{
-                                width: `${pct}%`,
-                                height: "100%",
-                                borderRadius: "4px",
-                                bgcolor:
-                                  status.color === "success"
-                                    ? "success.main"
-                                    : status.color === "primary"
-                                      ? "primary.main"
-                                      : status.color === "warning"
-                                        ? "warning.main"
-                                        : "text.secondary",
-                              }}
-                            />
-                          </Box>
+            {/* Tab 1: Personal Information */}
+            {activeTab === 1 && (
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: "bold", mb: 4, color: "text.primary" }}>
+                  Personal Information
+                </Typography>
+                <Stack spacing={4}>
+                  <Box>
+                    <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px", display: "block", mb: 1 }}>Biography</Typography>
+                    <Typography variant="body2" sx={{ color: "text.primary", lineHeight: 1.7, fontSize: "0.95rem" }}>{userDetails.bio}</Typography>
+                  </Box>
+                  <Divider />
+                  <Grid container spacing={4}>
+                    <Grid item xs={12} sm={6}>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                        <Avatar sx={{ bgcolor: "rgba(59, 130, 246, 0.15)", color: "#3b82f6" }}><EmailIcon /></Avatar>
+                        <Box>
+                          <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700 }}>EMAIL</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary", fontFamily: "monospace" }}>{userDetails.email}</Typography>
                         </Box>
-                      );
-                    })}
-                  </Stack>
-                </CardContent>
-              </Card>
-
-              {/* Roles & Permissions Card */}
-              <Card
-                className="border-none shadow-lg rounded-2xl bg-white dark:bg-slate-900"
-                sx={{ backgroundImage: "none", p: 3 }}
-              >
-                <CardContent sx={{ p: 1 }}>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
-                    <ShieldIcon color="primary" fontSize="large" />
-                    <Box>
-                      <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-                        Assigned Security Policy
-                      </Typography>
-                      <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                        {userDetails.role} (Inherited Permissions)
-                      </Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                        <Avatar sx={{ bgcolor: "rgba(16, 185, 129, 0.15)", color: "#10b981" }}><PhoneIcon /></Avatar>
+                        <Box>
+                          <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700 }}>PHONE</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>{userDetails.phone}</Typography>
+                        </Box>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                        <Avatar sx={{ bgcolor: "rgba(139, 92, 246, 0.15)", color: "#8b5cf6" }}><LanguageIcon /></Avatar>
+                        <Box>
+                          <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700 }}>WEBSITE</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 600, color: "primary.main", cursor: "pointer", "&:hover": { textDecoration: "underline" } }}>{userDetails.website}</Typography>
+                        </Box>
+                      </Box>
+                    </Grid>
+                  </Grid>
+                  <Divider />
+                  <Box>
+                    <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px", display: "block", mb: 2 }}>Skills & Expertise</Typography>
+                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5 }}>
+                      {userDetails.skills.map((skill) => (
+                        <Chip key={skill} label={skill} variant="outlined" sx={{ borderRadius: "8px", fontWeight: 600 }} />
+                      ))}
                     </Box>
                   </Box>
-                  <Divider sx={{ mb: 3 }} />
+                </Stack>
+              </Box>
+            )}
 
-                  <Typography variant="body2" sx={{ color: "text.secondary", mb: 3 }}>
-                    Below are the active security privileges authorized for your user role.
-                  </Typography>
+            {/* Tab 2: Ticket Stats */}
+            {activeTab === 2 && (
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: "bold", mb: 4, color: "text.primary" }}>
+                  Ticket Stats
+                </Typography>
 
-                  <Stack spacing={3}>
-                    {[
-                      { val: 1, name: "Level 1 - Organization Policies" },
-                      { val: 2, name: "Level 2 - Department Policies" },
-                      { val: 3, name: "Level 3 - Tickets Policies" }
-                    ].map((lvl, index) => {
-                      const perms = systemPermissions.filter(p => p.level === lvl.val);
-                      return (
-                        <Box key={lvl.val}>
-                          <Typography
-                            variant="caption"
+                <Grid container spacing={3} sx={{ mb: 4 }}>
+                  {[
+                    {
+                      label: "Total Tickets",
+                      value: userStats.tickets,
+                      icon: <TicketIcon fontSize="medium" />,
+                      color: "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400",
+                    },
+                    {
+                      label: "Files Uploaded",
+                      value: userStats.files,
+                      icon: <UploadIcon fontSize="medium" />,
+                      color: "bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400",
+                    },
+                    {
+                      label: "Comments Posted",
+                      value: userStats.comments,
+                      icon: <CommentIcon fontSize="medium" />,
+                      color: "bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400",
+                    },
+                    {
+                      label: "Resolution Rate",
+                      value: `${userStats.resolutionRate}%`,
+                      icon: <ResolveIcon fontSize="medium" />,
+                      color: "bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400",
+                    },
+                  ].map((stat, idx) => (
+                    <Grid item xs={12} sm={6} md={3} key={idx}>
+                      <Box className="p-4 border border-slate-100 dark:border-slate-800 rounded-2xl flex items-center gap-3 bg-slate-50/50 dark:bg-slate-900/20">
+                        <div className={`p-3 rounded-xl ${stat.color} flex items-center justify-center`}>
+                          {stat.icon}
+                        </div>
+                        <div>
+                          <Typography variant="caption" className="text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block">
+                            {stat.label}
+                          </Typography>
+                          <Typography variant="h5" className="font-extrabold text-slate-800 dark:text-slate-100 mt-0.5">
+                            {stat.value}
+                          </Typography>
+                        </div>
+                      </Box>
+                    </Grid>
+                  ))}
+                </Grid>
+
+                <Divider sx={{ my: 4 }} />
+
+                <Typography variant="subtitle2" sx={{ fontWeight: "bold", mb: 3, display: "block" }}>
+                  Ticket Status Summary
+                </Typography>
+                <Stack spacing={3}>
+                  {[
+                    { label: "Open", count: userStats.statusSummary.open, color: "success" },
+                    { label: "In Progress", count: userStats.statusSummary.inProgress, color: "primary" },
+                    { label: "Pending", count: userStats.statusSummary.pending, color: "warning" },
+                    { label: "Closed", count: userStats.statusSummary.closed, color: "inherit" },
+                  ].map((status, idx) => {
+                    const total =
+                      userStats.statusSummary.open +
+                      userStats.statusSummary.inProgress +
+                      userStats.statusSummary.pending +
+                      userStats.statusSummary.closed;
+                    const pct = total > 0 ? (status.count / total) * 100 : 0;
+                    return (
+                      <Box key={idx}>
+                        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>
+                            {status.label}
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: "bold" }}>
+                            {status.count} ({Math.round(pct)}%)
+                          </Typography>
+                        </Box>
+                        <Box
+                          sx={{
+                            width: "100%",
+                            height: "10px",
+                            bgcolor: "action.hover",
+                            borderRadius: "5px",
+                            overflow: "hidden",
+                          }}
+                        >
+                          <Box
                             sx={{
-                              fontWeight: 700,
-                              mb: 1.5,
-                              display: "block",
-                              color: lvl.val === 1 ? "error.main" : lvl.val === 2 ? "secondary.main" : "primary.main",
-                              textTransform: "uppercase",
-                              letterSpacing: "1px"
+                              width: `${pct}%`,
+                              height: "100%",
+                              borderRadius: "5px",
+                              bgcolor:
+                                status.color === "success"
+                                  ? "success.main"
+                                  : status.color === "primary"
+                                    ? "primary.main"
+                                    : status.color === "warning"
+                                      ? "warning.main"
+                                      : "text.secondary",
+                            }}
+                          />
+                        </Box>
+                      </Box>
+                    );
+                  })}
+                </Stack>
+              </Box>
+            )}
+
+            {/* Tab 3: User Activity */}
+            {activeTab === 3 && (
+              <Box>
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4 }}>
+                  <Box>
+                    <Typography variant="h6" sx={{ fontWeight: "bold", color: "text.primary" }}>
+                      User Activity Log
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                      Recent system actions and audit trail for this account
+                    </Typography>
+                  </Box>
+                  <Chip
+                    label="Compliance Audited"
+                    color="success"
+                    size="small"
+                    variant="outlined"
+                    sx={{ fontWeight: "bold", borderRadius: "8px" }}
+                  />
+                </Box>
+
+                <Stack spacing={3}>
+                  {userActivities.map((act) => (
+                    <Box
+                      key={act.id}
+                      className="p-5 border border-slate-100 dark:border-slate-800 rounded-2xl bg-slate-50/30 dark:bg-slate-900/10 hover:shadow-md transition-all duration-200"
+                    >
+                      <Grid container spacing={2} alignItems="center">
+                        <Grid item xs={12} sm={8}>
+                          <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
+                            <Box
+                              className={`p-2.5 rounded-xl flex items-center justify-center ${act.category === "Access Control" || act.category === "Security Policy" || act.category === "Compliance"
+                                ? "bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400"
+                                : act.category === "Session"
+                                  ? "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400"
+                                  : act.category === "Attachments"
+                                    ? "bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400"
+                                    : "bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400"
+                                }`}
+                            >
+                              {act.category === "Access Control" || act.category === "Security Policy" || act.category === "Compliance" ? (
+                                <ShieldIcon fontSize="small" />
+                              ) : act.category === "Session" ? (
+                                <LanguageIcon fontSize="small" />
+                              ) : act.category === "Attachments" ? (
+                                <UploadIcon fontSize="small" />
+                              ) : (
+                                <TicketIcon fontSize="small" />
+                              )}
+                            </Box>
+                            <Box>
+                              <Typography variant="subtitle2" sx={{ fontWeight: "bold", color: "text.primary" }}>
+                                {act.action}
+                              </Typography>
+                              <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.5 }}>
+                                {act.detail}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        </Grid>
+                        <Grid item xs={12} sm={4}>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              flexDirection: "column",
+                              alignItems: { xs: "flex-start", sm: "flex-end" },
+                              gap: 1,
+                              pl: { xs: 6, sm: 0 },
                             }}
                           >
-                            {lvl.name}
-                          </Typography>
-                          <Stack spacing={1.5}>
-                            {perms.map((perm) => {
-                              const hasPerm = userRole.permissions.includes(perm.id);
-                              return (
+                            <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 600 }}>
+                              {act.time}
+                            </Typography>
+                            <Box sx={{ display: "flex", gap: 1 }}>
+                              <Chip
+                                label={`IP: ${act.ip}`}
+                                size="small"
+                                variant="outlined"
+                                sx={{ fontSize: "0.75rem", height: "20px", color: "text.secondary" }}
+                              />
+                              <Chip
+                                label={act.category}
+                                size="small"
+                                sx={{
+                                  fontSize: "0.75rem",
+                                  height: "20px",
+                                  bgcolor: "action.selected",
+                                  color: "text.primary",
+                                  fontWeight: 600,
+                                }}
+                              />
+                            </Box>
+                          </Box>
+                        </Grid>
+                      </Grid>
+                    </Box>
+                  ))}
+                </Stack>
+              </Box>
+            )}
+
+            {/* Tab 4: Role & Permissions Settings */}
+            {activeTab === 4 && (
+              <Box>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 3 }}>
+                  <ShieldIcon color="primary" fontSize="large" />
+                  <Box>
+                    <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                      Security Role & Permissions Settings
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                      Inherited authorization and access policies
+                    </Typography>
+                  </Box>
+                </Box>
+                <Divider sx={{ mb: 4 }} />
+
+                <Typography variant="subtitle2" sx={{ fontWeight: "bold", mb: 1.5, display: "block" }}>
+                  Your Security Role
+                </Typography>
+                <Box sx={{ mb: 4, display: "flex", alignItems: "center", gap: 1.5 }}>
+                  <Chip label={userDetails.role} color="secondary" sx={{ fontWeight: "bold" }} />
+                  <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                    Your role is assigned by the System Administrator and determines the permissions below.
+                  </Typography>
+                </Box>
+
+                <Divider sx={{ mb: 4 }} />
+
+                <Typography variant="subtitle2" sx={{ fontWeight: "bold", mb: 3, display: "flex", alignItems: "center", gap: 1 }}>
+                  <ShieldIcon color="primary" fontSize="small" /> Inherited Policy Permissions
+                </Typography>
+
+                <Stack spacing={4}>
+                  {[
+                    { val: 1, name: "Level 1 - Organization Policies" },
+                    { val: 2, name: "Level 2 - Department Policies" },
+                    { val: 3, name: "Level 3 - Tickets Policies" }
+                  ].map((lvl, index) => {
+                    const perms = systemPermissions.filter(p => p.level === lvl.val);
+                    return (
+                      <Box key={lvl.val}>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            fontWeight: 700,
+                            mb: 2,
+                            display: "block",
+                            color: lvl.val === 1 ? "error.main" : lvl.val === 2 ? "secondary.main" : "primary.main",
+                            textTransform: "uppercase",
+                            letterSpacing: "1px"
+                          }}
+                        >
+                          {lvl.name}
+                        </Typography>
+                        <Grid container spacing={2}>
+                          {perms.map((perm) => {
+                            const hasPerm = userRole.permissions.includes(perm.id);
+                            return (
+                              <Grid item xs={12} sm={6} key={perm.id}>
                                 <Box
-                                  key={perm.id}
                                   sx={{
                                     display: "flex",
                                     alignItems: "center",
                                     justifyContent: "space-between",
                                     p: 2,
+                                    height: "100%",
                                     borderRadius: 3,
                                     bgcolor: hasPerm ? "action.hover" : "transparent",
                                     border: "1px solid",
@@ -395,116 +663,19 @@ const UserProfile = () => {
                                     </Box>
                                   </Box>
                                 </Box>
-                              );
-                            })}
-                          </Stack>
-                          {index < 2 && <Divider sx={{ mt: 3 }} />}
-                        </Box>
-                      );
-                    })}
-                  </Stack>
-                </CardContent>
-              </Card>
-            </Stack>
-          </Grid>
-
-          {/* Right Column: Contact Details & Personal Info */}
-          <Grid item xs={12} md={5}>
-            <Card
-              className="border-none shadow-lg rounded-2xl bg-white dark:bg-slate-900"
-              sx={{ backgroundImage: "none", p: 3, height: "100%" }}
-            >
-              <CardContent className="p-1">
-                <Typography
-                  variant="h6"
-                  className="font-bold text-slate-800 dark:text-slate-100 mb-6"
-                >
-                  Personal Information
-                </Typography>
-
-                <Stack spacing={3}>
-                  <Box>
-                    <Typography
-                      variant="caption"
-                      className="text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1"
-                    >
-                      Bio
-                    </Typography>
-                    <Typography variant="body2" className="text-slate-700 dark:text-slate-300 leading-relaxed">
-                      {userDetails.bio}
-                    </Typography>
-                  </Box>
-
-                  <Divider className="opacity-60" />
-
-                  <div className="flex items-start gap-4">
-                    <div className="p-2 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 rounded-lg">
-                      <EmailIcon fontSize="small" />
-                    </div>
-                    <div>
-                      <Typography
-                        variant="caption"
-                        className="text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block"
-                      >
-                        Email
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        className="text-slate-700 dark:text-slate-200 font-medium font-mono"
-                      >
-                        {userDetails.email}
-                      </Typography>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-4">
-                    <div className="p-2 bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400 rounded-lg">
-                      <PhoneIcon fontSize="small" />
-                    </div>
-                    <div>
-                      <Typography
-                        variant="caption"
-                        className="text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block"
-                      >
-                        Phone
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        className="text-slate-700 dark:text-slate-200 font-medium"
-                      >
-                        {userDetails.phone}
-                      </Typography>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-4">
-                    <div className="p-2 bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 rounded-lg">
-                      <LanguageIcon fontSize="small" />
-                    </div>
-                    <div>
-                      <Typography
-                        variant="caption"
-                        className="text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block"
-                      >
-                        Website
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        className="text-blue-600 dark:text-blue-400 font-medium hover:underline cursor-pointer"
-                      >
-                        {userDetails.website}
-                      </Typography>
-                    </div>
-                  </div>
-
-                  <Divider className="opacity-60" />
-
-
+                              </Grid>
+                            );
+                          })}
+                        </Grid>
+                        {index < 2 && <Divider sx={{ mt: 4 }} />}
+                      </Box>
+                    );
+                  })}
                 </Stack>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
+              </Box>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </Box>
   );

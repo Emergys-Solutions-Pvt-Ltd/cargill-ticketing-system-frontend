@@ -28,7 +28,7 @@ import LanguageIcon from "@mui/icons-material/Language";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import ImageIcon from "@mui/icons-material/Image";
 import MailIcon from "@mui/icons-material/Mail";
-import RequestDetails from "./../pages/private/Requests/RequestDetails";
+
 
 import TxtPreview from "./filePreviews/TxtPreview";
 import PdfPreview from "./filePreviews/PdfPreview";

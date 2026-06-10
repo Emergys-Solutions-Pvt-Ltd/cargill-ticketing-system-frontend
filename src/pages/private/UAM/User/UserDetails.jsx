@@ -158,6 +158,41 @@ const UserDetails = () => {
     }
   }, [user]);
 
+  const userActivities = React.useMemo(() => {
+    if (!user) return [];
+    const email = user.email.toLowerCase();
+
+    if (email.startsWith("admin")) {
+      return [
+        { id: 1, action: "User Access Review", detail: "Reviewed and approved UAM roles for 4 team members", time: "2 hours ago", category: "Access Control", status: "Success", ip: "10.124.45.12" },
+        { id: 2, action: "Role Modified", detail: "Updated HR Depart Admin permissions policy", time: "1 day ago", category: "Security Policy", status: "Success", ip: "10.124.45.12" },
+        { id: 3, action: "Ticket Transferred", detail: "Assigned INC0010045 to Alice Smith", time: "3 days ago", category: "Ticket Assignment", status: "Success", ip: "10.124.45.18" },
+        { id: 4, action: "Security Audit", detail: "Exported Q2 UAM system logs for compliance verification", time: "1 week ago", category: "Compliance", status: "Success", ip: "10.124.45.12" },
+        { id: 5, action: "System Logged In", detail: "Session initiated via Single Sign-On (SSO)", time: "1 week ago", category: "Session", status: "Success", ip: "10.124.45.12" },
+      ];
+    } else if (email.startsWith("hr")) {
+      return [
+        { id: 1, action: "Ticket Created", detail: "Raised REQ0001235: Adobe Creative Cloud installation request", time: "1 day ago", category: "Ticket Management", status: "Success", ip: "192.168.22.4" },
+        { id: 2, action: "Comment Added", detail: "Commented on REQ0001234: 'Confirming requirement validation'", time: "2 days ago", category: "Ticket Management", status: "Success", ip: "192.168.22.4" },
+        { id: 3, action: "File Uploaded", detail: "Uploaded employee onboarding file: uam_guidelines.pdf", time: "4 days ago", category: "Attachments", status: "Success", ip: "192.168.22.9" },
+        { id: 4, action: "System Logged In", detail: "Session initiated via desktop agent", time: "5 days ago", category: "Session", status: "Success", ip: "192.168.22.4" },
+      ];
+    } else if (email.startsWith("finance")) {
+      return [
+        { id: 1, action: "File Uploaded", detail: "Uploaded scan_requirements.txt to REQ0001234", time: "10 mins ago", category: "Attachments", status: "Success", ip: "10.98.12.112" },
+        { id: 2, action: "Comment Added", detail: "Commented on REQ0001234 regarding spreadsheet architecture", time: "15 mins ago", category: "Ticket Management", status: "Success", ip: "10.98.12.112" },
+        { id: 3, action: "Ticket Created", detail: "Raised REQ0001234: Request to initiate QA environment scan", time: "4 months ago", category: "Ticket Management", status: "Success", ip: "10.98.10.45" },
+        { id: 4, action: "System Logged In", detail: "Session initiated via SSO", time: "4 months ago", category: "Session", status: "Success", ip: "10.98.10.45" },
+      ];
+    } else {
+      return [
+        { id: 1, action: "Ticket Update", detail: "Modified description for REQ0001235", time: "3 hours ago", category: "Ticket Management", status: "Success", ip: "172.16.14.8" },
+        { id: 2, action: "System Logged In", detail: "Session initiated via mobile app", time: "1 day ago", category: "Session", status: "Success", ip: "172.16.14.8" },
+        { id: 3, action: "Comment Added", detail: "Commented on incident regarding laptop battery swap status", time: "3 days ago", category: "Ticket Management", status: "Success", ip: "172.16.12.5" },
+      ];
+    }
+  }, [user]);
+
   if (!user) {
     return (
       <Box sx={{ p: 4, textAlign: "center" }}>
@@ -267,8 +302,10 @@ const UserDetails = () => {
           >
             <Tab label="Basic Info" />
             <Tab label="Personal Information" />
-            <Tab label="User Activity & Ticket Stats" />
             <Tab label="Role & Permissions Settings" />
+            <Tab label="Ticket Stats" />
+            <Tab label="User Activity" />
+
           </Tabs>
         </Paper>
 
@@ -376,11 +413,11 @@ const UserDetails = () => {
               </Box>
             )}
 
-            {/* Tab 2: User Activity & Ticket Stats */}
+            {/* Tab 2: Ticket Stats */}
             {activeTab === 2 && (
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: "bold", mb: 4, color: "text.primary" }}>
-                  User Activity & Ticket Stats
+                  Ticket Stats
                 </Typography>
 
                 <Grid container spacing={3} sx={{ mb: 4 }}>
@@ -488,8 +525,109 @@ const UserDetails = () => {
               </Box>
             )}
 
-            {/* Tab 3: Role & Permissions Settings */}
+            {/* Tab 3: User Activity */}
             {activeTab === 3 && (
+              <Box>
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4 }}>
+                  <Box>
+                    <Typography variant="h6" sx={{ fontWeight: "bold", color: "text.primary" }}>
+                      User Activity Log
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                      Recent system actions and audit trail for this account
+                    </Typography>
+                  </Box>
+                  <Chip
+                    label="Compliance Audited"
+                    color="success"
+                    size="small"
+                    variant="outlined"
+                    sx={{ fontWeight: "bold", borderRadius: "8px" }}
+                  />
+                </Box>
+
+                <Stack spacing={3}>
+                  {userActivities.map((act) => (
+                    <Box
+                      key={act.id}
+                      className="p-5 border border-slate-100 dark:border-slate-800 rounded-2xl bg-slate-50/30 dark:bg-slate-900/10 hover:shadow-md transition-all duration-200"
+                    >
+                      <Grid container spacing={2} alignItems="center">
+                        <Grid item xs={12} sm={8}>
+                          <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
+                            <Box
+                              className={`p-2.5 rounded-xl flex items-center justify-center ${act.category === "Access Control" || act.category === "Security Policy" || act.category === "Compliance"
+                                ? "bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400"
+                                : act.category === "Session"
+                                  ? "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400"
+                                  : act.category === "Attachments"
+                                    ? "bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400"
+                                    : "bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400"
+                                }`}
+                            >
+                              {act.category === "Access Control" || act.category === "Security Policy" || act.category === "Compliance" ? (
+                                <ShieldIcon fontSize="small" />
+                              ) : act.category === "Session" ? (
+                                <LanguageIcon fontSize="small" />
+                              ) : act.category === "Attachments" ? (
+                                <UploadIcon fontSize="small" />
+                              ) : (
+                                <TicketIcon fontSize="small" />
+                              )}
+                            </Box>
+                            <Box>
+                              <Typography variant="subtitle2" sx={{ fontWeight: "bold", color: "text.primary" }}>
+                                {act.action}
+                              </Typography>
+                              <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.5 }}>
+                                {act.detail}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        </Grid>
+                        <Grid item xs={12} sm={4}>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              flexDirection: "column",
+                              alignItems: { xs: "flex-start", sm: "flex-end" },
+                              gap: 1,
+                              pl: { xs: 6, sm: 0 },
+                            }}
+                          >
+                            <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 600 }}>
+                              {act.time}
+                            </Typography>
+                            <Box sx={{ display: "flex", gap: 1 }}>
+                              <Chip
+                                label={`IP: ${act.ip}`}
+                                size="small"
+                                variant="outlined"
+                                sx={{ fontSize: "0.75rem", height: "20px", color: "text.secondary" }}
+                              />
+                              <Chip
+                                label={act.category}
+                                size="small"
+                                sx={{
+                                  fontSize: "0.75rem",
+                                  height: "20px",
+                                  bgcolor: "action.selected",
+                                  color: "text.primary",
+                                  fontWeight: 600,
+                                }}
+                              />
+                            </Box>
+                          </Box>
+                        </Grid>
+                      </Grid>
+                    </Box>
+                  ))}
+                </Stack>
+              </Box>
+            )}
+
+            {/* Tab 4: Role & Permissions Settings */}
+            {activeTab === 4 && (
               <Box>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 3 }}>
                   <ShieldIcon color="primary" fontSize="large" />
