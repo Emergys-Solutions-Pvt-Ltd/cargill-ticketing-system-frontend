@@ -15,6 +15,17 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Divider from "@mui/material/Divider";
+import Popover from "@mui/material/Popover";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemAvatar from "@mui/material/ListItemAvatar";
+import Avatar from "@mui/material/Avatar";
+import ListItemText from "@mui/material/ListItemText";
+import Chip from "@mui/material/Chip";
+import Stack from "@mui/material/Stack";
+
+import { useAuth } from "../context/AuthContext";
+import { getFileActions, recordFileAction, getTicketViews } from "../utils/fileActionTracker";
 
 import DownloadIcon from "@mui/icons-material/Download";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -29,6 +40,11 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import ImageIcon from "@mui/icons-material/Image";
 import MailIcon from "@mui/icons-material/Mail";
 
+import HelpOutlineIcon from "@mui/icons-material/Help";
+import PersonOutlineIcon from "@mui/icons-material/PersonOutlined";
+import CategoryIcon from "@mui/icons-material/Category";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+
 
 import TxtPreview from "./filePreviews/TxtPreview";
 import PdfPreview from "./filePreviews/PdfPreview";
@@ -40,62 +56,7 @@ import Mp4Preview from "./filePreviews/Mp4Preview";
 import EmlPreview from "./filePreviews/EmlPreview";
 import ImagePreview from "./filePreviews/ImagePreview";
 import BasicTimeline from "./BasicTimeline";
-const commentsData = [
-  {
-    id: 1,
-    author: "Ashish Shende",
-    avatar: "A",
-    time: "10 mins ago",
-    text: "I have uploaded the initial text guidelines, architectural diagram, and financial audit spreadsheets for review.",
-    attachments: [
-      { name: "scan_requirements.txt", size: "1.2 KB", type: "txt" },
-      { name: "architecture_diagram.pdf", size: "2.4 MB", type: "pdf" },
-      { name: "financial_report.xlsx", size: "850 KB", type: "xlsx" },
-      { name: "project_schedule.xls", size: "1.5 MB", type: "xls" }
-    ]
-  },
-  {
-    id: 2,
-    author: "Security Team",
-    avatar: "S",
-    time: "2 hours ago",
-    text: "Review completed. Attached are the slide presentations, legacy documentations, and signed clearance sheets.",
-    attachments: [
-      { name: "preliminary_audit.pptx", size: "4.8 MB", type: "pptx" },
-      { name: "slideshow_backup.ppt", size: "12.4 MB", type: "ppt" },
-      { name: "auth_signed.docx", size: "420 KB", type: "docx" },
-      { name: "access_permission.doc", size: "380 KB", type: "doc" }
-    ]
-  },
-  {
-    id: 3,
-    author: "Systems Admin",
-    avatar: "O",
-    time: "1 day ago",
-    text: "Added the datacenter photos, legacy database schema design maps, and network topology blueprint files.",
-    attachments: [
-      { name: "network_topography.png", size: "1.8 MB", type: "png" },
-      { name: "server_rack_photo.jpg", size: "3.2 MB", type: "jpg" },
-      { name: "datacenter_blueprint.jpeg", size: "4.1 MB", type: "jpeg" },
-      { name: "device_firmware_spec.tiff", size: "8.6 MB", type: "tiff" },
-      { name: "legacy_schema.bmp", size: "900 KB", type: "bmp" }
-    ]
-  },
-  {
-    id: 4,
-    author: "Developer Team",
-    avatar: "D",
-    time: "2 days ago",
-    text: "Here is the vulnerability HTML scan log report, a video recording of the login security gap verification, and the raw email communication threads.",
-    attachments: [
-      { name: "security_report.html", size: "180 KB", type: "html" },
-      { name: "index_backup.htm", size: "75 KB", type: "htm" },
-      { name: "screen_recording.mp4", size: "15.4 MB", type: "mp4" },
-      { name: "authorization_email.eml", size: "12 KB", type: "eml" },
-      { name: "clearance_msg.msg", size: "25 KB", type: "msg" }
-    ]
-  }
-];
+
 
 const getFileIcon = (type) => {
   const t = type.toLowerCase();
@@ -133,9 +94,53 @@ const getFileIcon = (type) => {
   }
 };
 
-export default function LabTabs({ comments = commentsData }) {
+export default function LabTabs({ comments = [], request }) {
   const [value, setValue] = React.useState("1");
   const [previewFile, setPreviewFile] = React.useState(null);
+
+  const { user: authUser } = useAuth();
+  const [fileStats, setFileStats] = React.useState({ previews: [], downloads: [] });
+  const [previewAnchorEl, setPreviewAnchorEl] = React.useState(null);
+  const [downloadAnchorEl, setDownloadAnchorEl] = React.useState(null);
+  const [ticketViews, setTicketViews] = React.useState([]);
+
+  React.useEffect(() => {
+    if (request && request.id) {
+      setTicketViews(getTicketViews(request.id));
+    }
+  }, [request, value]);
+
+  const handlePreviewStatsClick = (event) => {
+    setPreviewAnchorEl(event.currentTarget);
+  };
+  const handlePreviewStatsClose = () => {
+    setPreviewAnchorEl(null);
+  };
+  const handleDownloadStatsClick = (event) => {
+    setDownloadAnchorEl(event.currentTarget);
+  };
+  const handleDownloadStatsClose = () => {
+    setDownloadAnchorEl(null);
+  };
+
+  const handlePreview = (file) => {
+    setPreviewFile(file);
+    const updatedStats = recordFileAction(file.name, "preview", authUser);
+    setFileStats(updatedStats);
+  };
+
+  const handleDownload = (file) => {
+    const updatedStats = recordFileAction(file.name, "download", authUser);
+    if (previewFile && previewFile.name === file.name) {
+      setFileStats(updatedStats);
+    }
+  };
+
+  const handleCloseDialog = () => {
+    setPreviewFile(null);
+    setPreviewAnchorEl(null);
+    setDownloadAnchorEl(null);
+  };
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -158,10 +163,6 @@ export default function LabTabs({ comments = commentsData }) {
     return list;
   }, [comments]);
 
-  const handlePreview = (file) => {
-    setPreviewFile(file);
-  };
-
   return (
     <Box sx={{ width: "100%", typography: "body1" }}>
       <TabContext value={value}>
@@ -169,6 +170,8 @@ export default function LabTabs({ comments = commentsData }) {
           <TabList onChange={handleChange} aria-label="request tabs">
             <Tab label="Activity" value="1" />
             <Tab label={`Attachments (${allAttachments.length})`} value="2" />
+            <Tab label="Ticket Attributes" value="3" />
+            <Tab label="Audit History" value="4" />
           </TabList>
         </Box>
         <TabPanel value="1" sx={{ p: 2 }}>
@@ -237,6 +240,7 @@ export default function LabTabs({ comments = commentsData }) {
                         size="small"
                         color="primary"
                         sx={{ border: "1px solid", borderColor: "divider" }}
+                        onClick={() => handleDownload(file)}
                       >
                         <DownloadIcon fontSize="small" />
                       </IconButton>
@@ -247,12 +251,119 @@ export default function LabTabs({ comments = commentsData }) {
             </Grid>
           )}
         </TabPanel>
+        <TabPanel value="3" sx={{ p: 3 }}>
+          <Box sx={{ maxWidth: "600px", mx: "auto" }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, color: "text.primary" }}>
+              Ticket Attributes
+            </Typography>
+            <Stack spacing={3}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Avatar sx={{ bgcolor: "action.hover", color: "text.primary" }}><HelpOutlineIcon fontSize="small" /></Avatar>
+                <Box>
+                  <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700 }}>TICKET TYPE</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>
+                    {request?.id?.startsWith("INC") ? "Incident (Break/Fix)" : "Service Catalog Item"}
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Divider />
+
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Avatar sx={{ bgcolor: "action.hover", color: "text.primary" }}><PersonOutlineIcon fontSize="small" /></Avatar>
+                <Box>
+                  <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700 }}>ASSIGNED GROUP / ASSIGNEE</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>{request?.assignee || "Triage Queue"}</Typography>
+                </Box>
+              </Box>
+
+              <Divider />
+
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Avatar sx={{ bgcolor: "action.hover", color: "text.primary" }}><CategoryIcon fontSize="small" /></Avatar>
+                <Box>
+                  <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700 }}>CATEGORY</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>{request?.category || "General Support"}</Typography>
+                </Box>
+              </Box>
+
+              <Divider />
+
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Avatar sx={{ bgcolor: "action.hover", color: "text.primary" }}><AccessTimeIcon fontSize="small" /></Avatar>
+                <Box>
+                  <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700 }}>CREATED / UPDATED</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>{request?.created} • Updated {request?.updated}</Typography>
+                </Box>
+              </Box>
+
+              <Divider />
+
+              <Grid container spacing={2}>
+                <Grid item xs={6}>
+                  <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700 }}>IMPACT</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>{request?.impact || "Medium"}</Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700 }}>URGENCY</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>{request?.urgency || "Medium"}</Typography>
+                </Grid>
+              </Grid>
+
+              <Divider />
+
+              <Box>
+                <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700 }}>SERVICE WORKSPACE / DEPT</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>{request?.department || "Enterprise Services"}</Typography>
+              </Box>
+            </Stack>
+          </Box>
+        </TabPanel>
+        <TabPanel value="4" sx={{ p: 3 }}>
+          <Box sx={{ maxWidth: "600px", mx: "auto" }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, color: "text.primary" }}>
+              Ticket View History
+            </Typography>
+            {ticketViews.length === 0 ? (
+              <Typography variant="body2" sx={{ color: "text.secondary", fontStyle: "italic" }}>
+                No views recorded yet.
+              </Typography>
+            ) : (
+              <List>
+                {ticketViews.map((view, idx) => (
+                  <React.Fragment key={idx}>
+                    <ListItem sx={{ px: 0, py: 1.5 }}>
+                      <ListItemAvatar>
+                        <Avatar sx={{ bgcolor: "secondary.main", color: "#ffffff", fontWeight: "bold" }}>
+                          {view.userName.charAt(0)}
+                        </Avatar>
+                      </ListItemAvatar>
+                      <ListItemText
+                        primary={
+                          <Typography variant="subtitle2" sx={{ fontWeight: "bold", color: "text.primary" }}>
+                            {view.userName}
+                          </Typography>
+                        }
+                        secondary={
+                          <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                            {view.role} • Viewed {view.timeAgo}
+                          </Typography>
+                        }
+                      />
+                    </ListItem>
+                    {idx < ticketViews.length - 1 && <Divider variant="inset" component="li" />}
+                  </React.Fragment>
+                ))}
+              </List>
+            )}
+          </Box>
+        </TabPanel>
       </TabContext>
 
       {/* File Preview Dialog */}
       <Dialog
         open={Boolean(previewFile)}
-        onClose={() => setPreviewFile(null)}
+        onClose={handleCloseDialog}
         fullWidth
         maxWidth="md"
         PaperProps={{
@@ -271,7 +382,49 @@ export default function LabTabs({ comments = commentsData }) {
               </Typography>
             </Box>
           </Box>
-          <IconButton onClick={() => setPreviewFile(null)}>
+
+          <Box sx={{ display: "flex", gap: 1.5, ml: "auto", mr: 2, alignItems: "center" }}>
+            <Chip
+              icon={<VisibilityIcon fontSize="small" sx={{ color: "text.secondary" }} />}
+              label={`${fileStats.previews.length}`}
+              onClick={handlePreviewStatsClick}
+              variant="outlined"
+              size="small"
+              sx={{
+                borderRadius: "8px",
+                borderColor: "divider",
+                cursor: "pointer",
+                transition: "all 0.2s",
+                "& .MuiChip-label": { px: 1 },
+                "& .MuiChip-icon": { ml: 0.5 },
+                "&:hover": {
+                  bgcolor: "action.hover",
+                  borderColor: "secondary.main"
+                }
+              }}
+            />
+            <Chip
+              icon={<DownloadIcon fontSize="small" sx={{ color: "text.secondary" }} />}
+              label={`${fileStats.downloads.length}`}
+              onClick={handleDownloadStatsClick}
+              variant="outlined"
+              size="small"
+              sx={{
+                borderRadius: "8px",
+                borderColor: "divider",
+                cursor: "pointer",
+                transition: "all 0.2s",
+                "& .MuiChip-label": { px: 1 },
+                "& .MuiChip-icon": { ml: 0.5 },
+                "&:hover": {
+                  bgcolor: "action.hover",
+                  borderColor: "primary.main"
+                }
+              }}
+            />
+          </Box>
+
+          <IconButton onClick={handleCloseDialog}>
             <CloseIcon />
           </IconButton>
         </DialogTitle>
@@ -324,7 +477,7 @@ export default function LabTabs({ comments = commentsData }) {
         </DialogContent>
         <Divider />
         <DialogActions sx={{ p: 3 }}>
-          <Button onClick={() => setPreviewFile(null)} color="inherit">
+          <Button onClick={handleCloseDialog} color="inherit">
             Close Preview
           </Button>
           {previewFile && (
@@ -334,12 +487,104 @@ export default function LabTabs({ comments = commentsData }) {
               download
               variant="contained"
               startIcon={<DownloadIcon />}
+              onClick={() => handleDownload(previewFile)}
             >
               Download File
             </Button>
           )}
         </DialogActions>
       </Dialog>
+
+      {/* Popovers for stats lists */}
+      <Popover
+        open={Boolean(previewAnchorEl)}
+        anchorEl={previewAnchorEl}
+        onClose={handlePreviewStatsClose}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "center",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "center",
+        }}
+        PaperProps={{
+          sx: { p: 2, width: 280, borderRadius: 3, boxShadow: "0 8px 30px rgba(0,0,0,0.15)", border: "1px solid", borderColor: "divider" }
+        }}
+      >
+        <Typography variant="subtitle2" sx={{ fontWeight: "bold", mb: 1, color: "text.primary" }}>
+          Viewed by
+        </Typography>
+        <Divider sx={{ mb: 1 }} />
+        {fileStats.previews.length === 0 ? (
+          <Typography variant="body2" sx={{ color: "text.secondary", fontStyle: "italic" }}>
+            No views recorded yet
+          </Typography>
+        ) : (
+          <List size="small" disablePadding sx={{ maxHeight: 200, overflowY: "auto" }}>
+            {fileStats.previews.map((action, idx) => (
+              <ListItem key={idx} disablePadding sx={{ py: 0.75 }}>
+                <ListItemAvatar sx={{ minWidth: 36 }}>
+                  <Avatar sx={{ width: 24, height: 24, fontSize: "0.75rem", bgcolor: "secondary.main", color: "#ffffff", fontWeight: "bold" }}>
+                    {action.userName.charAt(0)}
+                  </Avatar>
+                </ListItemAvatar>
+                <ListItemText
+                  primary={action.userName}
+                  secondary={`${action.role} • ${action.timeAgo}`}
+                  primaryTypographyProps={{ variant: "body2", fontWeight: 600, color: "text.primary" }}
+                  secondaryTypographyProps={{ variant: "caption", color: "text.secondary" }}
+                />
+              </ListItem>
+            ))}
+          </List>
+        )}
+      </Popover>
+
+      <Popover
+        open={Boolean(downloadAnchorEl)}
+        anchorEl={downloadAnchorEl}
+        onClose={handleDownloadStatsClose}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "center",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "center",
+        }}
+        PaperProps={{
+          sx: { p: 2, width: 280, borderRadius: 3, boxShadow: "0 8px 30px rgba(0,0,0,0.15)", border: "1px solid", borderColor: "divider" }
+        }}
+      >
+        <Typography variant="subtitle2" sx={{ fontWeight: "bold", mb: 1, color: "text.primary" }}>
+          Downloaded by
+        </Typography>
+        <Divider sx={{ mb: 1 }} />
+        {fileStats.downloads.length === 0 ? (
+          <Typography variant="body2" sx={{ color: "text.secondary", fontStyle: "italic" }}>
+            No downloads recorded yet
+          </Typography>
+        ) : (
+          <List size="small" disablePadding sx={{ maxHeight: 200, overflowY: "auto" }}>
+            {fileStats.downloads.map((action, idx) => (
+              <ListItem key={idx} disablePadding sx={{ py: 0.75 }}>
+                <ListItemAvatar sx={{ minWidth: 36 }}>
+                  <Avatar sx={{ width: 24, height: 24, fontSize: "0.75rem", bgcolor: "primary.main", color: "#ffffff", fontWeight: "bold" }}>
+                    {action.userName.charAt(0)}
+                  </Avatar>
+                </ListItemAvatar>
+                <ListItemText
+                  primary={action.userName}
+                  secondary={`${action.role} • ${action.timeAgo}`}
+                  primaryTypographyProps={{ variant: "body2", fontWeight: 600, color: "text.primary" }}
+                  secondaryTypographyProps={{ variant: "caption", color: "text.secondary" }}
+                />
+              </ListItem>
+            ))}
+          </List>
+        )}
+      </Popover>
     </Box>
   );
 }

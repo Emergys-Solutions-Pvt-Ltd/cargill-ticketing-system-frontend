@@ -1,28 +1,156 @@
 {
   "activities": {
     "admin": [
-      { "id": 1, "action": "User Access Review", "detail": "Reviewed and approved UAM roles for 4 team members", "time": "2 hours ago", "category": "Access Control", "status": "Success", "ip": "10.124.45.12" },
-      { "id": 2, "action": "Role Modified", "detail": "Updated HR Depart Admin permissions policy", "time": "1 day ago", "category": "Security Policy", "status": "Success", "ip": "10.124.45.12" },
-      { "id": 3, "action": "Ticket Transferred", "detail": "Assigned INC0010045 to Alice Smith", "time": "3 days ago", "category": "Ticket Assignment", "status": "Success", "ip": "10.124.45.18" },
-      { "id": 4, "action": "Security Audit", "detail": "Exported Q2 UAM system logs for compliance verification", "time": "1 week ago", "category": "Compliance", "status": "Success", "ip": "10.124.45.12" },
-      { "id": 5, "action": "System Logged In", "detail": "Session initiated via Single Sign-On (SSO)", "time": "1 week ago", "category": "Session", "status": "Success", "ip": "10.124.45.12" }
+      {
+        "id": 1,
+        "action": "User Access Review",
+        "detail": "Reviewed and approved UAM roles for 4 team members",
+        "time": "2 hours ago",
+        "category": "Access Control",
+        "status": "Success",
+        "ip": "10.124.45.12"
+      },
+      {
+        "id": 2,
+        "action": "Role Modified",
+        "detail": "Updated HR Depart Admin permissions policy",
+        "time": "1 day ago",
+        "category": "Security Policy",
+        "status": "Success",
+        "ip": "10.124.45.12"
+      },
+      {
+        "id": 3,
+        "action": "Ticket Transferred",
+        "detail": "Assigned INC0010045 to Alice Smith",
+        "time": "3 days ago",
+        "category": "Ticket Assignment",
+        "status": "Success",
+        "ip": "10.124.45.18"
+      },
+      {
+        "id": 4,
+        "action": "Security Audit",
+        "detail": "Exported Q2 UAM system logs for compliance verification",
+        "time": "1 week ago",
+        "category": "Compliance",
+        "status": "Success",
+        "ip": "10.124.45.12"
+      },
+      {
+        "id": 5,
+        "action": "System Logged In",
+        "detail": "Session initiated via Single Sign-On (SSO)",
+        "time": "1 week ago",
+        "category": "Session",
+        "status": "Success",
+        "ip": "10.124.45.12"
+      }
     ],
     "hr": [
-      { "id": 1, "action": "Ticket Created", "detail": "Raised REQ0001235: Adobe Creative Cloud installation request", "time": "1 day ago", "category": "Ticket Management", "status": "Success", "ip": "192.168.22.4" },
-      { "id": 2, "action": "Comment Added", "detail": "Commented on REQ0001234: 'Confirming requirement validation'", "time": "2 days ago", "category": "Ticket Management", "status": "Success", "ip": "192.168.22.4" },
-      { "id": 3, "action": "File Uploaded", "detail": "Uploaded employee onboarding file: uam_guidelines.pdf", "time": "4 days ago", "category": "Attachments", "status": "Success", "ip": "192.168.22.9" },
-      { "id": 4, "action": "System Logged In", "detail": "Session initiated via desktop agent", "time": "5 days ago", "category": "Session", "status": "Success", "ip": "192.168.22.4" }
+      {
+        "id": 1,
+        "action": "Ticket Created",
+        "detail": "Raised REQ0001235: Adobe Creative Cloud installation request",
+        "time": "1 day ago",
+        "category": "Ticket Management",
+        "status": "Success",
+        "ip": "192.168.22.4"
+      },
+      {
+        "id": 2,
+        "action": "Comment Added",
+        "detail": "Commented on REQ0001234: 'Confirming requirement validation'",
+        "time": "2 days ago",
+        "category": "Ticket Management",
+        "status": "Success",
+        "ip": "192.168.22.4"
+      },
+      {
+        "id": 3,
+        "action": "File Uploaded",
+        "detail": "Uploaded employee onboarding file: uam_guidelines.pdf",
+        "time": "4 days ago",
+        "category": "Attachments",
+        "status": "Success",
+        "ip": "192.168.22.9"
+      },
+      {
+        "id": 4,
+        "action": "System Logged In",
+        "detail": "Session initiated via desktop agent",
+        "time": "5 days ago",
+        "category": "Session",
+        "status": "Success",
+        "ip": "192.168.22.4"
+      }
     ],
     "finance": [
-      { "id": 1, "action": "File Uploaded", "detail": "Uploaded scan_requirements.txt to REQ0001234", "time": "10 mins ago", "category": "Attachments", "status": "Success", "ip": "10.98.12.112" },
-      { "id": 2, "action": "Comment Added", "detail": "Commented on REQ0001234 regarding spreadsheet architecture", "time": "15 mins ago", "category": "Ticket Management", "status": "Success", "ip": "10.98.12.112" },
-      { "id": 3, "action": "Ticket Created", "detail": "Raised REQ0001234: Request to initiate QA environment scan", "time": "4 months ago", "category": "Ticket Management", "status": "Success", "ip": "10.98.10.45" },
-      { "id": 4, "action": "System Logged In", "detail": "Session initiated via SSO", "time": "4 months ago", "category": "Session", "status": "Success", "ip": "10.98.10.45" }
+      {
+        "id": 1,
+        "action": "File Uploaded",
+        "detail": "Uploaded scan_requirements.txt to REQ0001234",
+        "time": "10 mins ago",
+        "category": "Attachments",
+        "status": "Success",
+        "ip": "10.98.12.112"
+      },
+      {
+        "id": 2,
+        "action": "Comment Added",
+        "detail": "Commented on REQ0001234 regarding spreadsheet architecture",
+        "time": "15 mins ago",
+        "category": "Ticket Management",
+        "status": "Success",
+        "ip": "10.98.12.112"
+      },
+      {
+        "id": 3,
+        "action": "Ticket Created",
+        "detail": "Raised REQ0001234: Request to initiate QA environment scan",
+        "time": "4 months ago",
+        "category": "Ticket Management",
+        "status": "Success",
+        "ip": "10.98.10.45"
+      },
+      {
+        "id": 4,
+        "action": "System Logged In",
+        "detail": "Session initiated via SSO",
+        "time": "4 months ago",
+        "category": "Session",
+        "status": "Success",
+        "ip": "10.98.10.45"
+      }
     ],
     "default": [
-      { "id": 1, "action": "Ticket Update", "detail": "Modified description for REQ0001235", "time": "3 hours ago", "category": "Ticket Management", "status": "Success", "ip": "172.16.14.8" },
-      { "id": 2, "action": "System Logged In", "detail": "Session initiated via mobile app", "time": "1 day ago", "category": "Session", "status": "Success", "ip": "172.16.14.8" },
-      { "id": 3, "action": "Comment Added", "detail": "Commented on incident regarding laptop battery swap status", "time": "3 days ago", "category": "Ticket Management", "status": "Success", "ip": "172.16.12.5" }
+      {
+        "id": 1,
+        "action": "Ticket Update",
+        "detail": "Modified description for REQ0001235",
+        "time": "3 hours ago",
+        "category": "Ticket Management",
+        "status": "Success",
+        "ip": "172.16.14.8"
+      },
+      {
+        "id": 2,
+        "action": "System Logged In",
+        "detail": "Session initiated via mobile app",
+        "time": "1 day ago",
+        "category": "Session",
+        "status": "Success",
+        "ip": "172.16.14.8"
+      },
+      {
+        "id": 3,
+        "action": "Comment Added",
+        "detail": "Commented on incident regarding laptop battery swap status",
+        "time": "3 days ago",
+        "category": "Ticket Management",
+        "status": "Success",
+        "ip": "172.16.12.5"
+      }
     ]
   },
   "stats": {
@@ -31,28 +159,48 @@
       "files": 8,
       "comments": 24,
       "resolutionRate": 85,
-      "statusSummary": { "open": 3, "inProgress": 4, "pending": 2, "closed": 5 }
+      "statusSummary": {
+        "open": 3,
+        "inProgress": 4,
+        "pending": 2,
+        "closed": 5
+      }
     },
     "hr": {
       "tickets": 5,
       "files": 2,
       "comments": 8,
       "resolutionRate": 80,
-      "statusSummary": { "open": 1, "inProgress": 1, "pending": 0, "closed": 3 }
+      "statusSummary": {
+        "open": 1,
+        "inProgress": 1,
+        "pending": 0,
+        "closed": 3
+      }
     },
     "finance": {
       "tickets": 8,
       "files": 4,
       "comments": 15,
       "resolutionRate": 70,
-      "statusSummary": { "open": 2, "inProgress": 2, "pending": 1, "closed": 3 }
+      "statusSummary": {
+        "open": 2,
+        "inProgress": 2,
+        "pending": 1,
+        "closed": 3
+      }
     },
     "default": {
       "tickets": 3,
       "files": 2,
       "comments": 5,
       "resolutionRate": 50,
-      "statusSummary": { "open": 1, "inProgress": 1, "pending": 0, "closed": 1 }
+      "statusSummary": {
+        "open": 1,
+        "inProgress": 1,
+        "pending": 0,
+        "closed": 1
+      }
     }
   },
   "profiles": {
@@ -61,28 +209,49 @@
       "phone": "+1 (952) 742-7575",
       "website": "cargill.com",
       "bio": "Dedicated Org Admin at Cargill. Auditing access logs, managing permissions hierarchy, and ensuring system compliance.",
-      "skills": ["Access Control", "System Administration", "Compliance Auditing", "Risk Assessment", "Operations Security"]
+      "skills": [
+        "Access Control",
+        "System Administration",
+        "Compliance Auditing",
+        "Risk Assessment",
+        "Operations Security"
+      ]
     },
     "hr": {
       "location": "Pune, India",
       "phone": "+91 98765 43210",
       "website": "cargill.com",
       "bio": "Dedicated HR Depart Admin at Cargill. Managing support requests, reviewing compliance checkpoints, and auditing access policies.",
-      "skills": ["Department Administration", "Access Control Management", "Ticket Workflows", "Team Leadership"]
+      "skills": [
+        "Department Administration",
+        "Access Control Management",
+        "Ticket Workflows",
+        "Team Leadership"
+      ]
     },
     "finance": {
       "location": "Pune, India",
       "phone": "+91 98765 43210",
       "website": "cargill.com",
       "bio": "Dedicated Finance Depart Admin at Cargill managing systems compliance and standard workflows.",
-      "skills": ["Department Administration", "Access Control Management", "Ticket Workflows", "Team Leadership"]
+      "skills": [
+        "Department Administration",
+        "Access Control Management",
+        "Ticket Workflows",
+        "Team Leadership"
+      ]
     },
     "default": {
       "location": "Pune, India",
       "phone": "+91 98765 43210",
       "website": "cargill.com",
       "bio": "Dedicated User at Cargill. Managing support requests, reviewing compliance checkpoints, and auditing access policies.",
-      "skills": ["Ticket Submission", "Vulnerability Review", "File Review", "Testing Support"]
+      "skills": [
+        "Ticket Submission",
+        "Vulnerability Review",
+        "File Review",
+        "Testing Support"
+      ]
     }
   },
   "tickets": [
@@ -106,10 +275,46 @@
           "time": "10 mins ago",
           "text": "I have uploaded the initial text guidelines, architectural diagram, and financial audit spreadsheets for review.",
           "attachments": [
-            { "name": "scan_requirements.txt", "size": "1.2 KB", "type": "txt" },
-            { "name": "architecture_diagram.pdf", "size": "2.4 MB", "type": "pdf" },
-            { "name": "financial_report.xlsx", "size": "850 KB", "type": "xlsx" },
-            { "name": "project_schedule.xls", "size": "1.5 MB", "type": "xls" }
+            {
+              "name": "scan_requirements.txt",
+              "size": "1.2 KB",
+              "type": "txt"
+            },
+            {
+              "name": "architecture_diagram.pdf",
+              "size": "2.4 MB",
+              "type": "pdf"
+            },
+            {
+              "name": "financial_report.xlsx",
+              "size": "850 KB",
+              "type": "xlsx"
+            },
+            {
+              "name": "project_schedule.xls",
+              "size": "1.5 MB",
+              "type": "xls"
+            },
+            {
+              "name": "preliminary_audit.pptx",
+              "size": "4.8 MB",
+              "type": "pptx"
+            },
+            {
+              "name": "slideshow_backup.ppt",
+              "size": "12.4 MB",
+              "type": "ppt"
+            },
+            {
+              "name": "auth_signed.docx",
+              "size": "420 KB",
+              "type": "docx"
+            },
+            {
+              "name": "access_permission.doc",
+              "size": "380 KB",
+              "type": "doc"
+            }
           ]
         }
       ]
@@ -158,33 +363,85 @@
     }
   ],
   "users": [
-    { "id": 1, "email": "admin@cargill.com", "role": "Org Admin", "status": "Active" },
-    { "id": 2, "email": "hr_admin@cargill.com", "role": "HR Depart Admin", "status": "Active" },
-    { "id": 3, "email": "finance_admin@cargill.com", "role": "Finance Depart Admin", "status": "Active" },
-    { "id": 4, "email": "user@cargill.com", "role": "User", "status": "Active" }
+    {
+      "id": 1,
+      "email": "admin@cargill.com",
+      "role": "Org Admin",
+      "status": "Active"
+    },
+    {
+      "id": 2,
+      "email": "hr_admin@cargill.com",
+      "role": "HR Depart Admin",
+      "status": "Active"
+    },
+    {
+      "id": 3,
+      "email": "finance_admin@cargill.com",
+      "role": "Finance Depart Admin",
+      "status": "Active"
+    },
+    {
+      "id": 4,
+      "email": "user@cargill.com",
+      "role": "User",
+      "status": "Active"
+    }
   ],
   "roles": [
     {
       "name": "Org Admin",
-      "permissions": ["manage_org", "manage_users", "manage_dept", "view_dept_analytics", "create_ticket", "edit_ticket", "comment_ticket", "preview_file", "download_file"],
+      "permissions": [
+        "manage_org",
+        "manage_users",
+        "manage_dept",
+        "view_dept_analytics",
+        "create_ticket",
+        "edit_ticket",
+        "comment_ticket",
+        "preview_file",
+        "download_file"
+      ],
       "isSystem": true,
       "level": 1
     },
     {
       "name": "HR Depart Admin",
-      "permissions": ["manage_dept", "view_dept_analytics", "create_ticket", "edit_ticket", "comment_ticket", "preview_file", "download_file"],
+      "permissions": [
+        "manage_dept",
+        "view_dept_analytics",
+        "create_ticket",
+        "edit_ticket",
+        "comment_ticket",
+        "preview_file",
+        "download_file"
+      ],
       "isSystem": true,
       "level": 2
     },
     {
       "name": "Finance Depart Admin",
-      "permissions": ["manage_dept", "view_dept_analytics", "create_ticket", "edit_ticket", "comment_ticket", "preview_file", "download_file"],
+      "permissions": [
+        "manage_dept",
+        "view_dept_analytics",
+        "create_ticket",
+        "edit_ticket",
+        "comment_ticket",
+        "preview_file",
+        "download_file"
+      ],
       "isSystem": true,
       "level": 2
     },
     {
       "name": "User",
-      "permissions": ["create_ticket", "edit_ticket", "comment_ticket", "preview_file", "download_file"],
+      "permissions": [
+        "create_ticket",
+        "edit_ticket",
+        "comment_ticket",
+        "preview_file",
+        "download_file"
+      ],
       "isSystem": true,
       "level": 3
     }

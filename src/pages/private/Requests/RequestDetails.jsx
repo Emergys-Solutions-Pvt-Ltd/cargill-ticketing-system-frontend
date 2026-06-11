@@ -24,6 +24,7 @@ import PersonOutlineIcon from '@mui/icons-material/PersonOutlined';
 import CategoryIcon from '@mui/icons-material/Category';
 import HelpOutlineIcon from '@mui/icons-material/Help';
 import { getStoredTickets, getStoredTicketsAsync, setStoredTickets } from "../../../utils/rbacData";
+import { recordTicketView } from "../../../utils/fileActionTracker";
 import { useAuth } from "../../../context/AuthContext";
 
 const getStatusColor = (status) => {
@@ -76,6 +77,12 @@ function RequestDetails() {
       });
     }
   }, [tickets]);
+
+  useEffect(() => {
+    if (requestId && authUser) {
+      recordTicketView(requestId, authUser);
+    }
+  }, [requestId, authUser]);
 
   const request = tickets.find(r => r.id === requestId) || {
     id: requestId || "REQ0000000",
@@ -180,6 +187,28 @@ function RequestDetails() {
                   px: 0.5
                 }}
               />
+              <Chip
+                label={"Created " + request.created}
+                sx={{
+                  backgroundColor: "primary",
+                  color: "black",
+                  fontWeight: 700,
+                  fontSize: '0.75rem',
+                  borderRadius: '4px',
+                  px: 0.5
+                }}
+              />
+              <Chip
+                label={"Last Updated " + request.updated}
+                sx={{
+                  backgroundColor: "primary",
+                  color: "black",
+                  fontWeight: 700,
+                  fontSize: '0.75rem',
+                  borderRadius: '4px',
+                  px: 0.5
+                }}
+              />
             </Box>
             <Typography variant="h6" sx={{ color: "text.secondary", fontWeight: 500, maxWidth: "800px" }}>
               {request.title}
@@ -200,7 +229,7 @@ function RequestDetails() {
 
       {/* Layout Split */}
       <Grid container spacing={4}>
-        <Grid item xs={12} lg={8}>
+        <Grid item xs={12}>
           {/* Post Comment Section */}
           <Card variant="outlined" sx={{ borderRadius: 3, mb: 3, border: "1px solid", borderColor: "divider", bgcolor: "background.paper", backgroundImage: "none" }}>
             <CardContent sx={{ p: 2.5 }}>
@@ -243,80 +272,8 @@ function RequestDetails() {
           {/* Activity Log & Attachments */}
           <Card variant="outlined" sx={{ borderRadius: 3, mb: 4, border: "1px solid", borderColor: "divider", overflow: 'visible', bgcolor: "background.paper", backgroundImage: "none" }}>
             <Box sx={{ p: 1 }}>
-              <LabTabs comments={request.comments || []} />
+              <LabTabs comments={request.comments || []} request={request} />
             </Box>
-          </Card>
-        </Grid>
-
-        {/* Sidebar details */}
-        <Grid item xs={12} lg={4}>
-          <Card variant="outlined" sx={{ borderRadius: 3, border: "1px solid", borderColor: "divider", position: 'sticky', top: 24, bgcolor: "background.paper", backgroundImage: "none" }}>
-            <CardContent sx={{ p: 3 }}>
-              <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, color: "text.primary" }}>
-                Ticket Attributes
-              </Typography>
-              <Stack spacing={3}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Avatar sx={{ bgcolor: "action.hover", color: "text.primary" }}><HelpOutlineIcon fontSize="small" /></Avatar>
-                  <Box>
-                    <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700 }}>TICKET TYPE</Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>
-                      {request.id.startsWith("INC") ? "Incident (Break/Fix)" : "Service Catalog Item"}
-                    </Typography>
-                  </Box>
-                </Box>
-
-                <Divider />
-
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Avatar sx={{ bgcolor: "action.hover", color: "text.primary" }}><PersonOutlineIcon fontSize="small" /></Avatar>
-                  <Box>
-                    <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700 }}>ASSIGNED GROUP / ASSIGNEE</Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>{request.assignee || "Triage Queue"}</Typography>
-                  </Box>
-                </Box>
-
-                <Divider />
-
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Avatar sx={{ bgcolor: "action.hover", color: "text.primary" }}><CategoryIcon fontSize="small" /></Avatar>
-                  <Box>
-                    <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700 }}>CATEGORY</Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>{request.category || "General Support"}</Typography>
-                  </Box>
-                </Box>
-
-                <Divider />
-
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Avatar sx={{ bgcolor: "action.hover", color: "text.primary" }}><AccessTimeIcon fontSize="small" /></Avatar>
-                  <Box>
-                    <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700 }}>CREATED / UPDATED</Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>{request.created} • Updated {request.updated}</Typography>
-                  </Box>
-                </Box>
-
-                <Divider />
-
-                <Grid container spacing={2}>
-                  <Grid item xs={6}>
-                    <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700 }}>IMPACT</Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>{request.impact || "Medium"}</Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700 }}>URGENCY</Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>{request.urgency || "Medium"}</Typography>
-                  </Grid>
-                </Grid>
-
-                <Divider />
-
-                <Box>
-                  <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700 }}>SERVICE WORKSPACE / DEPT</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>{request.department || "Enterprise Services"}</Typography>
-                </Box>
-              </Stack>
-            </CardContent>
           </Card>
         </Grid>
       </Grid>
