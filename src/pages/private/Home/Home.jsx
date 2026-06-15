@@ -342,118 +342,8 @@ export default function Home() {
       {/* Grid container */}
       <Box sx={{ maxWidth: "1240px", mx: "auto", px: { xs: 2, md: 4 }, mt: 5 }}>
         <Grid container spacing={4}>
-
-          {/* Quick Action Tiles */}
-          <Grid item xs={12} md={8}>
-            <Typography variant="h6" sx={{ fontWeight: "bold", mb: 3, color: "text.primary" }}>
-              Service Portal Actions
-            </Typography>
-
-            <Grid container spacing={3}>
-              {[
-                {
-                  title: "Get Help (Report Incident)",
-                  desc: "Submit a break-fix ticket for system crashes, bugs, or account outages.",
-                  icon: <ReportProblemIcon sx={{ fontSize: "2rem", color: "#e11d48" }} />,
-                  action: () => setOpenIncident(true)
-                },
-                {
-                  title: "Service Catalog",
-                  desc: "Request laptops, enterprise software, cloud sandboxes, or database access.",
-                  icon: <ShoppingCartIcon sx={{ fontSize: "2rem", color: "#2563eb" }} />,
-                  action: () => setOpenRequest(true)
-                },
-                {
-                  title: "Knowledge Base",
-                  desc: "Read support documentation, quick setup instructions, and guidelines.",
-                  icon: <BookIcon sx={{ fontSize: "2rem", color: "#0d9488" }} />,
-                  action: () => handleOpenKb(kbArticles[0])
-                },
-                {
-                  title: "Access Policy Settings",
-                  desc: "Manage security roles, user accounts, and inherited organization permissions.",
-                  icon: <SettingsIcon sx={{ fontSize: "2rem", color: "#4f46e5" }} />,
-                  action: () => navigate("/uam")
-                }
-              ].map((item, idx) => (
-                <Grid item xs={12} sm={6} key={idx}>
-                  <Card
-                    variant="outlined"
-                    onClick={item.action}
-                    sx={{
-                      borderRadius: 3,
-                      borderColor: "divider",
-                      cursor: "pointer",
-                      height: "100%",
-                      transition: "transform 0.2s, box-shadow 0.2s",
-                      bgcolor: "background.paper",
-                      backgroundImage: "none",
-                      "&:hover": {
-                        transform: "translateY(-3px)",
-                        boxShadow: "0 6px 18px rgba(0,0,0,0.05)",
-                        borderColor: "secondary.main"
-                      }
-                    }}
-                  >
-                    <CardContent sx={{ p: 3, display: "flex", gap: 2 }}>
-                      <Box sx={{ p: 1.5, borderRadius: 3, bgcolor: "action.hover", display: "flex", alignItems: "center", alignSelf: "flex-start" }}>
-                        {item.icon}
-                      </Box>
-                      <Box>
-                        <Typography variant="body1" sx={{ fontWeight: "bold", color: "text.primary", mb: 0.5 }}>
-                          {item.title}
-                        </Typography>
-                        <Typography variant="caption" sx={{ color: "text.secondary", display: "block", lineHeight: 1.5 }}>
-                          {item.desc}
-                        </Typography>
-                      </Box>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
-
-            {/* Popular Articles Widget */}
-            <Card variant="outlined" sx={{ borderRadius: 3, mt: 4, borderColor: "divider", bgcolor: "background.paper", backgroundImage: "none" }}>
-              <CardContent sx={{ p: 3 }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: "bold", color: "text.primary", mb: 2 }}>
-                  Featured Knowledge Articles
-                </Typography>
-                <Divider sx={{ mb: 2 }} />
-                <List disablePadding>
-                  {kbArticles.map((art) => (
-                    <ListItem
-                      key={art.id}
-                      disableGutters
-                      sx={{
-                        borderBottom: "1px solid",
-                        borderColor: "divider",
-                        "&:last-child": { border: 0 },
-                        py: 1.5,
-                        cursor: "pointer",
-                        "&:hover": { pl: 0.5 }
-                      }}
-                      onClick={() => handleOpenKb(art)}
-                    >
-                      <ListItemIcon sx={{ minWidth: 36 }}>
-                        <BookIcon fontSize="small" sx={{ color: "secondary.main" }} />
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={art.title}
-                        secondary={`Article ID: ${art.id} • Triage Manual`}
-                        primaryTypographyProps={{ fontWeight: 600, fontSize: "0.9rem", color: "primary.main" }}
-                        secondaryTypographyProps={{ fontSize: "0.75rem" }}
-                      />
-                      <ChevronRightIcon fontSize="small" sx={{ color: "text.secondary" }} />
-                    </ListItem>
-                  ))}
-                </List>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          {/* Sidebar - Open Items */}
-          <Grid item xs={12} md={4}>
+          {/* Sidebar - Recently Viewed */}
+          <Grid item xs={12} md={6}>
             <Card
               variant="outlined"
               sx={{
@@ -466,7 +356,73 @@ export default function Home() {
             >
               <CardContent sx={{ p: 3 }}>
                 <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2, color: "text.primary" }}>
-                  My Open Tickets
+                  Recently Viewed Tickets
+                </Typography>
+                <Divider sx={{ mb: 2 }} />
+
+                <List disablePadding>
+                  {tickets.slice(0, 4).map((ticket) => (
+                    <ListItem
+                      key={ticket.id}
+                      disableGutters
+                      secondaryAction={
+                        <IconButton size="small" edge="end" onClick={() => navigate(`/requests/${ticket.id}`)}>
+                          <ChevronRightIcon />
+                        </IconButton>
+                      }
+                      sx={{
+                        borderBottom: "1px solid",
+                        borderColor: "divider",
+                        "&:last-child": { border: 0 },
+                        py: 2
+                      }}
+                    >
+                      <ListItemIcon sx={{ minWidth: 42 }}>
+                        <Avatar sx={{ bgcolor: "action.hover", color: "primary.main", width: 32, height: 32 }}>
+                          {ticket.id.startsWith("INC") ? <ReportProblemIcon fontSize="inherit" /> : <HistoryIcon fontSize="inherit" />}
+                        </Avatar>
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={ticket.id}
+                        secondary={ticket.title}
+                        primaryTypographyProps={{ fontWeight: "bold", fontSize: "0.85rem", color: "primary.main" }}
+                        secondaryTypographyProps={{
+                          fontSize: "0.75rem",
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          maxWidth: "180px"
+                        }}
+                      />
+                    </ListItem>
+                  ))}
+                </List>
+
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  onClick={() => navigate("/requests")}
+                  sx={{ mt: 2, textTransform: "none", fontWeight: "bold", borderRadius: "8px" }}
+                >
+                  View All Open Tickets ({tickets.length})
+                </Button>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Card
+              variant="outlined"
+              sx={{
+                borderRadius: 3,
+                borderColor: "divider",
+                bgcolor: "background.paper",
+                backgroundImage: "none",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.02)"
+              }}
+            >
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2, color: "text.primary" }}>
+                  Recently Searched Tickets
                 </Typography>
                 <Divider sx={{ mb: 2 }} />
 
@@ -731,6 +687,6 @@ export default function Home() {
           {toast.message}
         </Alert>
       </Snackbar>
-    </Box>
+    </Box >
   );
 }
