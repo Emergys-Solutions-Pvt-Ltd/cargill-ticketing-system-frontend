@@ -11,7 +11,9 @@ export const ThemeContextProvider = ({ children }) => {
   const [mode, setMode] = useState(() => {
     const savedMode = localStorage.getItem("themeMode");
     if (savedMode) return savedMode;
-    const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const systemPrefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)",
+    ).matches;
     return systemPrefersDark ? "dark" : "light";
   });
 
@@ -44,7 +46,7 @@ export const ThemeContextProvider = ({ children }) => {
                 main: "#81B563",
               },
               background: {
-                default: "#F4F7F6",
+                default: "#FFFDFA",
                 paper: "#ffffff",
               },
               text: {
