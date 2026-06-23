@@ -32,11 +32,16 @@ import SearchIcon from "@mui/icons-material/Search";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import BookIcon from "@mui/icons-material/Book";
-import SettingsIcon from "@mui/icons-material/Settings";
 import HistoryIcon from "@mui/icons-material/History";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { useAuth } from "../../../context/AuthContext";
-import { getStoredTickets, getStoredTicketsAsync, setStoredTickets } from "../../../utils/rbacData";
+import {
+  getStoredTickets,
+  getStoredTicketsAsync,
+  setStoredTickets,
+} from "../../../utils/rbacData";
+import Group2 from "../../../assets/Group-2.png";
+import Group3 from "../../../assets/Group-3.png";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -62,7 +67,11 @@ export default function Home() {
   const [openKbArticle, setOpenKbArticle] = useState(false);
 
   // Toast state
-  const [toast, setToast] = useState({ open: false, message: "", severity: "success" });
+  const [toast, setToast] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
   // Incident Form state
   const [incTitle, setIncTitle] = useState("");
@@ -83,18 +92,21 @@ export default function Home() {
     {
       id: "KB0010045",
       title: "How to Request Vulnerability Scan on QA Environment",
-      content: "To trigger a vulnerability scan, navigate to the Get Help widget on the Home page, select the 'Security Assessment' category, specify your target QA environment url, and attach any config details."
+      content:
+        "To trigger a vulnerability scan, navigate to the Get Help widget on the Home page, select the 'Security Assessment' category, specify your target QA environment url, and attach any config details.",
     },
     {
       id: "KB0010046",
       title: "Database Access Control Policy & Level Privileges",
-      content: "Organization Admin (Level 1) can configure permissions, create custom roles, and add new users. Department Admins (Level 2) can manage settings and view analytics. Standard Users (Level 3) can raise support requests."
+      content:
+        "Organization Admin (Level 1) can configure permissions, create custom roles, and add new users. Department Admins (Level 2) can manage settings and view analytics. Standard Users (Level 3) can raise support requests.",
     },
     {
       id: "KB0010047",
       title: "Requesting Laptop / Hardware Replacements",
-      content: "Hardware requests can be submitted via the 'Request Items' widget. Select the 'Hardware' category, fill in the specifications of the machine (e.g. RAM, storage, processor), and hit submit."
-    }
+      content:
+        "Hardware requests can be submitted via the 'Request Items' widget. Select the 'Hardware' category, fill in the specifications of the machine (e.g. RAM, storage, processor), and hit submit.",
+    },
   ];
 
   const displayName = React.useMemo(() => {
@@ -102,7 +114,7 @@ export default function Home() {
     const namePart = user.email.split("@")[0];
     return namePart
       .split(/[._-]/)
-      .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
       .join(" ");
   }, [user]);
 
@@ -113,7 +125,7 @@ export default function Home() {
       const results = tickets.filter(
         (t) =>
           t.id.toLowerCase().includes(value.toLowerCase()) ||
-          t.title.toLowerCase().includes(value.toLowerCase())
+          t.title.toLowerCase().includes(value.toLowerCase()),
       );
       setSearchResults(results);
       setSearchAnchor(e.currentTarget);
@@ -138,20 +150,33 @@ export default function Home() {
   const handleSubmitIncident = (e) => {
     e.preventDefault();
     if (!incTitle.trim() || !incDesc.trim()) {
-      setToast({ open: true, message: "Please fill out all mandatory fields.", severity: "error" });
+      setToast({
+        open: true,
+        message: "Please fill out all mandatory fields.",
+        severity: "error",
+      });
       return;
     }
 
-    const nextIncNum = 10045 + tickets.filter(t => t.id.startsWith("INC")).length;
+    const nextIncNum =
+      10045 + tickets.filter((t) => t.id.startsWith("INC")).length;
     const newIncident = {
       id: `INC00${nextIncNum}`,
       title: incTitle,
       status: "New",
       created: "Just now",
       updated: "Just now",
-      priority: incUrgency === "High" && incImpact === "High" ? "Critical" : incUrgency === "High" || incImpact === "High" ? "High" : "Medium",
+      priority:
+        incUrgency === "High" && incImpact === "High"
+          ? "Critical"
+          : incUrgency === "High" || incImpact === "High"
+            ? "High"
+            : "Medium",
       assignee: "Triage Queue",
-      department: user?.role === "Org Admin" ? "IT Security Administration" : "Help Desk Services",
+      department:
+        user?.role === "Org Admin"
+          ? "IT Security Administration"
+          : "Help Desk Services",
       category: incCategory,
       urgency: incUrgency,
       impact: incImpact,
@@ -161,9 +186,9 @@ export default function Home() {
           author: displayName,
           avatar: displayName.charAt(0),
           time: "Just now",
-          text: `Incident reported: ${incDesc}`
-        }
-      ]
+          text: `Incident reported: ${incDesc}`,
+        },
+      ],
     };
 
     const updatedTickets = [newIncident, ...tickets];
@@ -177,18 +202,27 @@ export default function Home() {
     setIncCategory("Software");
     setOpenIncident(false);
 
-    setToast({ open: true, message: `Incident ${newIncident.id} created successfully!`, severity: "success" });
+    setToast({
+      open: true,
+      message: `Incident ${newIncident.id} created successfully!`,
+      severity: "success",
+    });
   };
 
   // Submit new request (REQ)
   const handleSubmitRequest = (e) => {
     e.preventDefault();
     if (!reqJustify.trim()) {
-      setToast({ open: true, message: "Please provide a justification.", severity: "error" });
+      setToast({
+        open: true,
+        message: "Please provide a justification.",
+        severity: "error",
+      });
       return;
     }
 
-    const nextReqNum = 1236 + tickets.filter(t => t.id.startsWith("REQ")).length;
+    const nextReqNum =
+      1236 + tickets.filter((t) => t.id.startsWith("REQ")).length;
     const newRequest = {
       id: `REQ000${nextReqNum}`,
       title: `Order Request: ${reqItem}`,
@@ -207,9 +241,9 @@ export default function Home() {
           author: displayName,
           avatar: displayName.charAt(0),
           time: "Just now",
-          text: `Item ordered: ${reqItem}. Business Justification: ${reqJustify}`
-        }
-      ]
+          text: `Item ordered: ${reqItem}. Business Justification: ${reqJustify}`,
+        },
+      ],
     };
 
     const updatedTickets = [newRequest, ...tickets];
@@ -220,7 +254,11 @@ export default function Home() {
     setReqUrgency("Medium");
     setOpenRequest(false);
 
-    setToast({ open: true, message: `Service Request ${newRequest.id} raised successfully!`, severity: "success" });
+    setToast({
+      open: true,
+      message: `Service Request ${newRequest.id} raised successfully!`,
+      severity: "success",
+    });
   };
 
   const handleOpenKb = (art) => {
@@ -233,7 +271,16 @@ export default function Home() {
       {/* Cargill Portal Banner */}
       <Box
         sx={{
-          bgcolor: "#1B3D41",
+          background: `
+      url(${Group3}) left center no-repeat,
+      url(${Group2}) right center no-repeat,
+      linear-gradient(
+        180deg,
+        #001E0E 0%,
+        #0A381F 50%,
+        #145532 100%
+      )
+    `,
           position: "relative",
           height: "260px",
           display: "flex",
@@ -242,37 +289,42 @@ export default function Home() {
           justifyContent: "center",
           color: "#ffffff",
           px: 2,
-          boxShadow: "inset 0 -20px 40px rgba(0,0,0,0.15)"
+          margin: "16px",
+          borderRadius: "16px",
+          boxShadow: "inset 0 -20px 40px rgba(0,0,0,0.15)",
         }}
       >
         <Typography
-          variant="h3"
+          variant="h4"
           sx={{
-            fontWeight: 300,
+            fontWeight: 700,
             mb: 1,
             textAlign: "center",
-            letterSpacing: "-0.5px"
+            letterSpacing: "-0.5px",
           }}
         >
-          How can we help?
+          Find What You Need, Faster
         </Typography>
         <Typography
           variant="subtitle1"
           sx={{
             color: "rgba(255,255,255,0.75)",
-            mb: 3,
+            mb: "32px",
             textAlign: "center",
-            fontWeight: 500
+            fontWeight: 400,
+            fontSize: "14px",
+            fontStyle: "italic",
           }}
         >
-          Search the Service Catalog, Knowledge Base, or view your open requests.
+          Search the Service Catalog, Knowledge Base, or view your open
+          requests.
         </Typography>
 
         {/* Global search */}
         <Box sx={{ width: "100%", maxWidth: "620px", position: "relative" }}>
           <TextField
             fullWidth
-            placeholder="Type your question or request ID..."
+            placeholder="Type your question or request ID"
             value={searchQuery}
             onChange={handleSearchChange}
             onKeyPress={handleSearchKeyPress}
@@ -283,18 +335,18 @@ export default function Home() {
                     <SearchIcon sx={{ color: "primary.main" }} />
                   </InputAdornment>
                 ),
-              }
+              },
             }}
             sx={{
               "& .MuiOutlinedInput-root": {
                 bgcolor: "#ffffff",
                 color: "#1F2D2E",
-                borderRadius: "8px",
+                borderRadius: "59px",
                 px: 2,
                 boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
-                height: "48px",
-                "& fieldset": { border: "none" }
-              }
+                height: "44px",
+                "& fieldset": { border: "none" },
+              },
             }}
           />
 
@@ -312,12 +364,22 @@ export default function Home() {
                 borderRadius: "12px",
                 boxShadow: "0 12px 30px rgba(0,0,0,0.12)",
                 maxHeight: "280px",
-                backgroundImage: "none"
-              }
+                backgroundImage: "none",
+              },
             }}
           >
-            <Box sx={{ px: 2, py: 1, borderBottom: "1px solid", borderColor: "divider" }}>
-              <Typography variant="caption" sx={{ fontWeight: "bold", color: "text.secondary" }}>
+            <Box
+              sx={{
+                px: 2,
+                py: 1,
+                borderBottom: "1px solid",
+                borderColor: "divider",
+              }}
+            >
+              <Typography
+                variant="caption"
+                sx={{ fontWeight: "bold", color: "text.secondary" }}
+              >
                 MATCHING TICKETS
               </Typography>
             </Box>
@@ -325,9 +387,17 @@ export default function Home() {
               <MenuItem
                 key={t.id}
                 onClick={() => handleResultClick(t.id)}
-                sx={{ py: 1.5, display: "flex", flexDirection: "column", alignItems: "flex-start" }}
+                sx={{
+                  py: 1.5,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                }}
               >
-                <Typography variant="body2" sx={{ fontWeight: "bold", color: "primary.main" }}>
+                <Typography
+                  variant="body2"
+                  sx={{ fontWeight: "bold", color: "primary.main" }}
+                >
                   {t.id}
                 </Typography>
                 <Typography variant="caption" sx={{ color: "text.secondary" }}>
@@ -351,11 +421,14 @@ export default function Home() {
                 borderColor: "divider",
                 bgcolor: "background.paper",
                 backgroundImage: "none",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.02)"
+                boxShadow: "0 4px 12px rgba(0,0,0,0.02)",
               }}
             >
               <CardContent sx={{ p: 3 }}>
-                <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2, color: "text.primary" }}>
+                <Typography
+                  variant="h6"
+                  sx={{ fontWeight: "bold", mb: 2, color: "text.primary" }}
+                >
                   Recently Viewed Tickets
                 </Typography>
                 <Divider sx={{ mb: 2 }} />
@@ -366,7 +439,11 @@ export default function Home() {
                       key={ticket.id}
                       disableGutters
                       secondaryAction={
-                        <IconButton size="small" edge="end" onClick={() => navigate(`/requests/${ticket.id}`)}>
+                        <IconButton
+                          size="small"
+                          edge="end"
+                          onClick={() => navigate(`/requests/${ticket.id}`)}
+                        >
                           <ChevronRightIcon />
                         </IconButton>
                       }
@@ -374,24 +451,39 @@ export default function Home() {
                         borderBottom: "1px solid",
                         borderColor: "divider",
                         "&:last-child": { border: 0 },
-                        py: 2
+                        py: 2,
                       }}
                     >
                       <ListItemIcon sx={{ minWidth: 42 }}>
-                        <Avatar sx={{ bgcolor: "action.hover", color: "primary.main", width: 32, height: 32 }}>
-                          {ticket.id.startsWith("INC") ? <ReportProblemIcon fontSize="inherit" /> : <HistoryIcon fontSize="inherit" />}
+                        <Avatar
+                          sx={{
+                            bgcolor: "action.hover",
+                            color: "primary.main",
+                            width: 32,
+                            height: 32,
+                          }}
+                        >
+                          {ticket.id.startsWith("INC") ? (
+                            <ReportProblemIcon fontSize="inherit" />
+                          ) : (
+                            <HistoryIcon fontSize="inherit" />
+                          )}
                         </Avatar>
                       </ListItemIcon>
                       <ListItemText
                         primary={ticket.id}
                         secondary={ticket.title}
-                        primaryTypographyProps={{ fontWeight: "bold", fontSize: "0.85rem", color: "primary.main" }}
+                        primaryTypographyProps={{
+                          fontWeight: "bold",
+                          fontSize: "0.85rem",
+                          color: "primary.main",
+                        }}
                         secondaryTypographyProps={{
                           fontSize: "0.75rem",
                           whiteSpace: "nowrap",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
-                          maxWidth: "180px"
+                          maxWidth: "180px",
                         }}
                       />
                     </ListItem>
@@ -402,7 +494,12 @@ export default function Home() {
                   fullWidth
                   variant="outlined"
                   onClick={() => navigate("/requests")}
-                  sx={{ mt: 2, textTransform: "none", fontWeight: "bold", borderRadius: "8px" }}
+                  sx={{
+                    mt: 2,
+                    textTransform: "none",
+                    fontWeight: "bold",
+                    borderRadius: "8px",
+                  }}
                 >
                   View All Open Tickets ({tickets.length})
                 </Button>
@@ -417,11 +514,14 @@ export default function Home() {
                 borderColor: "divider",
                 bgcolor: "background.paper",
                 backgroundImage: "none",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.02)"
+                boxShadow: "0 4px 12px rgba(0,0,0,0.02)",
               }}
             >
               <CardContent sx={{ p: 3 }}>
-                <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2, color: "text.primary" }}>
+                <Typography
+                  variant="h6"
+                  sx={{ fontWeight: "bold", mb: 2, color: "text.primary" }}
+                >
                   Recently Searched Tickets
                 </Typography>
                 <Divider sx={{ mb: 2 }} />
@@ -432,7 +532,11 @@ export default function Home() {
                       key={ticket.id}
                       disableGutters
                       secondaryAction={
-                        <IconButton size="small" edge="end" onClick={() => navigate(`/requests/${ticket.id}`)}>
+                        <IconButton
+                          size="small"
+                          edge="end"
+                          onClick={() => navigate(`/requests/${ticket.id}`)}
+                        >
                           <ChevronRightIcon />
                         </IconButton>
                       }
@@ -440,24 +544,39 @@ export default function Home() {
                         borderBottom: "1px solid",
                         borderColor: "divider",
                         "&:last-child": { border: 0 },
-                        py: 2
+                        py: 2,
                       }}
                     >
                       <ListItemIcon sx={{ minWidth: 42 }}>
-                        <Avatar sx={{ bgcolor: "action.hover", color: "primary.main", width: 32, height: 32 }}>
-                          {ticket.id.startsWith("INC") ? <ReportProblemIcon fontSize="inherit" /> : <HistoryIcon fontSize="inherit" />}
+                        <Avatar
+                          sx={{
+                            bgcolor: "action.hover",
+                            color: "primary.main",
+                            width: 32,
+                            height: 32,
+                          }}
+                        >
+                          {ticket.id.startsWith("INC") ? (
+                            <ReportProblemIcon fontSize="inherit" />
+                          ) : (
+                            <HistoryIcon fontSize="inherit" />
+                          )}
                         </Avatar>
                       </ListItemIcon>
                       <ListItemText
                         primary={ticket.id}
                         secondary={ticket.title}
-                        primaryTypographyProps={{ fontWeight: "bold", fontSize: "0.85rem", color: "primary.main" }}
+                        primaryTypographyProps={{
+                          fontWeight: "bold",
+                          fontSize: "0.85rem",
+                          color: "primary.main",
+                        }}
                         secondaryTypographyProps={{
                           fontSize: "0.75rem",
                           whiteSpace: "nowrap",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
-                          maxWidth: "180px"
+                          maxWidth: "180px",
                         }}
                       />
                     </ListItem>
@@ -468,7 +587,12 @@ export default function Home() {
                   fullWidth
                   variant="outlined"
                   onClick={() => navigate("/requests")}
-                  sx={{ mt: 2, textTransform: "none", fontWeight: "bold", borderRadius: "8px" }}
+                  sx={{
+                    mt: 2,
+                    textTransform: "none",
+                    fontWeight: "bold",
+                    borderRadius: "8px",
+                  }}
                 >
                   View All Open Tickets ({tickets.length})
                 </Button>
@@ -485,16 +609,25 @@ export default function Home() {
         fullWidth
         maxWidth="sm"
         PaperProps={{
-          sx: { borderRadius: "20px", backgroundImage: "none" }
+          sx: { borderRadius: "20px", backgroundImage: "none" },
         }}
       >
-        <DialogTitle sx={{ fontWeight: "bold", display: "flex", alignItems: "center", gap: 1 }}>
+        <DialogTitle
+          sx={{
+            fontWeight: "bold",
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+          }}
+        >
           <ReportProblemIcon sx={{ color: "error.main" }} />
           Create Incident (Record Outage/Error)
         </DialogTitle>
         <Divider />
         <form onSubmit={handleSubmitIncident}>
-          <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2.5, p: 3 }}>
+          <DialogContent
+            sx={{ display: "flex", flexDirection: "column", gap: 2.5, p: 3 }}
+          >
             <TextField
               required
               fullWidth
@@ -552,8 +685,12 @@ export default function Home() {
                   >
                     <MenuItem value="Software">Software</MenuItem>
                     <MenuItem value="Hardware">Hardware</MenuItem>
-                    <MenuItem value="Access Management">Access Management</MenuItem>
-                    <MenuItem value="Security Assessment">Security Assessment</MenuItem>
+                    <MenuItem value="Access Management">
+                      Access Management
+                    </MenuItem>
+                    <MenuItem value="Security Assessment">
+                      Security Assessment
+                    </MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
@@ -561,10 +698,19 @@ export default function Home() {
           </DialogContent>
           <Divider />
           <DialogActions sx={{ p: 2.5 }}>
-            <Button onClick={() => setOpenIncident(false)} color="inherit" sx={{ fontWeight: "bold" }}>
+            <Button
+              onClick={() => setOpenIncident(false)}
+              color="inherit"
+              sx={{ fontWeight: "bold" }}
+            >
               Cancel
             </Button>
-            <Button type="submit" variant="contained" color="error" sx={{ fontWeight: "bold", borderRadius: "8px" }}>
+            <Button
+              type="submit"
+              variant="contained"
+              color="error"
+              sx={{ fontWeight: "bold", borderRadius: "8px" }}
+            >
               Submit Incident
             </Button>
           </DialogActions>
@@ -578,16 +724,25 @@ export default function Home() {
         fullWidth
         maxWidth="sm"
         PaperProps={{
-          sx: { borderRadius: "20px", backgroundImage: "none" }
+          sx: { borderRadius: "20px", backgroundImage: "none" },
         }}
       >
-        <DialogTitle sx={{ fontWeight: "bold", display: "flex", alignItems: "center", gap: 1 }}>
+        <DialogTitle
+          sx={{
+            fontWeight: "bold",
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+          }}
+        >
           <ShoppingCartIcon sx={{ color: "primary.main" }} />
           Service Catalog - Request Item
         </DialogTitle>
         <Divider />
         <form onSubmit={handleSubmitRequest}>
-          <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2.5, p: 3 }}>
+          <DialogContent
+            sx={{ display: "flex", flexDirection: "column", gap: 2.5, p: 3 }}
+          >
             <FormControl fullWidth>
               <InputLabel>Choose Catalog Item</InputLabel>
               <Select
@@ -595,11 +750,21 @@ export default function Home() {
                 label="Choose Catalog Item"
                 onChange={(e) => setReqItem(e.target.value)}
               >
-                <MenuItem value="Adobe Creative Cloud Suite License">Adobe Creative Cloud Suite License</MenuItem>
-                <MenuItem value="Standard Developer Laptop (16GB RAM)">Standard Developer Laptop (16GB RAM)</MenuItem>
-                <MenuItem value="Production Database Access Role">Production Database Access Role</MenuItem>
-                <MenuItem value="QA Environment Server Allocation">QA Environment Server Allocation</MenuItem>
-                <MenuItem value="Microsoft 365 Enterprise License">Microsoft 365 Enterprise License</MenuItem>
+                <MenuItem value="Adobe Creative Cloud Suite License">
+                  Adobe Creative Cloud Suite License
+                </MenuItem>
+                <MenuItem value="Standard Developer Laptop (16GB RAM)">
+                  Standard Developer Laptop (16GB RAM)
+                </MenuItem>
+                <MenuItem value="Production Database Access Role">
+                  Production Database Access Role
+                </MenuItem>
+                <MenuItem value="QA Environment Server Allocation">
+                  QA Environment Server Allocation
+                </MenuItem>
+                <MenuItem value="Microsoft 365 Enterprise License">
+                  Microsoft 365 Enterprise License
+                </MenuItem>
               </Select>
             </FormControl>
 
@@ -623,16 +788,27 @@ export default function Home() {
               >
                 <MenuItem value="Low">Low - Standard Triage</MenuItem>
                 <MenuItem value="Medium">Medium - Regular Queue</MenuItem>
-                <MenuItem value="High">High - Urgent Project Requirement</MenuItem>
+                <MenuItem value="High">
+                  High - Urgent Project Requirement
+                </MenuItem>
               </Select>
             </FormControl>
           </DialogContent>
           <Divider />
           <DialogActions sx={{ p: 2.5 }}>
-            <Button onClick={() => setOpenRequest(false)} color="inherit" sx={{ fontWeight: "bold" }}>
+            <Button
+              onClick={() => setOpenRequest(false)}
+              color="inherit"
+              sx={{ fontWeight: "bold" }}
+            >
               Cancel
             </Button>
-            <Button type="submit" variant="contained" color="primary" sx={{ fontWeight: "bold", borderRadius: "8px" }}>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              sx={{ fontWeight: "bold", borderRadius: "8px" }}
+            >
               Raise Request
             </Button>
           </DialogActions>
@@ -646,10 +822,17 @@ export default function Home() {
         fullWidth
         maxWidth="sm"
         PaperProps={{
-          sx: { borderRadius: "20px", backgroundImage: "none" }
+          sx: { borderRadius: "20px", backgroundImage: "none" },
         }}
       >
-        <DialogTitle sx={{ fontWeight: "bold", display: "flex", alignItems: "center", gap: 1 }}>
+        <DialogTitle
+          sx={{
+            fontWeight: "bold",
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+          }}
+        >
           <BookIcon sx={{ color: "secondary.main" }} />
           Knowledge Article Details
         </DialogTitle>
@@ -657,13 +840,35 @@ export default function Home() {
         <DialogContent sx={{ p: 3 }}>
           {selectedKb && (
             <Box>
-              <Typography variant="h6" sx={{ fontWeight: "bold", mb: 1.5, color: "text.primary" }}>
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: "bold", mb: 1.5, color: "text.primary" }}
+              >
                 {selectedKb.title}
               </Typography>
-              <Typography variant="caption" sx={{ color: "text.secondary", display: "block", mb: 2, fontWeight: 600 }}>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "text.secondary",
+                  display: "block",
+                  mb: 2,
+                  fontWeight: 600,
+                }}
+              >
                 Article ID: {selectedKb.id} • Cargill Triage Database
               </Typography>
-              <Typography variant="body2" sx={{ color: "text.primary", lineHeight: 1.8, bgcolor: "action.hover", p: 2, borderRadius: 3, border: "1px solid", borderColor: "divider" }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.primary",
+                  lineHeight: 1.8,
+                  bgcolor: "action.hover",
+                  p: 2,
+                  borderRadius: 3,
+                  border: "1px solid",
+                  borderColor: "divider",
+                }}
+              >
                 {selectedKb.content}
               </Typography>
             </Box>
@@ -671,7 +876,11 @@ export default function Home() {
         </DialogContent>
         <Divider />
         <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setOpenKbArticle(false)} color="inherit" sx={{ fontWeight: "bold" }}>
+          <Button
+            onClick={() => setOpenKbArticle(false)}
+            color="inherit"
+            sx={{ fontWeight: "bold" }}
+          >
             Close
           </Button>
         </DialogActions>
@@ -683,10 +892,14 @@ export default function Home() {
         onClose={() => setToast({ ...toast, open: false })}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
-        <Alert severity={toast.severity} variant="filled" className="rounded-xl shadow-lg">
+        <Alert
+          severity={toast.severity}
+          variant="filled"
+          className="rounded-xl shadow-lg"
+        >
           {toast.message}
         </Alert>
       </Snackbar>
-    </Box >
+    </Box>
   );
 }
