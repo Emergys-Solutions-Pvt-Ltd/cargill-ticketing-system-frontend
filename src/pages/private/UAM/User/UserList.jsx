@@ -185,7 +185,7 @@ const UserList = () => {
   };
 
   return (
-    <Box className="p-6 md:p-10 bg-slate-50 dark:bg-slate-950 min-h-screen text-slate-800 dark:text-slate-100 transition-colors duration-200">
+    <Box className="p-6 md:p-10 min-h-screen text-slate-800 dark:text-slate-100 transition-colors duration-200">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8 flex-wrap gap-4">

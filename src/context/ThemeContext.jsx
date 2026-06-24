@@ -46,7 +46,7 @@ export const ThemeContextProvider = ({ children }) => {
                 main: "#81B563",
               },
               background: {
-                default: "#FFFDFA",
+                default: "#FFFBF7",
                 paper: "#ffffff",
               },
               text: {
