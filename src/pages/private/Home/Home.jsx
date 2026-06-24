@@ -42,6 +42,7 @@ import {
 } from "../../../utils/rbacData";
 import Group2 from "../../../assets/Group-2.png";
 import Group3 from "../../../assets/Group-3.png";
+import Chip from "@mui/material/Chip";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -410,196 +411,251 @@ export default function Home() {
       </Box>
 
       {/* Grid container */}
-      <Box sx={{ maxWidth: "1240px", mx: "auto", px: { xs: 2, md: 4 }, mt: 5 }}>
-        <Grid container spacing={4}>
-          {/* Sidebar - Recently Viewed */}
-          <Grid item xs={12} md={6}>
-            <Card
-              variant="outlined"
-              sx={{
-                borderRadius: 3,
-                borderColor: "divider",
-                bgcolor: "background.paper",
-                backgroundImage: "none",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.02)",
-              }}
-            >
-              <CardContent sx={{ p: 3 }}>
-                <Typography
-                  variant="h6"
-                  sx={{ fontWeight: "bold", mb: 2, color: "text.primary" }}
-                >
-                  Recently Viewed Tickets
-                </Typography>
-                <Divider sx={{ mb: 2 }} />
+      <Box sx={{ mx: "auto", px: { xs: 2, md: 4 }, mt: 5 }}>
+        {/* Recently Viewed Tickets */}
+        <Box sx={{ mb: 4 }}>
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 700,
+              fontSize: "1.1rem",
+              color: "#1F2937",
+              mb: 0.25,
+            }}
+          >
+            Recently Viewed Tickets
+          </Typography>
 
-                <List disablePadding>
-                  {tickets.slice(0, 4).map((ticket) => (
-                    <ListItem
-                      key={ticket.id}
-                      disableGutters
-                      secondaryAction={
-                        <IconButton
-                          size="small"
-                          edge="end"
-                          onClick={() => navigate(`/requests/${ticket.id}`)}
-                        >
-                          <ChevronRightIcon />
-                        </IconButton>
-                      }
-                      sx={{
-                        borderBottom: "1px solid",
-                        borderColor: "divider",
-                        "&:last-child": { border: 0 },
-                        py: 2,
-                      }}
-                    >
-                      <ListItemIcon sx={{ minWidth: 42 }}>
-                        <Avatar
-                          sx={{
-                            bgcolor: "action.hover",
-                            color: "primary.main",
-                            width: 32,
-                            height: 32,
-                          }}
-                        >
-                          {ticket.id.startsWith("INC") ? (
-                            <ReportProblemIcon fontSize="inherit" />
-                          ) : (
-                            <HistoryIcon fontSize="inherit" />
-                          )}
-                        </Avatar>
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={ticket.id}
-                        secondary={ticket.title}
-                        primaryTypographyProps={{
-                          fontWeight: "bold",
-                          fontSize: "0.85rem",
-                          color: "primary.main",
-                        }}
-                        secondaryTypographyProps={{
-                          fontSize: "0.75rem",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          maxWidth: "180px",
-                        }}
-                      />
-                    </ListItem>
-                  ))}
-                </List>
+          <Typography
+            variant="body2"
+            sx={{
+              color: "#6B7280",
+              mb: 2,
+              fontSize: "0.8rem",
+            }}
+          >
+            Tickets with recent activity, focused on who updated and what
+            changed.
+          </Typography>
 
-                <Button
-                  fullWidth
-                  variant="outlined"
-                  onClick={() => navigate("/requests")}
+          <Grid container spacing={2}>
+            {tickets.slice(0, 4).map((ticket) => (
+              <Grid size={{ xs: 12, sm: 6, md: 3 }} key={ticket.id}>
+                <Card
+                  onClick={() => navigate(`/requests/${ticket.id}`)}
                   sx={{
-                    mt: 2,
-                    textTransform: "none",
-                    fontWeight: "bold",
+                    cursor: "pointer",
                     borderRadius: "8px",
+                    border: "1px solid #E5E7EB",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+                    transition: "0.2s",
+                    "&:hover": {
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
+                    },
+                    width: "100%",
                   }}
                 >
-                  View All Open Tickets ({tickets.length})
-                </Button>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Card
-              variant="outlined"
-              sx={{
-                borderRadius: 3,
-                borderColor: "divider",
-                bgcolor: "background.paper",
-                backgroundImage: "none",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.02)",
-              }}
-            >
-              <CardContent sx={{ p: 3 }}>
-                <Typography
-                  variant="h6"
-                  sx={{ fontWeight: "bold", mb: 2, color: "text.primary" }}
-                >
-                  Recently Searched Tickets
-                </Typography>
-                <Divider sx={{ mb: 2 }} />
-
-                <List disablePadding>
-                  {tickets.slice(0, 4).map((ticket) => (
-                    <ListItem
-                      key={ticket.id}
-                      disableGutters
-                      secondaryAction={
-                        <IconButton
-                          size="small"
-                          edge="end"
-                          onClick={() => navigate(`/requests/${ticket.id}`)}
-                        >
-                          <ChevronRightIcon />
-                        </IconButton>
-                      }
+                  <CardContent sx={{ p: 1.5 }}>
+                    <Box
                       sx={{
-                        borderBottom: "1px solid",
-                        borderColor: "divider",
-                        "&:last-child": { border: 0 },
-                        py: 2,
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        mb: 1,
                       }}
                     >
-                      <ListItemIcon sx={{ minWidth: 42 }}>
-                        <Avatar
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
+                        <SearchIcon
                           sx={{
-                            bgcolor: "action.hover",
-                            color: "primary.main",
-                            width: 32,
-                            height: 32,
+                            fontSize: 16,
+                            color: "#16A34A",
+                          }}
+                        />
+
+                        <Typography
+                          sx={{
+                            fontWeight: 700,
+                            fontSize: "0.75rem",
                           }}
                         >
-                          {ticket.id.startsWith("INC") ? (
-                            <ReportProblemIcon fontSize="inherit" />
-                          ) : (
-                            <HistoryIcon fontSize="inherit" />
-                          )}
-                        </Avatar>
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={ticket.id}
-                        secondary={ticket.title}
-                        primaryTypographyProps={{
-                          fontWeight: "bold",
-                          fontSize: "0.85rem",
-                          color: "primary.main",
-                        }}
-                        secondaryTypographyProps={{
-                          fontSize: "0.75rem",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          maxWidth: "180px",
+                          {ticket.id}
+                        </Typography>
+                      </Box>
+
+                      <Chip
+                        label={ticket.status}
+                        size="small"
+                        sx={{
+                          height: 20,
+                          fontSize: "0.6rem",
                         }}
                       />
-                    </ListItem>
-                  ))}
-                </List>
+                    </Box>
 
-                <Button
-                  fullWidth
-                  variant="outlined"
-                  onClick={() => navigate("/requests")}
+                    <Typography
+                      sx={{
+                        fontSize: "0.72rem",
+                        color: "#6B7280",
+                      }}
+                    >
+                      Category: {ticket.category}
+                    </Typography>
+
+                    <Typography
+                      sx={{
+                        fontSize: "0.7rem",
+                        color: "#9CA3AF",
+                        textAlign: "right",
+                        mt: 1,
+                      }}
+                    >
+                      2m ago
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+
+        {/* Open Requests / Recently Searched */}
+        <Box>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 0.25,
+            }}
+          >
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                fontSize: "1.1rem",
+                color: "#1F2937",
+              }}
+            >
+              Open Requests
+            </Typography>
+
+            <Typography
+              sx={{
+                color: "#16A34A",
+                fontWeight: 500,
+                fontSize: "0.9rem",
+                cursor: "pointer",
+                textDecoration: "underline",
+                textUnderlineOffset: 2,
+              }}
+              onClick={() => navigate("/requests")}
+            >
+              View All
+            </Typography>
+          </Box>
+
+          <Typography
+            variant="body2"
+            sx={{
+              color: "#6B7280",
+              mb: 2,
+              fontSize: "0.8rem",
+            }}
+          >
+            Open tickets that may require your attention or follow-up.
+          </Typography>
+
+          <Grid container spacing={2}>
+            {tickets.slice(0, 4).map((ticket) => (
+              <Grid
+                item
+                size={{ xs: 12, sm: 6, md: 3 }}
+                key={`open-${ticket.id}`}
+              >
+                <Card
+                  onClick={() => navigate(`/requests/${ticket.id}`)}
                   sx={{
-                    mt: 2,
-                    textTransform: "none",
-                    fontWeight: "bold",
+                    cursor: "pointer",
                     borderRadius: "8px",
+                    border: "1px solid #E5E7EB",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+                    transition: "0.2s",
+                    "&:hover": {
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
+                    },
                   }}
                 >
-                  View All Open Tickets ({tickets.length})
-                </Button>
-              </CardContent>
-            </Card>
+                  <CardContent sx={{ p: 1.5 }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        mb: 2,
+                      }}
+                    >
+                      <Typography
+                        sx={{
+                          fontWeight: 700,
+                          fontSize: "0.9rem",
+                          color: "#1F2937",
+                        }}
+                      >
+                        {ticket.id}
+                      </Typography>
+
+                      <Typography
+                        sx={{
+                          fontSize: "0.7rem",
+                          color: "#9CA3AF",
+                        }}
+                      >
+                        2h ago
+                      </Typography>
+                    </Box>
+
+                    <Typography
+                      sx={{
+                        fontSize: "0.8rem",
+                        color: "#6B7280",
+                        minHeight: 40,
+                      }}
+                    >
+                      {ticket.title}
+                    </Typography>
+
+                    <Divider sx={{ my: 2 }} />
+
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Typography
+                        sx={{
+                          fontSize: "0.72rem",
+                          color: "#6B7280",
+                        }}
+                      >
+                        Created by: M. Chen
+                      </Typography>
+
+                      <ChevronRightIcon
+                        sx={{
+                          fontSize: 18,
+                          color: "#6B7280",
+                        }}
+                      />
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
           </Grid>
-        </Grid>
+        </Box>
       </Box>
 
       {/* dialog 1: Create Incident */}
