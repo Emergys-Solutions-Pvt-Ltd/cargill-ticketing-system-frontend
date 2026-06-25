@@ -25,7 +25,11 @@ import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
 
 import { useAuth } from "../context/AuthContext";
-import { getFileActions, recordFileAction, getTicketViews } from "../utils/fileActionTracker";
+import {
+  getFileActions,
+  recordFileAction,
+  getTicketViews,
+} from "../utils/fileActionTracker";
 
 import DownloadIcon from "@mui/icons-material/Download";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -45,7 +49,6 @@ import PersonOutlineIcon from "@mui/icons-material/PersonOutlined";
 import CategoryIcon from "@mui/icons-material/Category";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 
-
 import TxtPreview from "./filePreviews/TxtPreview";
 import PdfPreview from "./filePreviews/PdfPreview";
 import DocPreview from "./filePreviews/DocPreview";
@@ -56,7 +59,7 @@ import Mp4Preview from "./filePreviews/Mp4Preview";
 import EmlPreview from "./filePreviews/EmlPreview";
 import ImagePreview from "./filePreviews/ImagePreview";
 import BasicTimeline from "./BasicTimeline";
-
+import DetailsForm from "./DetailsForm";
 
 const getFileIcon = (type) => {
   const t = type.toLowerCase();
@@ -88,9 +91,13 @@ const getFileIcon = (type) => {
     case "msg":
       return <MailIcon sx={{ color: "#d97706", fontSize: "2rem" }} />;
     case "txt":
-      return <InsertDriveFileIcon sx={{ color: "#6b7280", fontSize: "2rem" }} />;
+      return (
+        <InsertDriveFileIcon sx={{ color: "#6b7280", fontSize: "2rem" }} />
+      );
     default:
-      return <InsertDriveFileIcon sx={{ color: "#9ca3af", fontSize: "2rem" }} />;
+      return (
+        <InsertDriveFileIcon sx={{ color: "#9ca3af", fontSize: "2rem" }} />
+      );
   }
 };
 
@@ -99,7 +106,10 @@ export default function LabTabs({ comments = [], request }) {
   const [previewFile, setPreviewFile] = React.useState(null);
 
   const { user: authUser } = useAuth();
-  const [fileStats, setFileStats] = React.useState({ previews: [], downloads: [] });
+  const [fileStats, setFileStats] = React.useState({
+    previews: [],
+    downloads: [],
+  });
   const [previewAnchorEl, setPreviewAnchorEl] = React.useState(null);
   const [downloadAnchorEl, setDownloadAnchorEl] = React.useState(null);
   const [ticketViews, setTicketViews] = React.useState([]);
@@ -149,13 +159,13 @@ export default function LabTabs({ comments = [], request }) {
   // Flatten all attachments from comments
   const allAttachments = React.useMemo(() => {
     const list = [];
-    comments.forEach(comment => {
+    comments.forEach((comment) => {
       if (comment.attachments && comment.attachments.length > 0) {
-        comment.attachments.forEach(att => {
+        comment.attachments.forEach((att) => {
           list.push({
             ...att,
             attachedBy: comment.author,
-            attachedTime: comment.time
+            attachedTime: comment.time,
           });
         });
       }
@@ -168,20 +178,29 @@ export default function LabTabs({ comments = [], request }) {
       <TabContext value={value}>
         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
           <TabList onChange={handleChange} aria-label="request tabs">
-            <Tab label="Activity" value="1" />
-            <Tab label={`Attachments (${allAttachments.length})`} value="2" />
-            <Tab label="Ticket Attributes" value="3" />
-            <Tab label="Audit History" value="4" />
+            <Tab label="Details" value="1" />
+            <Tab label="Activity" value="2" />
+            <Tab label={`Attachments (${allAttachments.length})`} value="3" />
+            <Tab label="Ticket Attributes" value="4" />
+            <Tab label="Audit History" value="5" />
           </TabList>
         </Box>
         <TabPanel value="1" sx={{ p: 2 }}>
           <Box sx={{ width: "100%" }}>
+            <DetailsForm request={request} />
+          </Box>
+        </TabPanel>
+        <TabPanel value="2" sx={{ p: 2 }}>
+          <Box sx={{ width: "100%" }}>
             <BasicTimeline comments={comments} onPreview={handlePreview} />
           </Box>
         </TabPanel>
-        <TabPanel value="2" sx={{ p: 3 }}>
+        <TabPanel value="3" sx={{ p: 3 }}>
           {allAttachments.length === 0 ? (
-            <Typography variant="body2" sx={{ color: "text.secondary", fontStyle: "italic" }}>
+            <Typography
+              variant="body2"
+              sx={{ color: "text.secondary", fontStyle: "italic" }}
+            >
               No attachments found for this request.
             </Typography>
           ) : (
@@ -197,12 +216,27 @@ export default function LabTabs({ comments = [], request }) {
                       transition: "transform 0.2s, box-shadow 0.2s",
                       "&:hover": {
                         transform: "translateY(-2px)",
-                        boxShadow: "0 4px 12px rgba(0,0,0,0.05)"
-                      }
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                      },
                     }}
                   >
-                    <CardContent sx={{ display: "flex", gap: 2, alignItems: "center", "&:last-child": { pb: 2 } }}>
-                      <Box sx={{ p: 1, borderRadius: 2, bgcolor: "action.hover", display: "flex", alignItems: "center" }}>
+                    <CardContent
+                      sx={{
+                        display: "flex",
+                        gap: 2,
+                        alignItems: "center",
+                        "&:last-child": { pb: 2 },
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          p: 1,
+                          borderRadius: 2,
+                          bgcolor: "action.hover",
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
                         {getFileIcon(file.type)}
                       </Box>
                       <Box sx={{ flexGrow: 1, minWidth: 0 }}>
@@ -213,22 +247,32 @@ export default function LabTabs({ comments = [], request }) {
                             color: "text.primary",
                             whiteSpace: "nowrap",
                             overflow: "hidden",
-                            textOverflow: "ellipsis"
+                            textOverflow: "ellipsis",
                           }}
                         >
                           {file.name}
                         </Typography>
-                        <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>
+                        <Typography
+                          variant="caption"
+                          sx={{ color: "text.secondary", display: "block" }}
+                        >
                           Size: {file.size}
                         </Typography>
-                        <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>
+                        <Typography
+                          variant="caption"
+                          sx={{ color: "text.secondary", display: "block" }}
+                        >
                           By: {file.attachedBy} • {file.attachedTime}
                         </Typography>
                       </Box>
                       <IconButton
                         size="small"
                         color="secondary"
-                        sx={{ border: "1px solid", borderColor: "divider", mr: 1 }}
+                        sx={{
+                          border: "1px solid",
+                          borderColor: "divider",
+                          mr: 1,
+                        }}
                         onClick={() => handlePreview(file)}
                       >
                         <VisibilityIcon fontSize="small" />
@@ -251,49 +295,100 @@ export default function LabTabs({ comments = [], request }) {
             </Grid>
           )}
         </TabPanel>
-        <TabPanel value="3" sx={{ p: 3 }}>
+        <TabPanel value="4" sx={{ p: 3 }}>
           <Box sx={{ maxWidth: "600px", mx: "auto" }}>
-            <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, color: "text.primary" }}>
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: 700, mb: 3, color: "text.primary" }}
+            >
               Ticket Attributes
             </Typography>
             <Stack spacing={3}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Avatar sx={{ bgcolor: "action.hover", color: "text.primary" }}><HelpOutlineIcon fontSize="small" /></Avatar>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <Avatar sx={{ bgcolor: "action.hover", color: "text.primary" }}>
+                  <HelpOutlineIcon fontSize="small" />
+                </Avatar>
                 <Box>
-                  <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700 }}>TICKET TYPE</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>
-                    {request?.id?.startsWith("INC") ? "Incident (Break/Fix)" : "Service Catalog Item"}
+                  <Typography
+                    variant="caption"
+                    sx={{ color: "text.secondary", fontWeight: 700 }}
+                  >
+                    TICKET TYPE
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{ fontWeight: 600, color: "text.primary" }}
+                  >
+                    {request?.id?.startsWith("INC")
+                      ? "Incident (Break/Fix)"
+                      : "Service Catalog Item"}
                   </Typography>
                 </Box>
               </Box>
 
               <Divider />
 
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Avatar sx={{ bgcolor: "action.hover", color: "text.primary" }}><PersonOutlineIcon fontSize="small" /></Avatar>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <Avatar sx={{ bgcolor: "action.hover", color: "text.primary" }}>
+                  <PersonOutlineIcon fontSize="small" />
+                </Avatar>
                 <Box>
-                  <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700 }}>ASSIGNED GROUP / ASSIGNEE</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>{request?.assignee || "Triage Queue"}</Typography>
+                  <Typography
+                    variant="caption"
+                    sx={{ color: "text.secondary", fontWeight: 700 }}
+                  >
+                    ASSIGNED GROUP / ASSIGNEE
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{ fontWeight: 600, color: "text.primary" }}
+                  >
+                    {request?.assignee || "Triage Queue"}
+                  </Typography>
                 </Box>
               </Box>
 
               <Divider />
 
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Avatar sx={{ bgcolor: "action.hover", color: "text.primary" }}><CategoryIcon fontSize="small" /></Avatar>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <Avatar sx={{ bgcolor: "action.hover", color: "text.primary" }}>
+                  <CategoryIcon fontSize="small" />
+                </Avatar>
                 <Box>
-                  <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700 }}>CATEGORY</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>{request?.category || "General Support"}</Typography>
+                  <Typography
+                    variant="caption"
+                    sx={{ color: "text.secondary", fontWeight: 700 }}
+                  >
+                    CATEGORY
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{ fontWeight: 600, color: "text.primary" }}
+                  >
+                    {request?.category || "General Support"}
+                  </Typography>
                 </Box>
               </Box>
 
               <Divider />
 
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Avatar sx={{ bgcolor: "action.hover", color: "text.primary" }}><AccessTimeIcon fontSize="small" /></Avatar>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <Avatar sx={{ bgcolor: "action.hover", color: "text.primary" }}>
+                  <AccessTimeIcon fontSize="small" />
+                </Avatar>
                 <Box>
-                  <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700 }}>CREATED / UPDATED</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>{request?.created} • Updated {request?.updated}</Typography>
+                  <Typography
+                    variant="caption"
+                    sx={{ color: "text.secondary", fontWeight: 700 }}
+                  >
+                    CREATED / UPDATED
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{ fontWeight: 600, color: "text.primary" }}
+                  >
+                    {request?.created} • Updated {request?.updated}
+                  </Typography>
                 </Box>
               </Box>
 
@@ -301,31 +396,67 @@ export default function LabTabs({ comments = [], request }) {
 
               <Grid container spacing={2}>
                 <Grid item xs={6}>
-                  <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700 }}>IMPACT</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>{request?.impact || "Medium"}</Typography>
+                  <Typography
+                    variant="caption"
+                    sx={{ color: "text.secondary", fontWeight: 700 }}
+                  >
+                    IMPACT
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{ fontWeight: 600, color: "text.primary" }}
+                  >
+                    {request?.impact || "Medium"}
+                  </Typography>
                 </Grid>
                 <Grid item xs={6}>
-                  <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700 }}>URGENCY</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>{request?.urgency || "Medium"}</Typography>
+                  <Typography
+                    variant="caption"
+                    sx={{ color: "text.secondary", fontWeight: 700 }}
+                  >
+                    URGENCY
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{ fontWeight: 600, color: "text.primary" }}
+                  >
+                    {request?.urgency || "Medium"}
+                  </Typography>
                 </Grid>
               </Grid>
 
               <Divider />
 
               <Box>
-                <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700 }}>SERVICE WORKSPACE / DEPT</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>{request?.department || "Enterprise Services"}</Typography>
+                <Typography
+                  variant="caption"
+                  sx={{ color: "text.secondary", fontWeight: 700 }}
+                >
+                  SERVICE WORKSPACE / DEPT
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{ fontWeight: 600, color: "text.primary" }}
+                >
+                  {request?.department || "Enterprise Services"}
+                </Typography>
               </Box>
             </Stack>
           </Box>
         </TabPanel>
-        <TabPanel value="4" sx={{ p: 3 }}>
+        <TabPanel value="5" sx={{ p: 3 }}>
           <Box sx={{ maxWidth: "600px", mx: "auto" }}>
-            <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, color: "text.primary" }}>
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: 700, mb: 3, color: "text.primary" }}
+            >
               Ticket View History
             </Typography>
             {ticketViews.length === 0 ? (
-              <Typography variant="body2" sx={{ color: "text.secondary", fontStyle: "italic" }}>
+              <Typography
+                variant="body2"
+                sx={{ color: "text.secondary", fontStyle: "italic" }}
+              >
                 No views recorded yet.
               </Typography>
             ) : (
@@ -334,24 +465,38 @@ export default function LabTabs({ comments = [], request }) {
                   <React.Fragment key={idx}>
                     <ListItem sx={{ px: 0, py: 1.5 }}>
                       <ListItemAvatar>
-                        <Avatar sx={{ bgcolor: "secondary.main", color: "#ffffff", fontWeight: "bold" }}>
+                        <Avatar
+                          sx={{
+                            bgcolor: "secondary.main",
+                            color: "#ffffff",
+                            fontWeight: "bold",
+                          }}
+                        >
                           {view.userName.charAt(0)}
                         </Avatar>
                       </ListItemAvatar>
                       <ListItemText
                         primary={
-                          <Typography variant="subtitle2" sx={{ fontWeight: "bold", color: "text.primary" }}>
+                          <Typography
+                            variant="subtitle2"
+                            sx={{ fontWeight: "bold", color: "text.primary" }}
+                          >
                             {view.userName}
                           </Typography>
                         }
                         secondary={
-                          <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                          <Typography
+                            variant="caption"
+                            sx={{ color: "text.secondary" }}
+                          >
                             {view.role} • Viewed {view.timeAgo}
                           </Typography>
                         }
                       />
                     </ListItem>
-                    {idx < ticketViews.length - 1 && <Divider variant="inset" component="li" />}
+                    {idx < ticketViews.length - 1 && (
+                      <Divider variant="inset" component="li" />
+                    )}
                   </React.Fragment>
                 ))}
               </List>
@@ -367,10 +512,17 @@ export default function LabTabs({ comments = [], request }) {
         fullWidth
         maxWidth="md"
         PaperProps={{
-          sx: { borderRadius: "20px", backgroundImage: "none" }
+          sx: { borderRadius: "20px", backgroundImage: "none" },
         }}
       >
-        <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", p: 3 }}>
+        <DialogTitle
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            p: 3,
+          }}
+        >
           <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
             {previewFile && getFileIcon(previewFile.type)}
             <Box>
@@ -383,9 +535,22 @@ export default function LabTabs({ comments = [], request }) {
             </Box>
           </Box>
 
-          <Box sx={{ display: "flex", gap: 1.5, ml: "auto", mr: 2, alignItems: "center" }}>
+          <Box
+            sx={{
+              display: "flex",
+              gap: 1.5,
+              ml: "auto",
+              mr: 2,
+              alignItems: "center",
+            }}
+          >
             <Chip
-              icon={<VisibilityIcon fontSize="small" sx={{ color: "text.secondary" }} />}
+              icon={
+                <VisibilityIcon
+                  fontSize="small"
+                  sx={{ color: "text.secondary" }}
+                />
+              }
               label={`${fileStats.previews.length}`}
               onClick={handlePreviewStatsClick}
               variant="outlined"
@@ -399,12 +564,17 @@ export default function LabTabs({ comments = [], request }) {
                 "& .MuiChip-icon": { ml: 0.5 },
                 "&:hover": {
                   bgcolor: "action.hover",
-                  borderColor: "secondary.main"
-                }
+                  borderColor: "secondary.main",
+                },
               }}
             />
             <Chip
-              icon={<DownloadIcon fontSize="small" sx={{ color: "text.secondary" }} />}
+              icon={
+                <DownloadIcon
+                  fontSize="small"
+                  sx={{ color: "text.secondary" }}
+                />
+              }
               label={`${fileStats.downloads.length}`}
               onClick={handleDownloadStatsClick}
               variant="outlined"
@@ -418,8 +588,8 @@ export default function LabTabs({ comments = [], request }) {
                 "& .MuiChip-icon": { ml: 0.5 },
                 "&:hover": {
                   bgcolor: "action.hover",
-                  borderColor: "primary.main"
-                }
+                  borderColor: "primary.main",
+                },
               }}
             />
           </Box>
@@ -431,14 +601,10 @@ export default function LabTabs({ comments = [], request }) {
         <Divider />
         <DialogContent sx={{ p: 4, bgcolor: "background.default" }}>
           {/* TXT Preview */}
-          {previewFile?.type === "txt" && (
-            <TxtPreview file={previewFile} />
-          )}
+          {previewFile?.type === "txt" && <TxtPreview file={previewFile} />}
 
           {/* PDF Preview */}
-          {previewFile?.type === "pdf" && (
-            <PdfPreview file={previewFile} />
-          )}
+          {previewFile?.type === "pdf" && <PdfPreview file={previewFile} />}
 
           {/* DOCX / DOC Word Document Preview */}
           {(previewFile?.type === "docx" || previewFile?.type === "doc") && (
@@ -461,9 +627,7 @@ export default function LabTabs({ comments = [], request }) {
           )}
 
           {/* MP4 Video Preview */}
-          {previewFile?.type === "mp4" && (
-            <Mp4Preview file={previewFile} />
-          )}
+          {previewFile?.type === "mp4" && <Mp4Preview file={previewFile} />}
 
           {/* EML / MSG Email Preview */}
           {(previewFile?.type === "eml" || previewFile?.type === "msg") && (
@@ -471,7 +635,11 @@ export default function LabTabs({ comments = [], request }) {
           )}
 
           {/* PNG, JPG, JPEG, BMP, TIFF Image Preview */}
-          {(previewFile?.type === "png" || previewFile?.type === "jpg" || previewFile?.type === "jpeg" || previewFile?.type === "bmp" || previewFile?.type === "tiff") && (
+          {(previewFile?.type === "png" ||
+            previewFile?.type === "jpg" ||
+            previewFile?.type === "jpeg" ||
+            previewFile?.type === "bmp" ||
+            previewFile?.type === "tiff") && (
             <ImagePreview file={previewFile} />
           )}
         </DialogContent>
@@ -509,31 +677,64 @@ export default function LabTabs({ comments = [], request }) {
           horizontal: "center",
         }}
         PaperProps={{
-          sx: { p: 2, width: 280, borderRadius: 3, boxShadow: "0 8px 30px rgba(0,0,0,0.15)", border: "1px solid", borderColor: "divider" }
+          sx: {
+            p: 2,
+            width: 280,
+            borderRadius: 3,
+            boxShadow: "0 8px 30px rgba(0,0,0,0.15)",
+            border: "1px solid",
+            borderColor: "divider",
+          },
         }}
       >
-        <Typography variant="subtitle2" sx={{ fontWeight: "bold", mb: 1, color: "text.primary" }}>
+        <Typography
+          variant="subtitle2"
+          sx={{ fontWeight: "bold", mb: 1, color: "text.primary" }}
+        >
           Viewed by
         </Typography>
         <Divider sx={{ mb: 1 }} />
         {fileStats.previews.length === 0 ? (
-          <Typography variant="body2" sx={{ color: "text.secondary", fontStyle: "italic" }}>
+          <Typography
+            variant="body2"
+            sx={{ color: "text.secondary", fontStyle: "italic" }}
+          >
             No views recorded yet
           </Typography>
         ) : (
-          <List size="small" disablePadding sx={{ maxHeight: 200, overflowY: "auto" }}>
+          <List
+            size="small"
+            disablePadding
+            sx={{ maxHeight: 200, overflowY: "auto" }}
+          >
             {fileStats.previews.map((action, idx) => (
               <ListItem key={idx} disablePadding sx={{ py: 0.75 }}>
                 <ListItemAvatar sx={{ minWidth: 36 }}>
-                  <Avatar sx={{ width: 24, height: 24, fontSize: "0.75rem", bgcolor: "secondary.main", color: "#ffffff", fontWeight: "bold" }}>
+                  <Avatar
+                    sx={{
+                      width: 24,
+                      height: 24,
+                      fontSize: "0.75rem",
+                      bgcolor: "secondary.main",
+                      color: "#ffffff",
+                      fontWeight: "bold",
+                    }}
+                  >
                     {action.userName.charAt(0)}
                   </Avatar>
                 </ListItemAvatar>
                 <ListItemText
                   primary={action.userName}
                   secondary={`${action.role} • ${action.timeAgo}`}
-                  primaryTypographyProps={{ variant: "body2", fontWeight: 600, color: "text.primary" }}
-                  secondaryTypographyProps={{ variant: "caption", color: "text.secondary" }}
+                  primaryTypographyProps={{
+                    variant: "body2",
+                    fontWeight: 600,
+                    color: "text.primary",
+                  }}
+                  secondaryTypographyProps={{
+                    variant: "caption",
+                    color: "text.secondary",
+                  }}
                 />
               </ListItem>
             ))}
@@ -554,31 +755,64 @@ export default function LabTabs({ comments = [], request }) {
           horizontal: "center",
         }}
         PaperProps={{
-          sx: { p: 2, width: 280, borderRadius: 3, boxShadow: "0 8px 30px rgba(0,0,0,0.15)", border: "1px solid", borderColor: "divider" }
+          sx: {
+            p: 2,
+            width: 280,
+            borderRadius: 3,
+            boxShadow: "0 8px 30px rgba(0,0,0,0.15)",
+            border: "1px solid",
+            borderColor: "divider",
+          },
         }}
       >
-        <Typography variant="subtitle2" sx={{ fontWeight: "bold", mb: 1, color: "text.primary" }}>
+        <Typography
+          variant="subtitle2"
+          sx={{ fontWeight: "bold", mb: 1, color: "text.primary" }}
+        >
           Downloaded by
         </Typography>
         <Divider sx={{ mb: 1 }} />
         {fileStats.downloads.length === 0 ? (
-          <Typography variant="body2" sx={{ color: "text.secondary", fontStyle: "italic" }}>
+          <Typography
+            variant="body2"
+            sx={{ color: "text.secondary", fontStyle: "italic" }}
+          >
             No downloads recorded yet
           </Typography>
         ) : (
-          <List size="small" disablePadding sx={{ maxHeight: 200, overflowY: "auto" }}>
+          <List
+            size="small"
+            disablePadding
+            sx={{ maxHeight: 200, overflowY: "auto" }}
+          >
             {fileStats.downloads.map((action, idx) => (
               <ListItem key={idx} disablePadding sx={{ py: 0.75 }}>
                 <ListItemAvatar sx={{ minWidth: 36 }}>
-                  <Avatar sx={{ width: 24, height: 24, fontSize: "0.75rem", bgcolor: "primary.main", color: "#ffffff", fontWeight: "bold" }}>
+                  <Avatar
+                    sx={{
+                      width: 24,
+                      height: 24,
+                      fontSize: "0.75rem",
+                      bgcolor: "primary.main",
+                      color: "#ffffff",
+                      fontWeight: "bold",
+                    }}
+                  >
                     {action.userName.charAt(0)}
                   </Avatar>
                 </ListItemAvatar>
                 <ListItemText
                   primary={action.userName}
                   secondary={`${action.role} • ${action.timeAgo}`}
-                  primaryTypographyProps={{ variant: "body2", fontWeight: 600, color: "text.primary" }}
-                  secondaryTypographyProps={{ variant: "caption", color: "text.secondary" }}
+                  primaryTypographyProps={{
+                    variant: "body2",
+                    fontWeight: 600,
+                    color: "text.primary",
+                  }}
+                  secondaryTypographyProps={{
+                    variant: "caption",
+                    color: "text.secondary",
+                  }}
                 />
               </ListItem>
             ))}

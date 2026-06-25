@@ -8,22 +8,17 @@ import {
   Chip,
   Grid,
   Card,
-  CardContent,
-  Avatar,
-  Divider,
   Stack,
-  TextField,
 } from "@mui/material";
 import LabTabs from "../../../components/LabTabs";
 import { useParams, useNavigate, Link as RouterLink } from "react-router-dom";
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
-import SendIcon from '@mui/icons-material/Send';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import PersonOutlineIcon from '@mui/icons-material/PersonOutlined';
-import CategoryIcon from '@mui/icons-material/Category';
-import HelpOutlineIcon from '@mui/icons-material/Help';
-import { getStoredTickets, getStoredTicketsAsync, setStoredTickets } from "../../../utils/rbacData";
+import {
+  getStoredTickets,
+  getStoredTicketsAsync,
+  setStoredTickets,
+} from "../../../utils/rbacData";
 import { recordTicketView } from "../../../utils/fileActionTracker";
 import { useAuth } from "../../../context/AuthContext";
 
@@ -68,7 +63,6 @@ function RequestDetails() {
   const { user: authUser } = useAuth();
 
   const [tickets, setTickets] = useState(() => getStoredTickets());
-  const [commentText, setCommentText] = useState("");
 
   useEffect(() => {
     if (tickets.length === 0) {
@@ -84,7 +78,7 @@ function RequestDetails() {
     }
   }, [requestId, authUser]);
 
-  const request = tickets.find(r => r.id === requestId) || {
+  const request = tickets.find((r) => r.id === requestId) || {
     id: requestId || "REQ0000000",
     title: "Loading Ticket Details...",
     status: "Open",
@@ -94,7 +88,7 @@ function RequestDetails() {
     comments: [],
     assignee: "Loading...",
     category: "General Support",
-    department: "Enterprise Services"
+    department: "Enterprise Services",
   };
   const statusColors = getStatusColor(request.status);
   const priorityColors = getPriorityColor(request.priority);
@@ -104,48 +98,33 @@ function RequestDetails() {
     const namePart = authUser.email.split("@")[0];
     return namePart
       .split(/[._-]/)
-      .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
       .join(" ");
   }, [authUser]);
-
-  const handlePostComment = () => {
-    if (!commentText.trim()) return;
-
-    const newComment = {
-      id: (request.comments?.length || 0) + 1,
-      author: displayName,
-      avatar: displayName.charAt(0),
-      time: "Just now",
-      text: commentText,
-      attachments: []
-    };
-
-    const updatedRequest = {
-      ...request,
-      comments: [newComment, ...(request.comments || [])],
-      updated: "Just now"
-    };
-
-    const updatedTickets = tickets.map(t => t.id === request.id ? updatedRequest : t);
-    setTickets(updatedTickets);
-    setStoredTickets(updatedTickets);
-    setCommentText("");
-  };
 
   const handleResolveTicket = () => {
     const updatedRequest = {
       ...request,
       status: "Resolved",
-      updated: "Just now"
+      updated: "Just now",
     };
 
-    const updatedTickets = tickets.map(t => t.id === request.id ? updatedRequest : t);
+    const updatedTickets = tickets.map((t) =>
+      t.id === request.id ? updatedRequest : t,
+    );
     setTickets(updatedTickets);
     setStoredTickets(updatedTickets);
   };
 
   return (
-    <Box sx={{ width: "100%", minHeight: "100vh", backgroundColor: "background.default", p: { xs: 2, md: 4 } }}>
+    <Box
+      sx={{
+        width: "100%",
+        minHeight: "100vh",
+        backgroundColor: "background.default",
+        p: { xs: 2, md: 4 },
+      }}
+    >
       {/* Breadcrumbs & Header */}
       <Box sx={{ mb: 4 }}>
         <Breadcrumbs
@@ -153,15 +132,41 @@ function RequestDetails() {
           aria-label="breadcrumb"
           sx={{ mb: 2 }}
         >
-          <Link underline="hover" color="inherit" component={RouterLink} to="/">Home</Link>
-          <Link underline="hover" color="inherit" component={RouterLink} to="/requests">My Requests</Link>
-          <Typography color="text.primary" sx={{ fontWeight: 500 }}>{request.id}</Typography>
+          <Link underline="hover" color="inherit" component={RouterLink} to="/">
+            Home
+          </Link>
+          <Link
+            underline="hover"
+            color="inherit"
+            component={RouterLink}
+            to="/requests"
+          >
+            My Requests
+          </Link>
+          <Typography color="text.primary" sx={{ fontWeight: 500 }}>
+            {request.id}
+          </Typography>
         </Breadcrumbs>
 
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 2 }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            flexWrap: "wrap",
+            gap: 2,
+          }}
+        >
           <Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-              <Typography variant="h4" sx={{ fontWeight: 800, color: "text.primary", letterSpacing: "-0.02em" }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
+              <Typography
+                variant="h4"
+                sx={{
+                  fontWeight: 800,
+                  color: "text.primary",
+                  letterSpacing: "-0.02em",
+                }}
+              >
                 {request.id}
               </Typography>
               <Chip
@@ -171,9 +176,9 @@ function RequestDetails() {
                   color: statusColors.text,
                   border: statusColors.border,
                   fontWeight: 700,
-                  fontSize: '0.75rem',
-                  borderRadius: '4px',
-                  px: 0.5
+                  fontSize: "0.75rem",
+                  borderRadius: "4px",
+                  px: 0.5,
                 }}
               />
               <Chip
@@ -182,9 +187,9 @@ function RequestDetails() {
                   backgroundColor: priorityColors.bg,
                   color: priorityColors.text,
                   fontWeight: 700,
-                  fontSize: '0.75rem',
-                  borderRadius: '4px',
-                  px: 0.5
+                  fontSize: "0.75rem",
+                  borderRadius: "4px",
+                  px: 0.5,
                 }}
               />
               <Chip
@@ -193,9 +198,9 @@ function RequestDetails() {
                   backgroundColor: "primary",
                   color: "black",
                   fontWeight: 700,
-                  fontSize: '0.75rem',
-                  borderRadius: '4px',
-                  px: 0.5
+                  fontSize: "0.75rem",
+                  borderRadius: "4px",
+                  px: 0.5,
                 }}
               />
               <Chip
@@ -204,22 +209,43 @@ function RequestDetails() {
                   backgroundColor: "primary",
                   color: "black",
                   fontWeight: 700,
-                  fontSize: '0.75rem',
-                  borderRadius: '4px',
-                  px: 0.5
+                  fontSize: "0.75rem",
+                  borderRadius: "4px",
+                  px: 0.5,
                 }}
               />
             </Box>
-            <Typography variant="h6" sx={{ color: "text.secondary", fontWeight: 500, maxWidth: "800px" }}>
+            <Typography
+              variant="h6"
+              sx={{
+                color: "text.secondary",
+                fontWeight: 500,
+                maxWidth: "800px",
+              }}
+            >
               {request.title}
             </Typography>
           </Box>
           <Stack direction="row" spacing={2}>
-            <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate('/requests')} sx={{ borderRadius: "8px" }}>
+            <Button
+              variant="outlined"
+              startIcon={<ArrowBackIcon />}
+              onClick={() => navigate("/requests")}
+              sx={{ borderRadius: "8px" }}
+            >
               Back to List
             </Button>
             {request.status !== "Closed" && request.status !== "Resolved" && (
-              <Button variant="contained" color="secondary" onClick={handleResolveTicket} sx={{ color: "#ffffff", fontWeight: "bold", borderRadius: "8px" }}>
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={handleResolveTicket}
+                sx={{
+                  color: "#ffffff",
+                  fontWeight: "bold",
+                  borderRadius: "8px",
+                }}
+              >
                 Resolve Ticket
               </Button>
             )}
@@ -230,47 +256,19 @@ function RequestDetails() {
       {/* Layout Split */}
       <Grid container spacing={4}>
         <Grid item xs={12}>
-          {/* Post Comment Section */}
-          <Card variant="outlined" sx={{ borderRadius: 3, mb: 3, border: "1px solid", borderColor: "divider", bgcolor: "background.paper", backgroundImage: "none" }}>
-            <CardContent sx={{ p: 2.5 }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: "bold", mb: 1.5, color: "text.primary" }}>
-                Work Notes / Activity Stream
-              </Typography>
-              <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
-                <Avatar sx={{ bgcolor: "primary.main" }}>{displayName.charAt(0)}</Avatar>
-                <Box sx={{ flexGrow: 1 }}>
-                  <TextField
-                    fullWidth
-                    multiline
-                    rows={3}
-                    placeholder="Type an update or work note for triagers..."
-                    value={commentText}
-                    onChange={(e) => setCommentText(e.target.value)}
-                    sx={{
-                      mb: 2,
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: "10px",
-                      }
-                    }}
-                  />
-                  <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                    <Button
-                      variant="contained"
-                      onClick={handlePostComment}
-                      endIcon={<SendIcon />}
-                      disabled={!commentText.trim()}
-                      sx={{ borderRadius: "8px", fontWeight: "bold", textTransform: "none" }}
-                    >
-                      Post Update
-                    </Button>
-                  </Box>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-
           {/* Activity Log & Attachments */}
-          <Card variant="outlined" sx={{ borderRadius: 3, mb: 4, border: "1px solid", borderColor: "divider", overflow: 'visible', bgcolor: "background.paper", backgroundImage: "none" }}>
+          <Card
+            variant="outlined"
+            sx={{
+              borderRadius: 3,
+              mb: 4,
+              border: "1px solid",
+              borderColor: "divider",
+              overflow: "visible",
+              bgcolor: "background.paper",
+              backgroundImage: "none",
+            }}
+          >
             <Box sx={{ p: 1 }}>
               <LabTabs comments={request.comments || []} request={request} />
             </Box>
