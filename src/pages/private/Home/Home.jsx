@@ -13,13 +13,11 @@ import {
   ListItemIcon,
   Avatar,
   InputAdornment,
-  Menu,
   MenuItem,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  Button,
   FormControl,
   InputLabel,
   Select,
@@ -27,6 +25,7 @@ import {
   Alert,
   Divider,
 } from "@mui/material";
+import Button from "@mui/material/Button";
 import { useNavigate } from "react-router-dom";
 import SearchIcon from "@mui/icons-material/Search";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
@@ -60,7 +59,6 @@ export default function Home() {
   // Search state
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
-  const [searchAnchor, setSearchAnchor] = useState(null);
 
   // Dialog states
   const [openIncident, setOpenIncident] = useState(false);
@@ -129,16 +127,14 @@ export default function Home() {
           t.title.toLowerCase().includes(value.toLowerCase()),
       );
       setSearchResults(results);
-      setSearchAnchor(e.currentTarget);
     } else {
       setSearchResults([]);
-      setSearchAnchor(null);
     }
   };
 
   const handleResultClick = (id) => {
     navigate(`/requests/${id}`);
-    setSearchAnchor(null);
+    setSearchResults([]);
   };
 
   const handleSearchKeyPress = (e) => {
@@ -348,65 +344,83 @@ export default function Home() {
                 height: "44px",
                 "& fieldset": { border: "none" },
               },
+              "& input:-webkit-autofill": {
+                WebkitBoxShadow: "0 0 0 100px #fff inset",
+                WebkitTextFillColor: "#1F2D2E",
+                height: "20px",
+                py: 0,
+              },
             }}
           />
 
-          {/* Search results Menu */}
-          <Menu
-            anchorEl={searchAnchor}
-            open={Boolean(searchAnchor) && searchResults.length > 0}
-            onClose={() => setSearchAnchor(null)}
-            autoFocus={false}
-            disableAutoFocusItem
-            PaperProps={{
-              sx: {
-                width: searchAnchor ? searchAnchor.clientWidth : "auto",
+          {/* Search results */}
+          {searchResults.length > 0 && (
+            <Card
+              sx={{
+                position: "absolute",
+                top: "100%",
+                left: 0,
+                right: 0,
                 mt: 1,
                 borderRadius: "12px",
                 boxShadow: "0 12px 30px rgba(0,0,0,0.12)",
                 maxHeight: "280px",
-                backgroundImage: "none",
-              },
-            }}
-          >
-            <Box
-              sx={{
-                px: 2,
-                py: 1,
-                borderBottom: "1px solid",
-                borderColor: "divider",
+                overflowY: "auto",
+                bgcolor: "background.paper",
+                zIndex: 1,
+                "&::-webkit-scrollbar": {
+                  width: "8px",
+                },
+                "&::-webkit-scrollbar-track": {
+                  backgroundColor: "transparent",
+                  borderRadius: "0 12px 12px 0",
+                },
+                "&::-webkit-scrollbar-thumb": {
+                  backgroundColor: "#ccc",
+                  borderRadius: "4px",
+                  border: "2px solid transparent",
+                },
               }}
             >
-              <Typography
-                variant="caption"
-                sx={{ fontWeight: "bold", color: "text.secondary" }}
-              >
-                MATCHING TICKETS
-              </Typography>
-            </Box>
-            {searchResults.map((t) => (
-              <MenuItem
-                key={t.id}
-                onClick={() => handleResultClick(t.id)}
+              <Box
                 sx={{
-                  py: 1.5,
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-start",
+                  px: 2,
+                  py: 1,
+                  borderBottom: "1px solid",
+                  borderColor: "divider",
                 }}
               >
                 <Typography
-                  variant="body2"
-                  sx={{ fontWeight: "bold", color: "primary.main" }}
+                  variant="caption"
+                  sx={{ fontWeight: "bold", color: "text.secondary" }}
                 >
-                  {t.id}
+                  MATCHING REQUESTS
                 </Typography>
-                <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                  {t.title}
-                </Typography>
-              </MenuItem>
-            ))}
-          </Menu>
+              </Box>
+              <List disablePadding>
+                {searchResults.map((t) => (
+                  <ListItem
+                    button={true}
+                    key={t.id}
+                    onClick={() => handleResultClick(t.id)}
+                  >
+                    <ListItemText
+                      primary={t.id}
+                      secondary={t.title}
+                      primaryTypographyProps={{
+                        variant: "body2",
+                        sx: { fontWeight: "bold", color: "text.primary" },
+                      }}
+                      secondaryTypographyProps={{
+                        variant: "caption",
+                        sx: { color: "text.secondary" },
+                      }}
+                    />
+                  </ListItem>
+                ))}
+              </List>
+            </Card>
+          )}
         </Box>
       </Box>
 
