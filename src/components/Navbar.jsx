@@ -130,7 +130,7 @@ export default function Navbar() {
           </div>
 
           <div id="navbar-links">
-            <Box sx={{ marginRight: 4 }}>
+            <Box>
               <ul
                 style={{
                   display: "flex",
@@ -147,7 +147,7 @@ export default function Navbar() {
                     Service Catalog
                   </NavLink>
                 </li>
-                <li>
+                {/* <li>
                   <Box
                     onClick={() => setKbOpen(true)}
                     style={{
@@ -159,7 +159,7 @@ export default function Navbar() {
                   >
                     Knowledge Base
                   </Box>
-                </li>
+                </li> */}
                 <li>
                   <NavLink to="/requests" style={navLinkStyle}>
                     My Requests
