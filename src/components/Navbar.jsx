@@ -134,7 +134,7 @@ export default function Navbar() {
               <ul
                 style={{
                   display: "flex",
-                  gap: 24,
+                  gap: 5,
                   listStyle: "none",
                   padding: 0,
                   margin: 0,
@@ -161,8 +161,18 @@ export default function Navbar() {
                   </Box>
                 </li> */}
                 <li>
+                  <NavLink to="/tasks" style={navLinkStyle}>
+                    Tasks
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/incidents" style={navLinkStyle}>
+                    Incidents
+                  </NavLink>
+                </li>
+                <li>
                   <NavLink to="/requests" style={navLinkStyle}>
-                    My Requests
+                    Service Requests
                   </NavLink>
                 </li>
                 <li>

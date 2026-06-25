@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Box, Typography } from "@mui/material";
 import App from "./App";
@@ -37,7 +37,23 @@ const router = createBrowserRouter([
         element: <RequestList />,
       },
       {
+        path: "tasks",
+        element: <RequestList />,
+      },
+      {
+        path: "incidents",
+        element: <RequestList />,
+      },
+      {
         path: "requests/:requestId",
+        element: <RequestDetails />,
+      },
+      {
+        path: "tasks/:taskId",
+        element: <RequestDetails />,
+      },
+      {
+        path: "incidents/:incidentId",
         element: <RequestDetails />,
       },
       {
@@ -93,13 +109,19 @@ function Index() {
           background: "linear-gradient(135deg, #1B3D41 0%, #0E2325 100%)",
           color: "#ffffff",
           fontFamily: "Outfit, Inter, sans-serif",
-          gap: 2
+          gap: 2,
         }}
       >
-        <Typography variant="h4" sx={{ fontWeight: 300, letterSpacing: "-0.5px" }}>
+        <Typography
+          variant="h4"
+          sx={{ fontWeight: 300, letterSpacing: "-0.5px" }}
+        >
           Cargilll
         </Typography>
-        <Typography variant="body2" sx={{ color: "rgba(255, 255, 255, 0.6)", fontWeight: 500 }}>
+        <Typography
+          variant="body2"
+          sx={{ color: "rgba(255, 255, 255, 0.6)", fontWeight: 500 }}
+        >
           Initializing Enterprise Service Portal...
         </Typography>
       </Box>
