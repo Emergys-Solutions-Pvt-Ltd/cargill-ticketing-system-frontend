@@ -21,10 +21,20 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import BookIcon from "@mui/icons-material/Book";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { useThemeContext } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 import cargillLogo from "../assets/cargill-logo.png";
+
+const navLinkStyle = ({ isActive }) => ({
+  color: "#fff",
+  textDecoration: "none",
+  padding: "0.5rem 1rem",
+  borderRadius: "20px",
+  fontWeight: 500,
+  transition: "all 0.2s ease",
+  backgroundColor: isActive ? "#0B8F4D" : "transparent",
+});
 
 const kbArticles = [
   {
@@ -133,9 +143,9 @@ export default function Navbar() {
                 }}
               >
                 <li>
-                  <Link to="/" style={linkStyle}>
+                  <NavLink to="/" style={navLinkStyle}>
                     Service Catalog
-                  </Link>
+                  </NavLink>
                 </li>
                 <li>
                   <Box
@@ -151,14 +161,14 @@ export default function Navbar() {
                   </Box>
                 </li>
                 <li>
-                  <Link to="/requests" style={linkStyle}>
+                  <NavLink to="/requests" style={navLinkStyle}>
                     My Requests
-                  </Link>
+                  </NavLink>
                 </li>
                 <li>
-                  <Link to="/uam" style={linkStyle}>
+                  <NavLink to="/uam" style={navLinkStyle}>
                     Access Control
-                  </Link>
+                  </NavLink>
                 </li>
               </ul>
             </Box>
