@@ -30,23 +30,27 @@ const kbArticles = [
   {
     id: "KB0010045",
     title: "How to Request Vulnerability Scan on QA Environment",
-    content: "To trigger a vulnerability scan, navigate to the Get Help widget on the Home page, select the 'Security Assessment' category, specify your target QA environment url, and attach any config details. The security team will triage within 24 hours."
+    content:
+      "To trigger a vulnerability scan, navigate to the Get Help widget on the Home page, select the 'Security Assessment' category, specify your target QA environment url, and attach any config details. The security team will triage within 24 hours.",
   },
   {
     id: "KB0010046",
     title: "Database Access Control Policy & Level Privileges",
-    content: "Organization Admin (Level 1) can configure permissions, create custom roles, and add new users. Department Admins (Level 2) can manage settings and view analytics. Standard Users (Level 3) can raise support requests and post comments."
+    content:
+      "Organization Admin (Level 1) can configure permissions, create custom roles, and add new users. Department Admins (Level 2) can manage settings and view analytics. Standard Users (Level 3) can raise support requests and post comments.",
   },
   {
     id: "KB0010047",
     title: "Requesting Laptop / Hardware Replacements",
-    content: "Hardware requests can be submitted via the 'Request Items' widget on the Service Portal home screen. Select the 'Hardware' category, fill in the specifications of the machine (e.g. RAM, storage, processor), and hit submit."
+    content:
+      "Hardware requests can be submitted via the 'Request Items' widget on the Service Portal home screen. Select the 'Hardware' category, fill in the specifications of the machine (e.g. RAM, storage, processor), and hit submit.",
   },
   {
     id: "KB0010048",
     title: "Cargill Service Portal Quick Authentication",
-    content: "The portal supports developer quick-login. You can use standard local profiles like 'admin', 'hr_admin', 'finance_admin', or 'user'. The password is identical to the username prefix."
-  }
+    content:
+      "The portal supports developer quick-login. You can use standard local profiles like 'admin', 'hr_admin', 'finance_admin', or 'user'. The password is identical to the username prefix.",
+  },
 ];
 
 export default function Navbar() {
@@ -79,39 +83,70 @@ export default function Navbar() {
           color: "#ffffff",
           borderBottom: "1px solid",
           borderColor: mode === "light" ? "#0e2325" : "rgba(255,255,255,0.08)",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
         }}
         elevation={0}
       >
-        <Toolbar sx={{ minHeight: "64px" }}>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1, display: "flex", alignItems: "center" }}>
-            <Link to="/" style={{ ...linkStyle, display: "flex", alignItems: "center", gap: "4px" }}>
-              <Box component="img" src={cargillLogo} alt="Cargill Logo" sx={{ height: 24, display: "block" }} />
-              <span style={{
-                fontSize: "0.75rem",
-                opacity: 0.8,
-                marginLeft: "10px",
-                borderLeft: "1px solid rgba(255,255,255,0.3)",
-                paddingLeft: "10px",
-                fontWeight: 600,
-                textTransform: "uppercase",
-                letterSpacing: "0.5px"
-              }}>
-                Portal
-              </span>
-            </Link>
-          </Typography>
+        <Toolbar
+          sx={{
+            minHeight: "64px",
+            display: "flex",
+            justifyContent: "space-between",
+          }}
+        >
+          <div id="navbar-logo">
+            <Typography
+              variant="h6"
+              component="div"
+              sx={{ flexGrow: 1, display: "flex", alignItems: "center" }}
+            >
+              <Link
+                to="/"
+                style={{
+                  ...linkStyle,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "4px",
+                }}
+              >
+                <Box
+                  component="img"
+                  src={cargillLogo}
+                  alt="Cargill Logo"
+                  sx={{ height: 24, display: "block" }}
+                />
+              </Link>
+            </Typography>
+          </div>
 
-          <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+          <div id="navbar-links">
             <Box sx={{ marginRight: 4 }}>
-              <ul style={{ display: "flex", gap: 24, listStyle: "none", padding: 0, margin: 0, fontWeight: 600, fontSize: "0.9rem" }}>
+              <ul
+                style={{
+                  display: "flex",
+                  gap: 24,
+                  listStyle: "none",
+                  padding: 0,
+                  margin: 0,
+                  fontWeight: 600,
+                  fontSize: "0.9rem",
+                }}
+              >
                 <li>
                   <Link to="/" style={linkStyle}>
                     Service Catalog
                   </Link>
                 </li>
                 <li>
-                  <Box onClick={() => setKbOpen(true)} style={{ ...linkStyle, display: "flex", alignItems: "center", gap: "4px" }}>
+                  <Box
+                    onClick={() => setKbOpen(true)}
+                    style={{
+                      ...linkStyle,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                    }}
+                  >
                     Knowledge Base
                   </Box>
                 </li>
@@ -127,37 +162,24 @@ export default function Navbar() {
                 </li>
               </ul>
             </Box>
+          </div>
 
+          <div
+            id="navbar-actions"
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
             <IconButton
               size="large"
               aria-label="toggle dark and light theme"
               onClick={toggleTheme}
               color="inherit"
-              sx={{ mr: 1 }}
             >
               {mode === "dark" ? <LightModeIcon /> : <DarkModeIcon />}
             </IconButton>
-
-            {user && (
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-end",
-                  mr: 1,
-                  cursor: "pointer",
-                  userSelect: "none"
-                }}
-                onClick={handleMenu}
-              >
-                <Typography variant="body2" sx={{ fontWeight: "bold", fontSize: "0.85rem", opacity: 0.9 }}>
-                  {user.email}
-                </Typography>
-                <Typography variant="caption" sx={{ fontSize: "0.7rem", opacity: 0.7, fontWeight: 600 }}>
-                  {user.role}
-                </Typography>
-              </Box>
-            )}
 
             <IconButton
               size="large"
@@ -169,6 +191,36 @@ export default function Navbar() {
             >
               <AccountCircle />
             </IconButton>
+
+            {user && (
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  mr: 1,
+                  cursor: "pointer",
+                  userSelect: "none",
+                }}
+                onClick={handleMenu}
+              >
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: "bold",
+                    fontSize: "0.85rem",
+                    opacity: 0.9,
+                  }}
+                >
+                  {user.email}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{ fontSize: "0.7rem", opacity: 0.7, fontWeight: 600 }}
+                >
+                  {user.role}
+                </Typography>
+              </Box>
+            )}
 
             <Menu
               id="menu-appbar"
@@ -191,16 +243,27 @@ export default function Navbar() {
                   borderRadius: "12px",
                   boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
                   padding: "4px 0",
-                  backgroundImage: "none"
-                }
+                  backgroundImage: "none",
+                },
               }}
             >
               {user && (
                 <Box sx={{ px: 2, py: 1.5, outline: "none" }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: "bold", color: "text.primary" }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{ fontWeight: "bold", color: "text.primary" }}
+                  >
                     Signed in as
                   </Typography>
-                  <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis" }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "text.secondary",
+                      fontWeight: 500,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
                     {user.email}
                   </Typography>
                   <Box sx={{ mt: 1 }}>
@@ -224,7 +287,12 @@ export default function Navbar() {
                   handleClose();
                   logout();
                 }}
-                sx={{ py: 1.25, color: "error.main", fontWeight: "bold", fontSize: "0.9rem" }}
+                sx={{
+                  py: 1.25,
+                  color: "error.main",
+                  fontWeight: "bold",
+                  fontSize: "0.9rem",
+                }}
               >
                 Logout
               </MenuItem>
@@ -236,14 +304,25 @@ export default function Navbar() {
       {/* Simulated Knowledge Base Dialog */}
       <Dialog
         open={kbOpen}
-        onClose={() => { setKbOpen(false); setSelectedArticle(null); }}
+        onClose={() => {
+          setKbOpen(false);
+          setSelectedArticle(null);
+        }}
         fullWidth
         maxWidth="sm"
         PaperProps={{
-          sx: { borderRadius: "20px", backgroundImage: "none" }
+          sx: { borderRadius: "20px", backgroundImage: "none" },
         }}
       >
-        <DialogTitle sx={{ fontWeight: "bold", display: "flex", alignItems: "center", gap: 1.5, pb: 1.5 }}>
+        <DialogTitle
+          sx={{
+            fontWeight: "bold",
+            display: "flex",
+            alignItems: "center",
+            gap: 1.5,
+            pb: 1.5,
+          }}
+        >
           <BookIcon sx={{ color: "secondary.main" }} />
           {selectedArticle ? "Knowledge Article" : "Knowledge Base Portal"}
         </DialogTitle>
@@ -259,19 +338,44 @@ export default function Navbar() {
               >
                 Back to Articles
               </Button>
-              <Typography variant="h6" sx={{ fontWeight: "bold", mb: 1.5, color: "text.primary" }}>
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: "bold", mb: 1.5, color: "text.primary" }}
+              >
                 {selectedArticle.title}
               </Typography>
-              <Typography variant="caption" sx={{ color: "text.secondary", display: "block", mb: 2, fontWeight: 600 }}>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "text.secondary",
+                  display: "block",
+                  mb: 2,
+                  fontWeight: 600,
+                }}
+              >
                 Article ID: {selectedArticle.id} • Views: 124 • Rating: ★★★★☆
               </Typography>
-              <Typography variant="body2" sx={{ color: "text.primary", lineHeight: 1.8, bgcolor: "action.hover", p: 2, borderRadius: 3, border: "1px solid", borderColor: "divider" }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.primary",
+                  lineHeight: 1.8,
+                  bgcolor: "action.hover",
+                  p: 2,
+                  borderRadius: 3,
+                  border: "1px solid",
+                  borderColor: "divider",
+                }}
+              >
                 {selectedArticle.content}
               </Typography>
             </Box>
           ) : (
             <Box>
-              <Typography variant="body2" sx={{ color: "text.secondary", mb: 3 }}>
+              <Typography
+                variant="body2"
+                sx={{ color: "text.secondary", mb: 3 }}
+              >
                 Search or browse active troubleshooting manuals and guides.
               </Typography>
               <List disablePadding>
@@ -286,15 +390,21 @@ export default function Navbar() {
                         transition: "all 0.2s",
                         "&:hover": {
                           bgcolor: "action.hover",
-                          borderColor: "primary.main"
-                        }
+                          borderColor: "primary.main",
+                        },
                       }}
                     >
                       <ListItemText
                         primary={art.title}
                         secondary={art.id}
-                        primaryTypographyProps={{ fontWeight: 600, fontSize: "0.9rem" }}
-                        secondaryTypographyProps={{ fontSize: "0.75rem", fontWeight: "bold" }}
+                        primaryTypographyProps={{
+                          fontWeight: 600,
+                          fontSize: "0.9rem",
+                        }}
+                        secondaryTypographyProps={{
+                          fontSize: "0.75rem",
+                          fontWeight: "bold",
+                        }}
                       />
                     </ListItemButton>
                   </ListItem>
@@ -305,7 +415,14 @@ export default function Navbar() {
         </DialogContent>
         <Divider />
         <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => { setKbOpen(false); setSelectedArticle(null); }} color="inherit" sx={{ fontWeight: "bold" }}>
+          <Button
+            onClick={() => {
+              setKbOpen(false);
+              setSelectedArticle(null);
+            }}
+            color="inherit"
+            sx={{ fontWeight: "bold" }}
+          >
             Close Portal
           </Button>
         </DialogActions>
@@ -313,4 +430,3 @@ export default function Navbar() {
     </Box>
   );
 }
-
