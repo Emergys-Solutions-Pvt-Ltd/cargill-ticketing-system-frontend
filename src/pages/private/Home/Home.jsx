@@ -433,7 +433,6 @@ export default function Home() {
             sx={{
               fontWeight: 700,
               fontSize: "1.1rem",
-              color: "#1F2937",
               mb: 0.25,
             }}
           >
@@ -549,7 +548,6 @@ export default function Home() {
               sx={{
                 fontWeight: 700,
                 fontSize: "1.1rem",
-                color: "#1F2937",
               }}
             >
               Open Requests
@@ -613,7 +611,6 @@ export default function Home() {
                         sx={{
                           fontWeight: 700,
                           fontSize: "0.9rem",
-                          color: "#1F2937",
                         }}
                       >
                         {ticket.id}
