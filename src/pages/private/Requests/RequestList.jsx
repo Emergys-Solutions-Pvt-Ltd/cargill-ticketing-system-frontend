@@ -14,12 +14,14 @@ import {
   MenuItem,
   Select,
   FormControl,
-  InputLabel,
   InputAdornment,
 } from "@mui/material";
 import { Search as SearchIcon } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import { getStoredTickets, getStoredTicketsAsync } from "../../../utils/rbacData";
+import {
+  getStoredTickets,
+  getStoredTicketsAsync,
+} from "../../../utils/rbacData";
 
 const getStatusColor = (status) => {
   const s = status.toLowerCase();
@@ -75,40 +77,70 @@ const RequestList = () => {
       row.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
       row.title.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesStatus = statusFilter === "All" || row.status.toLowerCase() === statusFilter.toLowerCase();
+    const matchesStatus =
+      statusFilter === "All" ||
+      row.status.toLowerCase() === statusFilter.toLowerCase();
 
     return matchesSearch && matchesStatus;
   });
 
   return (
-    <Box sx={{ width: "100%", minHeight: "100vh", backgroundColor: "background.default", p: { xs: 2, md: 4 } }}>
+    <Box
+      sx={{
+        width: "100%",
+        minHeight: "100vh",
+        backgroundColor: "background.default",
+        p: { xs: 2, md: 4 },
+      }}
+    >
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 3,
+        }}
+      >
         <Box>
-          <Typography variant="h5" sx={{ fontWeight: 'bold', color: "text.primary" }}>
-            Service Desk - Open Tickets
+          <Typography
+            sx={{ fontWeight: 600, fontSize: "18px", color: "text.primary" }}
+          >
+            Requests
           </Typography>
-          <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 600 }}>
-            Cargill Incident & Request Tracking Workspace
+          <Typography
+            variant="caption"
+            sx={{ color: "text.secondary", fontWeight: 400, fontSize: "13px" }}
+          >
+            Search, view and stay informed about your requests and their current
+            status.
           </Typography>
         </Box>
       </Box>
 
       {/* Search & Filters */}
-      <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap', alignItems: 'center' }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          mb: 3,
+          flexWrap: "wrap",
+          alignItems: "center",
+        }}
+      >
         <TextField
-          placeholder="Search by ID, short description, or category..."
+          placeholder="Search by ID, short description, or category"
           variant="outlined"
           size="small"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           sx={{
             flexGrow: 1,
-            minWidth: '250px',
-            maxWidth: '450px',
+            maxWidth: "450px",
             "& .MuiOutlinedInput-root": {
               borderRadius: "8px",
-            }
+            },
+            backgroundColor: "background.paper",
           }}
           slotProps={{
             input: {
@@ -117,26 +149,50 @@ const RequestList = () => {
                   <SearchIcon color="action" fontSize="small" />
                 </InputAdornment>
               ),
-            }
+            },
           }}
         />
-        <FormControl size="small" sx={{ minWidth: '160px' }}>
-          <InputLabel id="status-filter-label">Filter Status</InputLabel>
-          <Select
-            labelId="status-filter-label"
-            value={statusFilter}
-            label="Filter Status"
-            onChange={(e) => setStatusFilter(e.target.value)}
-            sx={{ borderRadius: "8px" }}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1.5,
+          }}
+        >
+          <Typography
+            variant="body2"
+            sx={{
+              fontSize: "13px",
+              fontWeight: "bold",
+              color: "text.primary",
+            }}
           >
-            <MenuItem value="All">All Statuses</MenuItem>
-            <MenuItem value="New">New / Open</MenuItem>
-            <MenuItem value="In Progress">In Progress</MenuItem>
-            <MenuItem value="Pending">Pending / On Hold</MenuItem>
-            <MenuItem value="Resolved">Resolved</MenuItem>
-            <MenuItem value="Closed">Closed</MenuItem>
-          </Select>
-        </FormControl>
+            Status
+          </Typography>
+
+          <FormControl
+            size="small"
+            sx={{ minWidth: 160, backgroundColor: "background.paper" }}
+          >
+            <Select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              displayEmpty
+              sx={{
+                height: 36,
+                fontSize: "13px",
+                borderRadius: "6px",
+              }}
+            >
+              <MenuItem value="All">All Status</MenuItem>
+              <MenuItem value="New">New / Open</MenuItem>
+              <MenuItem value="In Progress">In Progress</MenuItem>
+              <MenuItem value="Pending">Pending / On Hold</MenuItem>
+              <MenuItem value="Resolved">Resolved</MenuItem>
+              <MenuItem value="Closed">Closed</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
       </Box>
 
       {/* Table listing */}
@@ -147,19 +203,33 @@ const RequestList = () => {
           borderRadius: "12px",
           border: "1px solid",
           borderColor: "divider",
-          backgroundImage: "none"
+          backgroundImage: "none",
         }}
       >
         <Table sx={{ minWidth: 650 }} aria-label="Cargill ticket list">
           <TableHead sx={{ backgroundColor: "action.hover" }}>
             <TableRow>
-              <TableCell sx={{ fontWeight: 'bold', color: "text.primary" }}>Number</TableCell>
-              <TableCell sx={{ fontWeight: 'bold', color: "text.primary" }}>Short Description</TableCell>
-              <TableCell sx={{ fontWeight: 'bold', color: "text.primary" }}>Priority</TableCell>
-              <TableCell sx={{ fontWeight: 'bold', color: "text.primary" }}>Category</TableCell>
-              <TableCell sx={{ fontWeight: 'bold', color: "text.primary" }}>State</TableCell>
-              <TableCell sx={{ fontWeight: 'bold', color: "text.primary" }}>Created</TableCell>
-              <TableCell sx={{ fontWeight: 'bold', color: "text.primary" }}>Assignee</TableCell>
+              <TableCell sx={{ fontWeight: "bold", color: "text.primary" }}>
+                Number
+              </TableCell>
+              <TableCell sx={{ fontWeight: "bold", color: "text.primary" }}>
+                Short Description
+              </TableCell>
+              <TableCell sx={{ fontWeight: "bold", color: "text.primary" }}>
+                Priority
+              </TableCell>
+              <TableCell sx={{ fontWeight: "bold", color: "text.primary" }}>
+                Category
+              </TableCell>
+              <TableCell sx={{ fontWeight: "bold", color: "text.primary" }}>
+                State
+              </TableCell>
+              <TableCell sx={{ fontWeight: "bold", color: "text.primary" }}>
+                Created
+              </TableCell>
+              <TableCell sx={{ fontWeight: "bold", color: "text.primary" }}>
+                Assignee
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -172,15 +242,32 @@ const RequestList = () => {
                   key={row.id}
                   sx={{
                     "&:last-child td, &:last-child th": { border: 0 },
-                    cursor: 'pointer',
-                    "&:hover": { backgroundColor: "action.hover" }
+                    cursor: "pointer",
+                    "&:hover": { backgroundColor: "action.hover" },
                   }}
                   onClick={() => navigate(`/requests/${row.id}`)}
                 >
-                  <TableCell component="th" scope="row" sx={{ fontWeight: 700, color: 'secondary.main', fontFamily: 'monospace' }}>
+                  <TableCell
+                    component="th"
+                    scope="row"
+                    sx={{
+                      fontWeight: 700,
+                      color: "secondary.main",
+                      fontFamily: "monospace",
+                    }}
+                  >
                     {row.id}
                   </TableCell>
-                  <TableCell sx={{ maxWidth: 280, fontWeight: 600, color: "text.primary", whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <TableCell
+                    sx={{
+                      maxWidth: 280,
+                      fontWeight: 600,
+                      color: "text.primary",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
                     {row.title}
                   </TableCell>
                   <TableCell>
@@ -188,38 +275,61 @@ const RequestList = () => {
                       label={row.priority || "Medium"}
                       size="small"
                       sx={{
-                        fontWeight: 'bold',
-                        fontSize: '0.7rem',
-                        borderRadius: '6px',
+                        fontWeight: "bold",
+                        fontSize: "0.7rem",
+                        borderRadius: "6px",
                         bgcolor: priorityColors.bg,
-                        color: priorityColors.text
+                        color: priorityColors.text,
                       }}
                     />
                   </TableCell>
-                  <TableCell sx={{ fontSize: '0.85rem', color: "text.primary", fontWeight: 500 }}>{row.category || "General Support"}</TableCell>
+                  <TableCell
+                    sx={{
+                      fontSize: "0.85rem",
+                      color: "text.primary",
+                      fontWeight: 500,
+                    }}
+                  >
+                    {row.category || "General Support"}
+                  </TableCell>
                   <TableCell>
                     <Chip
                       label={row.status}
                       size="small"
                       sx={{
-                        fontWeight: 'bold',
-                        fontSize: '0.72rem',
-                        borderRadius: '4px',
+                        fontWeight: "bold",
+                        fontSize: "0.72rem",
+                        borderRadius: "4px",
                         bgcolor: statusColors.bg,
                         color: statusColors.text,
-                        border: statusColors.border
+                        border: statusColors.border,
                       }}
                     />
                   </TableCell>
-                  <TableCell sx={{ color: 'text.secondary', fontSize: '0.85rem' }}>{row.created}</TableCell>
-                  <TableCell sx={{ color: 'text.secondary', fontSize: '0.85rem', fontWeight: 500 }}>{row.assignee || "Unassigned"}</TableCell>
+                  <TableCell
+                    sx={{ color: "text.secondary", fontSize: "0.85rem" }}
+                  >
+                    {row.created}
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      color: "text.secondary",
+                      fontSize: "0.85rem",
+                      fontWeight: 500,
+                    }}
+                  >
+                    {row.assignee || "Unassigned"}
+                  </TableCell>
                 </TableRow>
               );
             })}
             {filteredRequests.length === 0 && (
               <TableRow>
                 <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
-                  <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
+                  <Typography
+                    variant="body2"
+                    sx={{ color: "text.secondary", fontStyle: "italic" }}
+                  >
                     No matching records found in this view.
                   </Typography>
                 </TableCell>
