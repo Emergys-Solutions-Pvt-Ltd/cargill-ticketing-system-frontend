@@ -3,17 +3,14 @@ import {
   Box,
   Typography,
   Button,
-  Breadcrumbs,
-  Link,
   Chip,
   Grid,
   Card,
   Stack,
 } from "@mui/material";
 import LabTabs from "../../../components/LabTabs";
-import { useParams, useNavigate, Link as RouterLink } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import {
   getStoredTickets,
   getStoredTicketsAsync,
@@ -127,26 +124,14 @@ function RequestDetails() {
     >
       {/* Breadcrumbs & Header */}
       <Box sx={{ mb: 4 }}>
-        <Breadcrumbs
-          separator={<NavigateNextIcon fontSize="small" />}
-          aria-label="breadcrumb"
-          sx={{ mb: 2 }}
+        <Button
+          variant="text"
+          startIcon={<ArrowBackIcon />}
+          onClick={() => navigate("/requests")}
+          sx={{ mb: 2, textTransform: "none" }}
         >
-          <Link underline="hover" color="inherit" component={RouterLink} to="/">
-            Home
-          </Link>
-          <Link
-            underline="hover"
-            color="inherit"
-            component={RouterLink}
-            to="/requests"
-          >
-            My Requests
-          </Link>
-          <Typography color="text.primary" sx={{ fontWeight: 500 }}>
-            {request.id}
-          </Typography>
-        </Breadcrumbs>
+          Back to Requests
+        </Button>
 
         <Box
           sx={{
@@ -227,14 +212,6 @@ function RequestDetails() {
             </Typography>
           </Box>
           <Stack direction="row" spacing={2}>
-            <Button
-              variant="outlined"
-              startIcon={<ArrowBackIcon />}
-              onClick={() => navigate("/requests")}
-              sx={{ borderRadius: "8px" }}
-            >
-              Back to List
-            </Button>
             {request.status !== "Closed" && request.status !== "Resolved" && (
               <Button
                 variant="contained"
