@@ -133,7 +133,7 @@ function RequestDetails() {
           Back to Requests
         </Button>
 
-        <Box
+        <Card
           sx={{
             display: "flex",
             justifyContent: "space-between",
@@ -142,14 +142,13 @@ function RequestDetails() {
             gap: 2,
           }}
         >
-          <Box>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
+          <Box sx={{ mx: 2, my: 2 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
               <Typography
-                variant="h4"
                 sx={{
-                  fontWeight: 800,
+                  fontWeight: "bold",
+                  fontSize: "1.25rem",
                   color: "text.primary",
-                  letterSpacing: "-0.02em",
                 }}
               >
                 {request.id}
@@ -161,20 +160,19 @@ function RequestDetails() {
                   color: statusColors.text,
                   border: statusColors.border,
                   fontWeight: 700,
-                  fontSize: "0.75rem",
-                  borderRadius: "4px",
-                  px: 0.5,
+                  fontSize: "0.688rem",
+                  borderRadius: "50px",
                 }}
               />
+
               <Chip
                 label={request.priority || "Medium"}
                 sx={{
                   backgroundColor: priorityColors.bg,
                   color: priorityColors.text,
                   fontWeight: 700,
-                  fontSize: "0.75rem",
-                  borderRadius: "4px",
-                  px: 0.5,
+                  fontSize: "0.688rem",
+                  borderRadius: "50px",
                 }}
               />
               <Chip
@@ -183,9 +181,8 @@ function RequestDetails() {
                   backgroundColor: "primary",
                   color: "black",
                   fontWeight: 700,
-                  fontSize: "0.75rem",
-                  borderRadius: "4px",
-                  px: 0.5,
+                  fontSize: "0.688rem",
+                  borderRadius: "50px",
                 }}
               />
               <Chip
@@ -194,24 +191,23 @@ function RequestDetails() {
                   backgroundColor: "primary",
                   color: "black",
                   fontWeight: 700,
-                  fontSize: "0.75rem",
-                  borderRadius: "4px",
-                  px: 0.5,
+                  fontSize: "0.688rem",
+                  borderRadius: "50px",
                 }}
               />
             </Box>
             <Typography
-              variant="h6"
               sx={{
                 color: "text.secondary",
                 fontWeight: 500,
-                maxWidth: "800px",
+                maxWidth: "50rem",
+                fontSize: "1rem",
               }}
             >
               {request.title}
             </Typography>
           </Box>
-          <Stack direction="row" spacing={2}>
+          <Stack direction="row" spacing={2} sx={{ mx: 2, my: 2 }}>
             {request.status !== "Closed" && request.status !== "Resolved" && (
               <Button
                 variant="contained"
@@ -227,7 +223,7 @@ function RequestDetails() {
               </Button>
             )}
           </Stack>
-        </Box>
+        </Card>
       </Box>
 
       {/* Layout Split */}
@@ -237,7 +233,6 @@ function RequestDetails() {
           <Card
             variant="outlined"
             sx={{
-              borderRadius: 3,
               mb: 4,
               border: "1px solid",
               borderColor: "divider",
@@ -246,9 +241,7 @@ function RequestDetails() {
               backgroundImage: "none",
             }}
           >
-            <Box sx={{ p: 1 }}>
               <LabTabs comments={request.comments || []} request={request} />
-            </Box>
           </Card>
         </Grid>
       </Grid>
