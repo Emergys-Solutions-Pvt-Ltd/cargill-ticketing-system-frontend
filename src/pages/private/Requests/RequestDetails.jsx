@@ -228,7 +228,7 @@ function RequestDetails() {
 
       {/* Layout Split */}
       <Grid container spacing={4}>
-        <Grid item xs={12}>
+        <Grid item xs={12} sx={{width: "100%"}}>
           {/* Activity Log & Attachments */}
           <Card
             variant="outlined"
@@ -241,7 +241,7 @@ function RequestDetails() {
               backgroundImage: "none",
             }}
           >
-              <LabTabs comments={request.comments || []} request={request} />
+              <LabTabs comments={request.comments || []} request={request}/>
           </Card>
         </Grid>
       </Grid>

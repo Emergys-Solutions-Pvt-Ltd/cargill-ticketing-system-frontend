@@ -51,7 +51,6 @@ function Section({ title, fields }) {
   return (
     <Box>
       <Typography
-        variant="h6"
         sx={{
           fontWeight: 700,
           color: "text.primary",
@@ -144,12 +143,9 @@ function DetailsForm({ request, user }) {
     <Card
       variant="outlined"
       sx={{
-        borderRadius: 3,
         mb: 3,
-        border: "1px solid",
-        borderColor: "divider",
-        bgcolor: "background.paper",
         backgroundImage: "none",
+        border: "none"
       }}
     >
       <CardContent sx={{ p: { xs: 2, md: 3 } }}>

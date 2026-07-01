@@ -176,8 +176,34 @@ export default function LabTabs({ comments = [], request }) {
   return (
     <Box sx={{ width: "100%", typography: "body1" }}>
       <TabContext value={value}>
-        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-          <TabList onChange={handleChange} aria-label="request tabs">
+        <Box
+          sx={{
+            borderBottom: 1,
+            borderColor: "divider",
+            backgroundColor: "#F8F8F8",
+            px: 2,
+          }}
+        >
+          <TabList
+            onChange={handleChange}
+            aria-label="request tabs"
+            sx={{
+              "& .MuiTab-root": {
+                color: "#757575",
+                textTransform: "none",
+              },
+              "& .MuiTab-root.Mui-selected": {
+                color: "#00843D",
+                fontWeight: 600,
+              },
+
+              "& .MuiTabs-indicator": {
+                backgroundColor: "#00843D",
+                height: 3,
+                borderRadius: "3px",
+              },
+            }}
+          >
             <Tab label="Details" value="1" />
             <Tab label="Activity" value="2" />
             <Tab label={`Attachments (${allAttachments.length})`} value="3" />
@@ -185,7 +211,7 @@ export default function LabTabs({ comments = [], request }) {
             <Tab label="Audit History" value="5" />
           </TabList>
         </Box>
-        <TabPanel value="1" sx={{ p: 2 }}>
+        <TabPanel value="1" sx={{ p: 0 }}>
           <Box sx={{ width: "100%" }}>
             <DetailsForm request={request} />
           </Box>
@@ -296,7 +322,7 @@ export default function LabTabs({ comments = [], request }) {
           )}
         </TabPanel>
         <TabPanel value="4" sx={{ p: 3 }}>
-          <Box sx={{ maxWidth: "600px", mx: "auto" }}>
+          <Box>
             <Typography
               variant="h6"
               sx={{ fontWeight: 700, mb: 3, color: "text.primary" }}
@@ -445,7 +471,7 @@ export default function LabTabs({ comments = [], request }) {
           </Box>
         </TabPanel>
         <TabPanel value="5" sx={{ p: 3 }}>
-          <Box sx={{ maxWidth: "600px", mx: "auto" }}>
+          <Box>
             <Typography
               variant="h6"
               sx={{ fontWeight: 700, mb: 3, color: "text.primary" }}
