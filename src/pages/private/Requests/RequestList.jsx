@@ -5,10 +5,10 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
   TableRow,
-  Paper,
+  Button,
+  Stack,
   Chip,
   TextField,
   MenuItem,
@@ -47,14 +47,22 @@ const getPriorityColor = (priority) => {
   const p = priority.toLowerCase();
   switch (p) {
     case "critical":
-      return { bg: "rgba(225, 29, 72, 0.15)", text: "#e11d48" };
+      return { bg: "rgba(225, 29, 72, 0.15)", text: "#e11d48", dot: "#e11d48" };
     case "high":
-      return { bg: "rgba(249, 115, 22, 0.15)", text: "#f97316" };
+      return {
+        bg: "rgba(249, 115, 22, 0.15)",
+        text: "#f97316",
+        dot: "#ef4444",
+      };
     case "medium":
-      return { bg: "rgba(37, 99, 235, 0.15)", text: "#2563eb" };
+      return { bg: "rgba(37, 99, 235, 0.15)", text: "#2563eb", dot: "#f59e0b" };
     case "low":
     default:
-      return { bg: "rgba(107, 114, 128, 0.15)", text: "#6b7280" };
+      return {
+        bg: "rgba(107, 114, 128, 0.15)",
+        text: "#6b7280",
+        dot: "#10b981",
+      };
   }
 };
 
@@ -63,6 +71,8 @@ const RequestList = () => {
   const [tickets, setTickets] = useState(() => getStoredTickets());
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [page, setPage] = useState(0);
+  const rowsPerPage = 8;
 
   useEffect(() => {
     if (tickets.length === 0) {
@@ -83,6 +93,11 @@ const RequestList = () => {
 
     return matchesSearch && matchesStatus;
   });
+
+  const paginatedRequests = filteredRequests.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage,
+  );
 
   return (
     <Box
@@ -142,14 +157,12 @@ const RequestList = () => {
             },
             backgroundColor: "background.paper",
           }}
-          slotProps={{
-            input: {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon color="action" fontSize="small" />
-                </InputAdornment>
-              ),
-            },
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon color="action" fontSize="small" />
+              </InputAdornment>
+            ),
           }}
         />
         <Box
@@ -196,44 +209,44 @@ const RequestList = () => {
       </Box>
 
       {/* Table listing */}
-      <TableContainer
-        component={Paper}
-        sx={{
-          boxShadow: "0 4px 16px rgba(0,0,0,0.04)",
-          borderRadius: "12px",
-          border: "1px solid",
-          borderColor: "divider",
-          backgroundImage: "none",
-        }}
-      >
-        <Table sx={{ minWidth: 650 }} aria-label="Cargill ticket list">
-          <TableHead sx={{ backgroundColor: "action.hover" }}>
+      <Box>
+        <Table
+          sx={{
+            minWidth: 650,
+            borderCollapse: "separate",
+            borderSpacing: "0 8px",
+          }}
+          aria-label="Cargill ticket list"
+        >
+          <TableHead>
             <TableRow>
-              <TableCell sx={{ fontWeight: "bold", color: "text.primary" }}>
-                Number
-              </TableCell>
-              <TableCell sx={{ fontWeight: "bold", color: "text.primary" }}>
-                Short Description
-              </TableCell>
-              <TableCell sx={{ fontWeight: "bold", color: "text.primary" }}>
-                Priority
-              </TableCell>
-              <TableCell sx={{ fontWeight: "bold", color: "text.primary" }}>
-                Category
-              </TableCell>
-              <TableCell sx={{ fontWeight: "bold", color: "text.primary" }}>
-                State
-              </TableCell>
-              <TableCell sx={{ fontWeight: "bold", color: "text.primary" }}>
-                Created
-              </TableCell>
-              <TableCell sx={{ fontWeight: "bold", color: "text.primary" }}>
-                Assignee
-              </TableCell>
+              {[
+                "TICKET ID",
+                "SHORT DESCRIPTION",
+                "PRIORITY",
+                "CATEGORY",
+                "STATE",
+                "CREATED",
+                "ASSIGNEE",
+              ].map((head) => (
+                <TableCell
+                  key={head}
+                  sx={{
+                    fontWeight: 600,
+                    color: "text.secondary",
+                    fontSize: "0.75rem",
+                    textTransform: "uppercase",
+                    border: "none",
+                    py: 1,
+                  }}
+                >
+                  {head}
+                </TableCell>
+              ))}
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredRequests.map((row) => {
+            {paginatedRequests.map((row) => {
               const statusColors = getStatusColor(row.status);
               const priorityColors = getPriorityColor(row.priority || "Medium");
 
@@ -241,27 +254,40 @@ const RequestList = () => {
                 <TableRow
                   key={row.id}
                   sx={{
-                    "&:last-child td, &:last-child th": { border: 0 },
                     cursor: "pointer",
-                    "&:hover": { backgroundColor: "action.hover" },
+                    backgroundColor: "background.paper",
+                    "&:hover": {
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                    },
+                    "& > td, & > th": {
+                      border: "none",
+                      py: 2,
+                      borderTop: "1px solid",
+                      borderBottom: "1px solid",
+                      borderColor: "divider",
+                    },
+                    "& > td:first-of-type, & > th:first-of-type": {
+                      borderTopLeftRadius: "8px",
+                      borderBottomLeftRadius: "8px",
+                      borderLeft: "1px solid",
+                      borderColor: "divider",
+                    },
+                    "& > td:last-of-type": {
+                      borderTopRightRadius: "8px",
+                      borderBottomRightRadius: "8px",
+                      borderRight: "1px solid",
+                      borderColor: "divider",
+                    },
                   }}
                   onClick={() => navigate(`/requests/${row.id}`)}
                 >
-                  <TableCell
-                    component="th"
-                    scope="row"
-                    sx={{
-                      fontWeight: 700,
-                      color: "secondary.main",
-                      fontFamily: "monospace",
-                    }}
-                  >
+                  <TableCell sx={{ fontWeight: 600, color: "primary.main" }}>
                     {row.id}
                   </TableCell>
                   <TableCell
                     sx={{
                       maxWidth: 280,
-                      fontWeight: 600,
+                      fontWeight: 500,
                       color: "text.primary",
                       whiteSpace: "nowrap",
                       overflow: "hidden",
@@ -271,22 +297,24 @@ const RequestList = () => {
                     {row.title}
                   </TableCell>
                   <TableCell>
-                    <Chip
-                      label={row.priority || "Medium"}
-                      size="small"
-                      sx={{
-                        fontWeight: "bold",
-                        fontSize: "0.7rem",
-                        borderRadius: "6px",
-                        bgcolor: priorityColors.bg,
-                        color: priorityColors.text,
-                      }}
-                    />
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Box
+                        sx={{
+                          width: 8,
+                          height: 8,
+                          borderRadius: "50%",
+                          backgroundColor: priorityColors.dot,
+                        }}
+                      />
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        {row.priority || "Medium"}
+                      </Typography>
+                    </Box>
                   </TableCell>
                   <TableCell
                     sx={{
                       fontSize: "0.85rem",
-                      color: "text.primary",
+                      color: "text.secondary",
                       fontWeight: 500,
                     }}
                   >
@@ -323,9 +351,9 @@ const RequestList = () => {
                 </TableRow>
               );
             })}
-            {filteredRequests.length === 0 && (
+            {paginatedRequests.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
+                <TableCell colSpan={7} align="center" sx={{ py: 4, border: 0 }}>
                   <Typography
                     variant="body2"
                     sx={{ color: "text.secondary", fontStyle: "italic" }}
@@ -337,7 +365,49 @@ const RequestList = () => {
             )}
           </TableBody>
         </Table>
-      </TableContainer>
+      </Box>
+
+      {/* Pagination */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mt: 2,
+          p: 2,
+        }}
+      >
+        <Typography variant="body2" color="text.secondary">
+          {`${page * rowsPerPage + 1} - ${Math.min(
+            (page + 1) * rowsPerPage,
+            filteredRequests.length,
+          )} of ${filteredRequests.length} items`}
+        </Typography>
+        <Stack direction="row" spacing={1}>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() => setPage((p) => Math.max(0, p - 1))}
+            disabled={page === 0}
+            sx={{ textTransform: "none" }}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() =>
+              setPage((p) =>
+                (p + 1) * rowsPerPage < filteredRequests.length ? p + 1 : p,
+              )
+            }
+            disabled={(page + 1) * rowsPerPage >= filteredRequests.length}
+            sx={{ textTransform: "none" }}
+          >
+            Next
+          </Button>
+        </Stack>
+      </Box>
     </Box>
   );
 };
