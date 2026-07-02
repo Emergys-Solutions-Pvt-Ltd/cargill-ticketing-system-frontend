@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useMemo } from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -25,16 +26,6 @@ import { Link, NavLink } from "react-router-dom";
 import { useThemeContext } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 import cargillLogo from "../assets/cargill-logo.png";
-
-const navLinkStyle = ({ isActive }) => ({
-  color: "#fff",
-  textDecoration: "none",
-  padding: "0.5rem 1rem",
-  borderRadius: "20px",
-  fontWeight: 500,
-  transition: "all 0.2s ease",
-  backgroundColor: isActive ? "#0B8F4D" : "transparent",
-});
 
 const kbArticles = [
   {
@@ -70,6 +61,16 @@ export default function Navbar() {
   const { mode, toggleTheme } = useThemeContext();
   const { user, logout } = useAuth();
 
+  const navLinkStyle = useMemo(() => ({ isActive }) => ({
+    color: mode === "light" ? "#000000" : "#ffffff",
+    textDecoration: "none",
+    padding: "0.5rem 1rem",
+    borderRadius: "20px",
+    fontWeight: 500,
+    transition: "all 0.2s ease",
+    backgroundColor: isActive ? "#0B8F4D" : "transparent",
+  }), [mode]);
+
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -89,10 +90,10 @@ export default function Navbar() {
       <AppBar
         position="static"
         sx={{
-          bgcolor: mode === "light" ? "#1B3D41" : "#141f21",
-          color: "#ffffff",
+          bgcolor: mode === "light" ? "#F8F8F8" : "#1B3D41",
+          color: mode === "light" ? "#000000" : "#ffffff",
           borderBottom: "1px solid",
-          borderColor: mode === "light" ? "#0e2325" : "rgba(255,255,255,0.08)",
+          borderColor: mode === "light" ? "#b0a9a9" : "rgba(255,255,255,0.08)",
           boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
         }}
         elevation={0}
