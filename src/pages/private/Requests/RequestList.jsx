@@ -281,7 +281,7 @@ const RequestList = () => {
                   }}
                   onClick={() => navigate(`/requests/${row.id}`)}
                 >
-                  <TableCell sx={{ fontWeight: 600, color: "primary.main" }}>
+                  <TableCell sx={{ color: "#1C64F2" }}>
                     {row.id}
                   </TableCell>
                   <TableCell
@@ -314,7 +314,7 @@ const RequestList = () => {
                   <TableCell
                     sx={{
                       fontSize: "0.85rem",
-                      color: "text.secondary",
+                      color: "text.primary",
                       fontWeight: 500,
                     }}
                   >
@@ -327,7 +327,7 @@ const RequestList = () => {
                       sx={{
                         fontWeight: "bold",
                         fontSize: "0.72rem",
-                        borderRadius: "4px",
+                        borderRadius: "50px",
                         bgcolor: statusColors.bg,
                         color: statusColors.text,
                         border: statusColors.border,
@@ -335,13 +335,13 @@ const RequestList = () => {
                     />
                   </TableCell>
                   <TableCell
-                    sx={{ color: "text.secondary", fontSize: "0.85rem" }}
+                    sx={{ color: "text.primary", fontSize: "0.85rem" }}
                   >
                     {row.created}
                   </TableCell>
                   <TableCell
                     sx={{
-                      color: "text.secondary",
+                      color: "text.primary",
                       fontSize: "0.85rem",
                       fontWeight: 500,
                     }}
