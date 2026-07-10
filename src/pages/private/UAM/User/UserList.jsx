@@ -27,8 +27,6 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Tabs,
-  Tab,
   Checkbox,
   FormControlLabel,
   FormGroup,
@@ -50,6 +48,7 @@ import {
   setStoredRoles,
   systemPermissions,
 } from "../../../../utils/rbacData";
+import SectionCard from "../../../../components/SectionCard";
 
 const UserList = () => {
   const navigate = useNavigate();
@@ -189,6 +188,241 @@ const UserList = () => {
     }
   };
 
+  const UsersTab = (
+    <Box>
+      <Button
+        variant="contained"
+        startIcon={<AddIcon />}
+        onClick={() => setOpenAddUserDialog(true)}
+        sx={{ borderRadius: "10px", textTransform: "none" }}
+      >
+        Add User
+      </Button>
+      <Typography
+        variant="h6"
+        className="font-bold text-slate-800 dark:text-slate-100"
+      >
+        User Accounts ({users.length})
+      </Typography>
+      <TableContainer>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell className="font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider text-xs p-5">
+                User
+              </TableCell>
+              <TableCell className="font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider text-xs p-5">
+                Role
+              </TableCell>
+              <TableCell className="font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider text-xs p-5 text-right">
+                Actions
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {users.map((u) => (
+              <TableRow
+                key={u.id}
+                hover
+                onClick={() => navigate(`/admin/users/${u.id}`)}
+                sx={{ cursor: "pointer" }}
+                className="transition-colors"
+              >
+                <TableCell className="p-5">
+                  <Stack direction="row" spacing={2} alignItems="center">
+                    <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[#1B3D41] dark:text-[#81B563] font-bold border border-slate-200 dark:border-slate-700">
+                      {u.email.charAt(0).toUpperCase()}
+                    </div>
+                    <Typography
+                      variant="body2"
+                      className="font-semibold text-slate-700 dark:text-slate-200"
+                    >
+                      {u.email}
+                    </Typography>
+                  </Stack>
+                </TableCell>
+                <TableCell className="p-5">
+                  <Chip
+                    label={u.role}
+                    color={getRoleColor(u.role)}
+                    size="small"
+                    className="font-bold rounded-lg px-2"
+                  />
+                </TableCell>
+                <TableCell
+                  className="p-5 text-right"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Tooltip title="View Access Policy">
+                    <IconButton
+                      size="small"
+                      onClick={() => navigate(`/admin/users/${u.id}`)}
+                      className="text-slate-400 hover:text-[#81B563] mr-2"
+                    >
+                      <ArrowForwardIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Revoke Access">
+                    <IconButton
+                      size="small"
+                      onClick={() => handleDeleteUser(u.id)}
+                      className="text-slate-400 hover:text-red-500"
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
+  );
+
+  const RolesTab = (
+    <Box>
+      <Button
+        variant="contained"
+        startIcon={<AddIcon />}
+        onClick={() => setOpenCreateRoleDialog(true)}
+        sx={{ borderRadius: "10px", textTransform: "none" }}
+      >
+        Create Role
+      </Button>
+      <Typography
+        variant="h6"
+        className="font-bold text-slate-800 dark:text-slate-100"
+      >
+        Role Definitions ({roles.length})
+      </Typography>
+      <Stack spacing={3}>
+        {roles.map((r) => {
+          const uCount = users.filter((u) => u.role === r.name).length;
+
+          return (
+            <Card
+              key={r.name}
+              variant="outlined"
+              onClick={() => navigate(`/admin/roles/${r.name}`)}
+              sx={{
+                borderRadius: 3,
+                cursor: "pointer",
+                borderColor: "divider",
+                bgcolor: "background.paper",
+                backgroundImage: "none",
+                transition: "all 0.2s",
+                "&:hover": {
+                  transform: "translateY(-2px)",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                  borderColor: "primary.main",
+                },
+              }}
+            >
+              <CardContent sx={{ p: 3, "&:last-child": { pb: 3 } }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    mb: 2,
+                  }}
+                >
+                  <Stack direction="row" spacing={1.5} alignItems="center">
+                    <ShieldIcon color="primary" />
+                    <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                      {r.name}
+                    </Typography>
+                    {r.level && (
+                      <Chip
+                        label={
+                          r.level === 1
+                            ? "Level 1: Organization"
+                            : r.level === 2
+                              ? "Level 2: Department"
+                              : "Level 3: Tickets"
+                        }
+                        size="small"
+                        color={
+                          r.level === 1
+                            ? "error"
+                            : r.level === 2
+                              ? "secondary"
+                              : "primary"
+                        }
+                        sx={{
+                          height: 20,
+                          fontSize: "0.7rem",
+                          fontWeight: "bold",
+                        }}
+                      />
+                    )}
+                    {r.isSystem && (
+                      <Chip
+                        label="System"
+                        size="small"
+                        variant="outlined"
+                        sx={{ height: 20, fontSize: "0.7rem" }}
+                      />
+                    )}
+                  </Stack>
+                  <Typography
+                    variant="body2"
+                    sx={{ color: "text.secondary", fontWeight: 500 }}
+                  >
+                    {uCount} {uCount === 1 ? "user" : "users"} assigned
+                  </Typography>
+                </Box>
+
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                  {r.permissions.map((pId) => {
+                    const label =
+                      systemPermissions.find((sp) => sp.id === pId)?.label ||
+                      pId;
+                    return (
+                      <Chip
+                        key={pId}
+                        label={label}
+                        size="small"
+                        sx={{
+                          borderRadius: "6px",
+                          bgcolor: "background.default",
+                          color: "text.primary",
+                        }}
+                      />
+                    );
+                  })}
+                  {r.permissions.length === 0 && (
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        fontStyle: "italic",
+                        color: "text.secondary",
+                      }}
+                    >
+                      No permissions assigned.
+                    </Typography>
+                  )}
+                </Box>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </Stack>
+    </Box>
+  );
+
+  const tabs = [
+    {
+      label: "Users",
+      content: UsersTab,
+    },
+    {
+      label: "Roles",
+      content: RolesTab,
+    },
+  ];
+
   return (
     <Box className="p-6 md:p-10 min-h-screen text-slate-800 dark:text-slate-100 transition-colors duration-200">
       <div className="max-w-5xl mx-auto">
@@ -213,294 +447,7 @@ const UserList = () => {
               </Typography>
             </div>
           </div>
-          {activeTab === 0 && (
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => setOpenAddUserDialog(true)}
-              sx={{ borderRadius: "10px", textTransform: "none" }}
-            >
-              Add User
-            </Button>
-          )}
-          {activeTab === 1 && (
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => setOpenCreateRoleDialog(true)}
-              sx={{ borderRadius: "10px", textTransform: "none" }}
-            >
-              Create Role
-            </Button>
-          )}
         </div>
-
-        {/* Tab Navigation */}
-        <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 4 }}>
-          <Tabs
-            value={activeTab}
-            onChange={handleTabChange}
-            variant="standard"
-            sx={{
-              "& .MuiTabs-indicator": {
-                backgroundColor: "#1B3D41",
-                height: "3px",
-              },
-              "& .MuiTab-root": {
-                textTransform: "none",
-                fontWeight: "bold",
-                color: "text.secondary",
-                "&.Mui-selected": {
-                  color: "text.primary",
-                },
-              },
-            }}
-          >
-            <Tab label="Users" />
-            <Tab label="Roles" />
-          </Tabs>
-        </Box>
-
-        {/* Tab Content */}
-        <Card
-          variant="outlined"
-          sx={{
-            borderRadius: 4,
-            borderColor: "divider",
-            bgcolor: "background.paper",
-            boxShadow: "0 4px 20px rgba(0,0,0,0.02)",
-            backgroundImage: "none",
-            mb: 4,
-          }}
-        >
-          <CardContent sx={{ p: { xs: 2, md: 3 } }}>
-            {/* Tab 1: Users */}
-            {activeTab === 0 && (
-              <Box>
-                <Typography
-                  variant="h6"
-                  className="font-bold text-slate-800 dark:text-slate-100"
-                >
-                  User Accounts ({users.length})
-                </Typography>
-                <TableContainer>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell className="font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider text-xs p-5">
-                          User
-                        </TableCell>
-                        <TableCell className="font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider text-xs p-5">
-                          Role
-                        </TableCell>
-                        <TableCell className="font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider text-xs p-5 text-right">
-                          Actions
-                        </TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {users.map((u) => (
-                        <TableRow
-                          key={u.id}
-                          hover
-                          onClick={() => navigate(`/admin/users/${u.id}`)}
-                          sx={{ cursor: "pointer" }}
-                          className="transition-colors"
-                        >
-                          <TableCell className="p-5">
-                            <Stack
-                              direction="row"
-                              spacing={2}
-                              alignItems="center"
-                            >
-                              <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[#1B3D41] dark:text-[#81B563] font-bold border border-slate-200 dark:border-slate-700">
-                                {u.email.charAt(0).toUpperCase()}
-                              </div>
-                              <Typography
-                                variant="body2"
-                                className="font-semibold text-slate-700 dark:text-slate-200"
-                              >
-                                {u.email}
-                              </Typography>
-                            </Stack>
-                          </TableCell>
-                          <TableCell className="p-5">
-                            <Chip
-                              label={u.role}
-                              color={getRoleColor(u.role)}
-                              size="small"
-                              className="font-bold rounded-lg px-2"
-                            />
-                          </TableCell>
-                          <TableCell
-                            className="p-5 text-right"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <Tooltip title="View Access Policy">
-                              <IconButton
-                                size="small"
-                                onClick={() => navigate(`/admin/users/${u.id}`)}
-                                className="text-slate-400 hover:text-[#81B563] mr-2"
-                              >
-                                <ArrowForwardIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Revoke Access">
-                              <IconButton
-                                size="small"
-                                onClick={() => handleDeleteUser(u.id)}
-                                className="text-slate-400 hover:text-red-500"
-                              >
-                                <DeleteIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </Box>
-            )}
-
-            {/* Tab 2: Roles */}
-            {activeTab === 1 && (
-              <Box>
-                <Typography
-                  variant="h6"
-                  className="font-bold text-slate-800 dark:text-slate-100"
-                >
-                  Role Definitions ({roles.length})
-                </Typography>
-                <Stack spacing={3}>
-                  {roles.map((r) => {
-                    const uCount = users.filter(
-                      (u) => u.role === r.name,
-                    ).length;
-
-                    return (
-                      <Card
-                        key={r.name}
-                        variant="outlined"
-                        onClick={() => navigate(`/admin/roles/${r.name}`)}
-                        sx={{
-                          borderRadius: 3,
-                          cursor: "pointer",
-                          borderColor: "divider",
-                          bgcolor: "background.paper",
-                          backgroundImage: "none",
-                          transition: "all 0.2s",
-                          "&:hover": {
-                            transform: "translateY(-2px)",
-                            boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-                            borderColor: "primary.main",
-                          },
-                        }}
-                      >
-                        <CardContent sx={{ p: 3, "&:last-child": { pb: 3 } }}>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                              mb: 2,
-                            }}
-                          >
-                            <Stack
-                              direction="row"
-                              spacing={1.5}
-                              alignItems="center"
-                            >
-                              <ShieldIcon color="primary" />
-                              <Typography
-                                variant="h6"
-                                sx={{ fontWeight: "bold" }}
-                              >
-                                {r.name}
-                              </Typography>
-                              {r.level && (
-                                <Chip
-                                  label={
-                                    r.level === 1
-                                      ? "Level 1: Organization"
-                                      : r.level === 2
-                                        ? "Level 2: Department"
-                                        : "Level 3: Tickets"
-                                  }
-                                  size="small"
-                                  color={
-                                    r.level === 1
-                                      ? "error"
-                                      : r.level === 2
-                                        ? "secondary"
-                                        : "primary"
-                                  }
-                                  sx={{
-                                    height: 20,
-                                    fontSize: "0.7rem",
-                                    fontWeight: "bold",
-                                  }}
-                                />
-                              )}
-                              {r.isSystem && (
-                                <Chip
-                                  label="System"
-                                  size="small"
-                                  variant="outlined"
-                                  sx={{ height: 20, fontSize: "0.7rem" }}
-                                />
-                              )}
-                            </Stack>
-                            <Typography
-                              variant="body2"
-                              sx={{ color: "text.secondary", fontWeight: 500 }}
-                            >
-                              {uCount} {uCount === 1 ? "user" : "users"}{" "}
-                              assigned
-                            </Typography>
-                          </Box>
-
-                          <Box
-                            sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}
-                          >
-                            {r.permissions.map((pId) => {
-                              const label =
-                                systemPermissions.find((sp) => sp.id === pId)
-                                  ?.label || pId;
-                              return (
-                                <Chip
-                                  key={pId}
-                                  label={label}
-                                  size="small"
-                                  sx={{
-                                    borderRadius: "6px",
-                                    bgcolor: "background.default",
-                                    color: "text.primary",
-                                  }}
-                                />
-                              );
-                            })}
-                            {r.permissions.length === 0 && (
-                              <Typography
-                                variant="caption"
-                                sx={{
-                                  fontStyle: "italic",
-                                  color: "text.secondary",
-                                }}
-                              >
-                                No permissions assigned.
-                              </Typography>
-                            )}
-                          </Box>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </Stack>
-              </Box>
-            )}
-          </CardContent>
-        </Card>
 
         {/* Add User Dialog */}
         <Dialog
@@ -749,6 +696,8 @@ const UserList = () => {
           </Alert>
         </Snackbar>
       </div>
+
+      <SectionCard tabs={tabs} />
     </Box>
   );
 };
