@@ -162,18 +162,8 @@ export default function Navbar() {
                   </Box>
                 </li> */}
                 <li>
-                  <NavLink to="/tasks" style={navLinkStyle}>
-                    Tasks
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink to="/incidents" style={navLinkStyle}>
-                    Incidents
-                  </NavLink>
-                </li>
-                <li>
                   <NavLink to="/requests" style={navLinkStyle}>
-                    Service Requests
+                    My Requests
                   </NavLink>
                 </li>
                 <li>

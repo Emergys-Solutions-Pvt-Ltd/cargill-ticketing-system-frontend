@@ -37,23 +37,7 @@ const router = createBrowserRouter([
         element: <RequestList />,
       },
       {
-        path: "tasks",
-        element: <RequestList />,
-      },
-      {
-        path: "incidents",
-        element: <RequestList />,
-      },
-      {
         path: "requests/:requestId",
-        element: <RequestDetails />,
-      },
-      {
-        path: "tasks/:taskId",
-        element: <RequestDetails />,
-      },
-      {
-        path: "incidents/:incidentId",
         element: <RequestDetails />,
       },
       {

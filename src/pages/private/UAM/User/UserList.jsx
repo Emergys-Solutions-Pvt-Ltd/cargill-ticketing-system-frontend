@@ -449,6 +449,8 @@ const UserList = () => {
           </div>
         </div>
 
+        <SectionCard tabs={tabs} />
+
         {/* Add User Dialog */}
         <Dialog
           open={openAddUserDialog}
@@ -696,8 +698,6 @@ const UserList = () => {
           </Alert>
         </Snackbar>
       </div>
-
-      <SectionCard tabs={tabs} />
     </Box>
   );
 };
