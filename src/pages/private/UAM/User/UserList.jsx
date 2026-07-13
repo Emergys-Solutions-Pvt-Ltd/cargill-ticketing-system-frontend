@@ -11,12 +11,6 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Chip,
   IconButton,
   Tooltip,
@@ -31,6 +25,7 @@ import {
   FormControlLabel,
   FormGroup,
   Divider,
+  Avatar,
 } from "@mui/material";
 import {
   PersonAdd as PersonAddIcon,
@@ -189,94 +184,138 @@ const UserList = () => {
   };
 
   const UsersTab = (
-    <Box>
-      <Button
-        variant="contained"
-        startIcon={<AddIcon />}
-        onClick={() => setOpenAddUserDialog(true)}
-        sx={{ borderRadius: "10px", textTransform: "none" }}
+    <Box sx={{ fontFamily: "sans-serif" }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 2,
+        }}
       >
-        Add User
-      </Button>
-      <Typography
-        variant="h6"
-        className="font-bold text-slate-800 dark:text-slate-100"
+        <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+          User Accounts ({users.length})
+        </Typography>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => setOpenAddUserDialog(true)}
+          sx={{
+            borderRadius: "8px",
+            textTransform: "none",
+            fontWeight: "bold",
+          }}
+        >
+          Add User
+        </Button>
+      </Box>
+
+      {/* Header */}
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: "2fr 1fr 1fr",
+          gap: 2,
+          p: "0 12px 12px 12px",
+          color: "#6b7280",
+          textTransform: "uppercase",
+          fontSize: "0.75rem",
+          fontWeight: "bold",
+          borderBottom: "1px solid",
+          borderColor: "divider",
+        }}
       >
-        User Accounts ({users.length})
-      </Typography>
-      <TableContainer>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell className="font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider text-xs p-5">
-                User
-              </TableCell>
-              <TableCell className="font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider text-xs p-5">
-                Role
-              </TableCell>
-              <TableCell className="font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider text-xs p-5 text-right">
-                Actions
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {users.map((u) => (
-              <TableRow
-                key={u.id}
-                hover
-                onClick={() => navigate(`/admin/users/${u.id}`)}
-                sx={{ cursor: "pointer" }}
-                className="transition-colors"
+        <Box>User</Box>
+        <Box>Role</Box>
+        <Box sx={{ textAlign: "right" }}>Actions</Box>
+      </Box>
+
+      {/* User Rows */}
+      <Box>
+        {users.map((u) => (
+          <Box
+            key={u.id}
+            onClick={() => navigate(`/admin/users/${u.id}`)}
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "2fr 1fr 1fr",
+              gap: 2,
+              alignItems: "center",
+              backgroundColor: "background.paper",
+              m: "8px 0",
+              p: "16px",
+              borderRadius: "8px",
+              boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+              fontSize: "0.875rem",
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+              "&:hover": {
+                transform: "translateY(-2px)",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+              },
+            }}
+          >
+            {/* User Column */}
+            <Stack
+              direction="row"
+              spacing={2}
+              alignItems="center"
+              sx={{ height: "100%" }}
+            >
+              <Avatar
+                sx={{
+                  bgcolor: "primary.main",
+                  color: "primary.contrastText",
+                  fontWeight: "bold",
+                }}
               >
-                <TableCell className="p-5">
-                  <Stack direction="row" spacing={2} alignItems="center">
-                    <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[#1B3D41] dark:text-[#81B563] font-bold border border-slate-200 dark:border-slate-700">
-                      {u.email.charAt(0).toUpperCase()}
-                    </div>
-                    <Typography
-                      variant="body2"
-                      className="font-semibold text-slate-700 dark:text-slate-200"
-                    >
-                      {u.email}
-                    </Typography>
-                  </Stack>
-                </TableCell>
-                <TableCell className="p-5">
-                  <Chip
-                    label={u.role}
-                    color={getRoleColor(u.role)}
-                    size="small"
-                    className="font-bold rounded-lg px-2"
-                  />
-                </TableCell>
-                <TableCell
-                  className="p-5 text-right"
-                  onClick={(e) => e.stopPropagation()}
+                {u.email.charAt(0).toUpperCase()}
+              </Avatar>
+              <Typography
+                variant="body2"
+                sx={{ fontWeight: 600, display: "flex", alignItems: "center" }}
+              >
+                {u.email}
+              </Typography>
+            </Stack>
+
+            {/* Role Column */}
+            <Box>
+              <Chip
+                label={u.role}
+                color={getRoleColor(u.role)}
+                size="small"
+                sx={{ fontWeight: "bold" }}
+              />
+            </Box>
+
+            {/* Actions Column */}
+            <Box
+              sx={{ textAlign: "right" }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Tooltip title="View Access Policy">
+                <IconButton
+                  size="small"
+                  onClick={() => navigate(`/admin/users/${u.id}`)}
+                  sx={{ mr: 1 }}
                 >
-                  <Tooltip title="View Access Policy">
-                    <IconButton
-                      size="small"
-                      onClick={() => navigate(`/admin/users/${u.id}`)}
-                      className="text-slate-400 hover:text-[#81B563] mr-2"
-                    >
-                      <ArrowForwardIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Revoke Access">
-                    <IconButton
-                      size="small"
-                      onClick={() => handleDeleteUser(u.id)}
-                      className="text-slate-400 hover:text-red-500"
-                    >
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+                  <ArrowForwardIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Revoke Access">
+                <IconButton
+                  size="small"
+                  onClick={() => handleDeleteUser(u.id)}
+                  color="error"
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          </Box>
+        ))}
+      </Box>
     </Box>
   );
 
@@ -425,13 +464,10 @@ const UserList = () => {
 
   return (
     <Box className="p-6 md:p-10 min-h-screen text-slate-800 dark:text-slate-100 transition-colors duration-200">
-      <div className="max-w-5xl mx-auto">
+      <div className="mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
           <div className="flex items-center gap-3 flex-1">
-            <div className="p-3 bg-[#1B3D41] rounded-2xl text-white shadow-md">
-              <AdminIcon fontSize="large" />
-            </div>
             <div>
               <Typography
                 variant="h4"
