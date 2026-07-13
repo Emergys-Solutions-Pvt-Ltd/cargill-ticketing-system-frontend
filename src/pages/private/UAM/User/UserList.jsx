@@ -30,7 +30,6 @@ import {
 import {
   PersonAdd as PersonAddIcon,
   Delete as DeleteIcon,
-  AdminPanelSettings as AdminIcon,
   Email as EmailIcon,
   Shield as ShieldIcon,
   Add as AddIcon,
@@ -184,7 +183,7 @@ const UserList = () => {
   };
 
   const UsersTab = (
-    <Box sx={{ fontFamily: "sans-serif" }}>
+    <Box sx={{ fontFamily: "sans-serif"}}>
       <Box
         sx={{
           display: "flex",
@@ -216,7 +215,7 @@ const UserList = () => {
           display: "grid",
           gridTemplateColumns: "2fr 1fr 1fr",
           gap: 2,
-          p: "0 12px 12px 12px",
+          p: "0 16px 16px 16px",
           color: "#6b7280",
           textTransform: "uppercase",
           fontSize: "0.75rem",
@@ -231,8 +230,9 @@ const UserList = () => {
       </Box>
 
       {/* User Rows */}
-      <Box>
+      <Box sx={{ backgroundColor: "background.paper", borderRadius: "8px" }}>
         {users.map((u) => (
+
           <Box
             key={u.id}
             onClick={() => navigate(`/admin/users/${u.id}`)}
@@ -241,17 +241,14 @@ const UserList = () => {
               gridTemplateColumns: "2fr 1fr 1fr",
               gap: 2,
               alignItems: "center",
-              backgroundColor: "background.paper",
-              m: "8px 0",
               p: "16px",
-              borderRadius: "8px",
-              boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
               fontSize: "0.875rem",
               cursor: "pointer",
               transition: "all 0.2s ease",
+              borderBottom: "1px solid",
+              borderColor: "divider",
               "&:hover": {
-                transform: "translateY(-2px)",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                backgroundColor: "action.hover",
               },
             }}
           >
