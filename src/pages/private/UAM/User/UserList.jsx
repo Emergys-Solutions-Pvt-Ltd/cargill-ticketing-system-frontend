@@ -212,7 +212,7 @@ const UserList = () => {
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: "2fr 1fr 1fr",
+          gridTemplateColumns: "1fr 1fr 1fr 60px",
           gap: 2,
           p: "0 16px 16px 16px",
           color: "#6b7280",
@@ -224,6 +224,7 @@ const UserList = () => {
         }}
       >
         <Box>User</Box>
+        <Box>Email</Box>
         <Box>Role</Box>
         <Box sx={{ textAlign: "right" }}>Actions</Box>
       </Box>
@@ -236,7 +237,7 @@ const UserList = () => {
             onClick={() => navigate(`/admin/users/${u.id}`)}
             sx={{
               display: "grid",
-              gridTemplateColumns: "2fr 1fr 1fr",
+              gridTemplateColumns: "1fr 1fr 1fr 60px",
               gap: 2,
               alignItems: "center",
               p: "12px",
@@ -273,6 +274,11 @@ const UserList = () => {
                 {u.email}
               </Typography>
             </Stack>
+
+            {/* Email Column */}
+            <Box>
+              <Typography variant="body2">{u.email}</Typography>
+            </Box>
 
             {/* Role Column */}
             <Box>
