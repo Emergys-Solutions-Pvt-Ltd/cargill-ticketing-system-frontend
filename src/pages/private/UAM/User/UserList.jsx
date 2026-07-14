@@ -195,7 +195,7 @@ const UserList = () => {
           User Accounts ({users.length})
         </Typography>
         <Button
-          variant="contained"
+          variant="outlined"
           startIcon={<AddIcon />}
           onClick={() => setOpenAddUserDialog(true)}
           sx={{
@@ -305,7 +305,7 @@ const UserList = () => {
   const RolesTab = (
     <Box>
       <Button
-        variant="contained"
+        variant="outlined"
         startIcon={<AddIcon />}
         onClick={() => setOpenCreateRoleDialog(true)}
         sx={{ borderRadius: "10px", textTransform: "none" }}
