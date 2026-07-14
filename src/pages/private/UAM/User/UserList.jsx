@@ -29,11 +29,9 @@ import {
 } from "@mui/material";
 import {
   PersonAdd as PersonAddIcon,
-  Delete as DeleteIcon,
   Email as EmailIcon,
   Shield as ShieldIcon,
   Add as AddIcon,
-  ArrowForward as ArrowForwardIcon,
 } from "@mui/icons-material";
 import {
   getStoredUsers,
@@ -43,6 +41,7 @@ import {
   systemPermissions,
 } from "../../../../utils/rbacData";
 import SectionCard from "../../../../components/SectionCard";
+import trash_icon from "../../../../assets/icons/trash_icon.svg";
 
 const UserList = () => {
   const navigate = useNavigate();
@@ -183,7 +182,7 @@ const UserList = () => {
   };
 
   const UsersTab = (
-    <Box sx={{ fontFamily: "sans-serif"}}>
+    <Box sx={{ fontFamily: "sans-serif" }}>
       <Box
         sx={{
           display: "flex",
@@ -232,7 +231,6 @@ const UserList = () => {
       {/* User Rows */}
       <Box sx={{ backgroundColor: "background.paper", borderRadius: "8px" }}>
         {users.map((u) => (
-
           <Box
             key={u.id}
             onClick={() => navigate(`/admin/users/${u.id}`)}
@@ -241,7 +239,7 @@ const UserList = () => {
               gridTemplateColumns: "2fr 1fr 1fr",
               gap: 2,
               alignItems: "center",
-              p: "16px",
+              p: "12px",
               fontSize: "0.875rem",
               cursor: "pointer",
               transition: "all 0.2s ease",
@@ -270,7 +268,7 @@ const UserList = () => {
               </Avatar>
               <Typography
                 variant="body2"
-                sx={{ fontWeight: 600, display: "flex", alignItems: "center" }}
+                sx={{ display: "flex", alignItems: "center", color: "#1C64F2" }}
               >
                 {u.email}
               </Typography>
@@ -278,12 +276,7 @@ const UserList = () => {
 
             {/* Role Column */}
             <Box>
-              <Chip
-                label={u.role}
-                color={getRoleColor(u.role)}
-                size="small"
-                sx={{ fontWeight: "bold" }}
-              />
+              <Typography variant="body2">{u.role}</Typography>
             </Box>
 
             {/* Actions Column */}
@@ -291,22 +284,9 @@ const UserList = () => {
               sx={{ textAlign: "right" }}
               onClick={(e) => e.stopPropagation()}
             >
-              <Tooltip title="View Access Policy">
-                <IconButton
-                  size="small"
-                  onClick={() => navigate(`/admin/users/${u.id}`)}
-                  sx={{ mr: 1 }}
-                >
-                  <ArrowForwardIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
               <Tooltip title="Revoke Access">
-                <IconButton
-                  size="small"
-                  onClick={() => handleDeleteUser(u.id)}
-                  color="error"
-                >
-                  <DeleteIcon fontSize="small" />
+                <IconButton onClick={() => handleDeleteUser(u.id)}>
+                  <Box component="img" src={trash_icon} alt="Delete" />
                 </IconButton>
               </Tooltip>
             </Box>
