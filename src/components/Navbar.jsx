@@ -61,15 +61,19 @@ export default function Navbar() {
   const { mode, toggleTheme } = useThemeContext();
   const { user, logout } = useAuth();
 
-  const navLinkStyle = useMemo(() => ({ isActive }) => ({
-    color: mode === "light" ? "#000000" : "#ffffff",
-    textDecoration: "none",
-    padding: "0.5rem 1rem",
-    borderRadius: "20px",
-    fontWeight: 500,
-    transition: "all 0.2s ease",
-    backgroundColor: isActive ? "#0B8F4D" : "transparent",
-  }), [mode]);
+  const navLinkStyle = useMemo(
+    () =>
+      ({ isActive }) => ({
+        color: mode === "light" ? "#000000" : "#ffffff",
+        textDecoration: "none",
+        padding: "0.5rem 1rem",
+        borderRadius: "20px",
+        fontWeight: 500,
+        transition: "all 0.2s ease",
+        backgroundColor: isActive ? "#0B8F4D" : "transparent",
+      }),
+    [mode],
+  );
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -143,24 +147,6 @@ export default function Navbar() {
                   fontSize: "0.9rem",
                 }}
               >
-                <li>
-                  <NavLink to="/" style={navLinkStyle}>
-                    Service Catalog
-                  </NavLink>
-                </li>
-                {/* <li>
-                  <Box
-                    onClick={() => setKbOpen(true)}
-                    style={{
-                      ...linkStyle,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "4px",
-                    }}
-                  >
-                    Knowledge Base
-                  </Box>
-                </li> */}
                 <li>
                   <NavLink to="/requests" style={navLinkStyle}>
                     My Requests

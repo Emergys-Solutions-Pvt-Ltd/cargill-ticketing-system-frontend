@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
 import { Box, Typography } from "@mui/material";
 import App from "./App";
 import RequestDetails from "./pages/private/Requests/RequestDetails";
@@ -9,7 +9,6 @@ import RequestList from "./pages/private/Requests/RequestList";
 import UserDetails from "./pages/private/UAM/User/UserDetails";
 import RoleDetails from "./pages/private/UAM/Roles/RoleDetails";
 import Login from "./pages/public/Login/Login";
-import Home from "./pages/private/Home/Home";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { ThemeContextProvider } from "./context/ThemeContext";
 import { AuthProvider } from "./context/AuthContext";
@@ -29,8 +28,8 @@ const router = createBrowserRouter([
     ),
     children: [
       {
-        path: "",
-        element: <Home />,
+        index: true,
+        element: <Navigate to="/requests" replace />,
       },
       {
         path: "requests",
