@@ -41,7 +41,7 @@ import {
   systemPermissions,
 } from "../../../../utils/rbacData";
 import SectionCard from "../../../../components/SectionCard";
-import trash_icon from "../../../../assets/icons/trash_icon.svg";
+import TrashIcon from "../../../../assets/icons/trash.svg";
 
 const UserList = () => {
   const navigate = useNavigate();
@@ -292,7 +292,7 @@ const UserList = () => {
             >
               <Tooltip title="Revoke Access">
                 <IconButton onClick={() => handleDeleteUser(u.id)}>
-                  <Box component="img" src={trash_icon} alt="Delete" />
+                  <Box component="img" src={TrashIcon} alt="Delete" />
                 </IconButton>
               </Tooltip>
             </Box>

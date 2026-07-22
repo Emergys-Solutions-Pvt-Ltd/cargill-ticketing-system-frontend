@@ -11,17 +11,15 @@ import {
   Stack,
   Chip,
   TextField,
-  MenuItem,
-  Select,
-  FormControl,
   InputAdornment,
 } from "@mui/material";
-import { Search as SearchIcon } from "@mui/icons-material";
+// import { Search as SearchIcon } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import {
   getStoredTickets,
   getStoredTicketsAsync,
 } from "../../../utils/rbacData";
+import SearchIcon from "../../../../src/assets/icons/search.svg";
 
 const getStatusColor = (status) => {
   const s = status.toLowerCase();
@@ -108,103 +106,75 @@ const RequestList = () => {
         p: { xs: 2, md: 4 },
       }}
     >
-      {/* Header */}
       <Box
         sx={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          mb: 3,
         }}
       >
-        <Box>
-          <Typography
-            sx={{ fontWeight: 600, fontSize: "18px", color: "text.primary" }}
-          >
-            Requests
-          </Typography>
-          <Typography
-            variant="caption"
-            sx={{ color: "text.secondary", fontWeight: 400, fontSize: "13px" }}
-          >
-            Search, view and stay informed about your requests and their current
-            status.
-          </Typography>
-        </Box>
-      </Box>
-
-      {/* Search & Filters */}
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          mb: 3,
-          flexWrap: "wrap",
-          alignItems: "center",
-        }}
-      >
-        <TextField
-          placeholder="Search by ID, short description, or category"
-          variant="outlined"
-          size="small"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          sx={{
-            flexGrow: 1,
-            maxWidth: "450px",
-            "& .MuiOutlinedInput-root": {
-              borderRadius: "8px",
-            },
-            backgroundColor: "background.paper",
-          }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon color="action" fontSize="small" />
-              </InputAdornment>
-            ),
-          }}
-        />
+        {/* Header */}
         <Box
           sx={{
             display: "flex",
+            justifyContent: "space-between",
             alignItems: "center",
-            gap: 1.5,
           }}
         >
-          <Typography
-            variant="body2"
-            sx={{
-              fontSize: "13px",
-              fontWeight: "bold",
-              color: "text.primary",
-            }}
-          >
-            Status
-          </Typography>
-
-          <FormControl
-            size="small"
-            sx={{ minWidth: 160, backgroundColor: "background.paper" }}
-          >
-            <Select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              displayEmpty
+          <Box>
+            <Typography
+              sx={{ fontWeight: 600, fontSize: "18px", color: "text.primary" }}
+            >
+              Requests
+            </Typography>
+            <Typography
+              variant="caption"
               sx={{
-                height: 36,
+                color: "text.secondary",
+                fontWeight: 400,
                 fontSize: "13px",
-                borderRadius: "6px",
               }}
             >
-              <MenuItem value="All">All Status</MenuItem>
-              <MenuItem value="New">New / Open</MenuItem>
-              <MenuItem value="In Progress">In Progress</MenuItem>
-              <MenuItem value="Pending">Pending / On Hold</MenuItem>
-              <MenuItem value="Resolved">Resolved</MenuItem>
-              <MenuItem value="Closed">Closed</MenuItem>
-            </Select>
-          </FormControl>
+              Search, view and stay informed about your requests and their
+              current status.
+            </Typography>
+          </Box>
+        </Box>
+
+        {/* Search & Filters */}
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            gap: 2,
+          }}
+        >
+          <TextField
+            placeholder="Search..."
+            variant="outlined"
+            size="small"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            sx={{
+              flexGrow: 1,
+              maxWidth: "450px",
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "4px",
+              },
+              backgroundColor: "background.paper",
+            }}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <img src={SearchIcon} alt="Search" width={16} height={16} />
+                  </InputAdornment>
+                ),
+              },
+            }}
+          />
+          <Box>Filter</Box>
         </Box>
       </Box>
 
@@ -281,9 +251,7 @@ const RequestList = () => {
                   }}
                   onClick={() => navigate(`/requests/${row.id}`)}
                 >
-                  <TableCell sx={{ color: "#1C64F2" }}>
-                    {row.id}
-                  </TableCell>
+                  <TableCell sx={{ color: "#1C64F2" }}>{row.id}</TableCell>
                   <TableCell
                     sx={{
                       maxWidth: 280,
