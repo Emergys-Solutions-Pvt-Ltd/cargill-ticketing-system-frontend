@@ -13,13 +13,13 @@ import {
   TextField,
   InputAdornment,
 } from "@mui/material";
-// import { Search as SearchIcon } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import {
   getStoredTickets,
   getStoredTicketsAsync,
 } from "../../../utils/rbacData";
 import SearchIcon from "../../../../src/assets/icons/search.svg";
+import FilterIcon from "../../../../src/assets/icons/filter.svg";
 
 const getStatusColor = (status) => {
   const s = status.toLowerCase();
@@ -174,7 +174,21 @@ const RequestList = () => {
               },
             }}
           />
-          <Box>Filter</Box>
+          <Box
+            sx={{
+              height: "2.125rem",
+              backgroundColor: "background.paper",
+              borderRadius: "4px",
+              border: "1px solid #D1D5DB",
+              px: 2,
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+            }}
+          >
+            <Box component="img" src={FilterIcon} alt="Filter" />
+            <Typography variant="body2">Filter</Typography>
+          </Box>
         </Box>
       </Box>
 
