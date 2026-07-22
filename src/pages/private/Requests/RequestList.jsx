@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import {
   Box,
   Typography,
+  TableContainer,
   Table,
   TableBody,
   TableCell,
@@ -11,6 +12,7 @@ import {
   Stack,
   Chip,
   TextField,
+  Paper,
   InputAdornment,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
@@ -24,18 +26,11 @@ import FilterIcon from "../../../../src/assets/icons/filter.svg";
 const getStatusColor = (status) => {
   const s = status.toLowerCase();
   switch (s) {
-    case "new":
-    case "open":
-      return { bg: "#e6f4ea", text: "#137333", border: "1px solid #ceead6" };
     case "in progress":
-      return { bg: "#e8f0fe", text: "#1a73e8", border: "1px solid #d2e3fc" };
+      return { bg: "#E1EFFE", text: "#3B82F6", border: "1px solid #C3DDFD" };
     case "pending":
     case "on hold":
-      return { bg: "#fef7e0", text: "#b06000", border: "1px solid #feebd0" };
-    case "resolved":
-      return { bg: "#e2f1e8", text: "#0f9d58", border: "1px solid #c6ecdb" };
-    case "closed":
-      return { bg: "#f1f3f4", text: "#5f6368", border: "1px solid #dadce0" };
+      return { bg: "#FEECDC", text: "#C97601", border: "1px solid #FCD9BD" };
     default:
       return { bg: "#f1f3f4", text: "#5f6368", border: "1px solid #dadce0" };
   }
@@ -101,7 +96,6 @@ const RequestList = () => {
     <Box
       sx={{
         width: "100%",
-        minHeight: "100vh",
         backgroundColor: "background.default",
         p: { xs: 2, md: 4 },
       }}
@@ -193,12 +187,21 @@ const RequestList = () => {
       </Box>
 
       {/* Table listing */}
-      <Box>
+      <TableContainer
+        component={Paper}
+        elevation={0}
+        sx={{
+          mt: 2,
+          borderRadius: "8px",
+          border: "1px solid #D1D5DB",
+        }}
+      >
         <Table
           sx={{
             minWidth: 650,
-            borderCollapse: "separate",
-            borderSpacing: "0 8px",
+            "& .MuiTableCell-root": {
+              borderBottom: "1px solid #E5E7EB",
+            },
           }}
           aria-label="Cargill ticket list"
         >
@@ -207,21 +210,23 @@ const RequestList = () => {
               {[
                 "TICKET ID",
                 "SHORT DESCRIPTION",
-                "PRIORITY",
-                "CATEGORY",
-                "STATE",
-                "CREATED",
-                "ASSIGNEE",
+                "DESCRIPTION",
+                "TICKET TYPE",
+                "FORM NAME",
+                "CLIENT ID",
+                "CONTACT",
+                "STATUS",
+                "OPENED DATE",
+                "STAFF",
               ].map((head) => (
                 <TableCell
                   key={head}
                   sx={{
                     fontWeight: 600,
-                    color: "text.secondary",
+                    color: "#6B7280",
                     fontSize: "0.75rem",
                     textTransform: "uppercase",
-                    border: "none",
-                    py: 1,
+                    py: 1.5,
                   }}
                 >
                   {head}
@@ -232,45 +237,30 @@ const RequestList = () => {
           <TableBody>
             {paginatedRequests.map((row) => {
               const statusColors = getStatusColor(row.status);
-              const priorityColors = getPriorityColor(row.priority || "Medium");
-
               return (
                 <TableRow
                   key={row.id}
+                  hover
                   sx={{
                     cursor: "pointer",
-                    backgroundColor: "background.paper",
-                    "&:hover": {
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-                    },
-                    "& > td, & > th": {
-                      border: "none",
-                      py: 2,
-                      borderTop: "1px solid",
-                      borderBottom: "1px solid",
-                      borderColor: "divider",
-                    },
-                    "& > td:first-of-type, & > th:first-of-type": {
-                      borderTopLeftRadius: "8px",
-                      borderBottomLeftRadius: "8px",
-                      borderLeft: "1px solid",
-                      borderColor: "divider",
-                    },
-                    "& > td:last-of-type": {
-                      borderTopRightRadius: "8px",
-                      borderBottomRightRadius: "8px",
-                      borderRight: "1px solid",
-                      borderColor: "divider",
-                    },
+                    "&:last-child td, &:last-child th": { border: 0 },
                   }}
                   onClick={() => navigate(`/requests/${row.id}`)}
                 >
-                  <TableCell sx={{ color: "#1C64F2" }}>{row.id}</TableCell>
+                  <TableCell
+                    component="th"
+                    scope="row"
+                    sx={{
+                      color: "#1C64F2",
+                      fontWeight: 500,
+                      "&:hover": { textDecoration: "underline" },
+                    }}
+                  >
+                    {row.id}
+                  </TableCell>
                   <TableCell
                     sx={{
-                      maxWidth: 280,
-                      fontWeight: 500,
-                      color: "text.primary",
+                      maxWidth: 200,
                       whiteSpace: "nowrap",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
@@ -278,30 +268,20 @@ const RequestList = () => {
                   >
                     {row.title}
                   </TableCell>
-                  <TableCell>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <Box
-                        sx={{
-                          width: 8,
-                          height: 8,
-                          borderRadius: "50%",
-                          backgroundColor: priorityColors.dot,
-                        }}
-                      />
-                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                        {row.priority || "Medium"}
-                      </Typography>
-                    </Box>
-                  </TableCell>
                   <TableCell
                     sx={{
-                      fontSize: "0.85rem",
-                      color: "text.primary",
-                      fontWeight: 500,
+                      maxWidth: 200,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
                     }}
                   >
-                    {row.category || "General Support"}
+                    {row.description || row.title}
                   </TableCell>
+                  <TableCell>{row.ticketType || "Service"}</TableCell>
+                  <TableCell>{row.formName || "General Request"}</TableCell>
+                  <TableCell>{row.clientId || "N/A"}</TableCell>
+                  <TableCell>{row.contact || "N/A"}</TableCell>
                   <TableCell>
                     <Chip
                       label={row.status}
@@ -316,30 +296,15 @@ const RequestList = () => {
                       }}
                     />
                   </TableCell>
-                  <TableCell
-                    sx={{ color: "text.primary", fontSize: "0.85rem" }}
-                  >
-                    {row.created}
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      color: "text.primary",
-                      fontSize: "0.85rem",
-                      fontWeight: 500,
-                    }}
-                  >
-                    {row.assignee || "Unassigned"}
-                  </TableCell>
+                  <TableCell>{row.created}</TableCell>
+                  <TableCell>{row.assignee || "Unassigned"}</TableCell>
                 </TableRow>
               );
             })}
             {paginatedRequests.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} align="center" sx={{ py: 4, border: 0 }}>
-                  <Typography
-                    variant="body2"
-                    sx={{ color: "text.secondary", fontStyle: "italic" }}
-                  >
+                <TableCell colSpan={10} align="center" sx={{ py: 4 }}>
+                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
                     No matching records found in this view.
                   </Typography>
                 </TableCell>
@@ -347,7 +312,7 @@ const RequestList = () => {
             )}
           </TableBody>
         </Table>
-      </Box>
+      </TableContainer>
 
       {/* Pagination */}
       <Box

@@ -94,10 +94,10 @@ export default function Navbar() {
       <AppBar
         position="static"
         sx={{
-          bgcolor: mode === "light" ? "#F8F8F8" : "#1B3D41",
+          bgcolor: mode === "light" ? "background.paper" : "#1B3D41",
           color: mode === "light" ? "#000000" : "#ffffff",
           borderBottom: "1px solid",
-          borderColor: mode === "light" ? "#b0a9a9" : "rgba(255,255,255,0.08)",
+          borderColor: mode === "light" ? "#E0E1E0" : "rgba(255,255,255,0.08)",
           boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
         }}
         elevation={0}
