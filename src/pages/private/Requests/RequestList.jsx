@@ -155,6 +155,7 @@ const RequestList = () => {
               maxWidth: "450px",
               "& .MuiOutlinedInput-root": {
                 borderRadius: "4px",
+                height: "2.125rem",
               },
               backgroundColor: "background.paper",
             }}
