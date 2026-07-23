@@ -14,6 +14,9 @@ import {
   TextField,
   Paper,
   InputAdornment,
+  FormControl,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import {
@@ -65,7 +68,7 @@ const RequestList = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [page, setPage] = useState(0);
-  const rowsPerPage = 8;
+  const [rowsPerPage, setRowsPerPage] = useState(8);
 
   useEffect(() => {
     if (tickets.length === 0) {
@@ -321,26 +324,115 @@ const RequestList = () => {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          mt: 2,
-          p: 2,
+          mt: 3,
         }}
       >
-        <Typography variant="body2" color="text.secondary">
-          {`${page * rowsPerPage + 1} - ${Math.min(
-            (page + 1) * rowsPerPage,
-            filteredRequests.length,
-          )} of ${filteredRequests.length} items`}
-        </Typography>
-        <Stack direction="row" spacing={1}>
+        {/* Left Section */}
+        <Stack direction="row" alignItems="center" spacing={2}>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ display: "flex", alignItems: "center" }}
+          >
+            {filteredRequests.length > 0
+              ? `${page * rowsPerPage + 1} - ${Math.min(
+                  (page + 1) * rowsPerPage,
+                  filteredRequests.length,
+                )}`
+              : "0"}{" "}
+            of {filteredRequests.length} items
+          </Typography>
+
+          <FormControl size="small" sx={{ minWidth: 120 }}>
+            <Select
+              value={rowsPerPage}
+              onChange={(e) => {
+                setRowsPerPage(parseInt(e.target.value, 10));
+                setPage(0);
+              }}
+              sx={{
+                borderRadius: "6px",
+                "& .MuiSelect-select": {
+                  display: "flex",
+                  alignItems: "center",
+                  height: "100%",
+                  boxSizing: "border-box",
+                },
+              }}
+            >
+              <MenuItem value={8}>8 / page</MenuItem>
+              <MenuItem value={10}>10 / page</MenuItem>
+              <MenuItem value={25}>25 / page</MenuItem>
+            </Select>
+          </FormControl>
+        </Stack>
+
+        {/* Right Section */}
+        <Stack direction="row" alignItems="center" spacing={1}>
           <Button
             variant="outlined"
             size="small"
             onClick={() => setPage((p) => Math.max(0, p - 1))}
             disabled={page === 0}
-            sx={{ textTransform: "none" }}
+            sx={{
+              height: 36,
+              minWidth: "auto",
+              px: 1.5,
+              textTransform: "none",
+              color: "text.primary",
+            }}
           >
             Previous
           </Button>
+
+          <TextField
+            size="small"
+            value={page + 1}
+            onChange={(e) => {
+              const newPage = e.target.value ? Number(e.target.value) - 1 : 0;
+
+              if (
+                !isNaN(newPage) &&
+                newPage >= 0 &&
+                newPage < Math.ceil(filteredRequests.length / rowsPerPage)
+              ) {
+                setPage(newPage);
+              }
+            }}
+            sx={{
+              width: 35,
+              "& .MuiOutlinedInput-root": {
+                height: 32,
+                borderRadius: "8px",
+                backgroundColor: "#FFFFFF",
+                border: "1px solid#00843D",
+                fontWeight: 500,
+
+                "& input": {
+                  textAlign: "center",
+                  padding: 0,
+                  height: "100%",
+                },
+
+                "& fieldset": {
+                  border: "none",
+                },
+              },
+            }}
+          />
+
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              height: 36,
+            }}
+          >
+            of {Math.ceil(filteredRequests.length / rowsPerPage)}
+          </Typography>
+
           <Button
             variant="outlined"
             size="small"
@@ -350,7 +442,13 @@ const RequestList = () => {
               )
             }
             disabled={(page + 1) * rowsPerPage >= filteredRequests.length}
-            sx={{ textTransform: "none" }}
+            sx={{
+              height: 36,
+              minWidth: "auto",
+              px: 1.5,
+              textTransform: "none",
+              color: "text.primary",
+            }}
           >
             Next
           </Button>
