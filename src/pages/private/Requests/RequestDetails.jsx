@@ -133,17 +133,17 @@ function RequestDetails() {
           Back to Requests
         </Button>
 
-        <Card
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            flexWrap: "wrap",
-            gap: 2,
-          }}
-        >
-          <Box sx={{ mx: 2, my: 2 }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+        <Card sx={{ px: 2, py: 2 }}>
+          <Box>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                gap: 2,
+                mb: 1,
+              }}
+            >
               <Typography
                 sx={{
                   fontWeight: "bold",
@@ -164,71 +164,24 @@ function RequestDetails() {
                   borderRadius: "50px",
                 }}
               />
-
-              <Chip
-                label={request.priority || "Medium"}
-                sx={{
-                  backgroundColor: priorityColors.bg,
-                  color: priorityColors.text,
-                  fontWeight: 700,
-                  fontSize: "0.688rem",
-                  borderRadius: "50px",
-                }}
-              />
-              <Chip
-                label={"Created " + request.created}
-                sx={{
-                  backgroundColor: "primary",
-                  color: "black",
-                  fontWeight: 700,
-                  fontSize: "0.688rem",
-                  borderRadius: "50px",
-                }}
-              />
-              <Chip
-                label={"Last Updated " + request.updated}
-                sx={{
-                  backgroundColor: "primary",
-                  color: "black",
-                  fontWeight: 700,
-                  fontSize: "0.688rem",
-                  borderRadius: "50px",
-                }}
-              />
             </Box>
-            <Typography
-              sx={{
-                color: "text.secondary",
-                fontWeight: 500,
-                maxWidth: "50rem",
-                fontSize: "1rem",
-              }}
-            >
-              {request.title}
-            </Typography>
           </Box>
-          <Stack direction="row" spacing={2} sx={{ mx: 2, my: 2 }}>
-            {request.status !== "Closed" && request.status !== "Resolved" && (
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={handleResolveTicket}
-                sx={{
-                  color: "#ffffff",
-                  fontWeight: "bold",
-                  borderRadius: "8px",
-                }}
-              >
-                Resolve Ticket
-              </Button>
-            )}
-          </Stack>
+          <Typography
+            sx={{
+              color: "text.secondary",
+              fontWeight: 500,
+              maxWidth: "50rem",
+              fontSize: "1rem",
+            }}
+          >
+            {request.title}
+          </Typography>
         </Card>
       </Box>
 
       {/* Layout Split */}
       <Grid container spacing={4}>
-        <Grid item xs={12} sx={{width: "100%"}}>
+        <Grid item xs={12} sx={{ width: "100%" }}>
           {/* Activity Log & Attachments */}
           <Card
             variant="outlined"
@@ -241,7 +194,7 @@ function RequestDetails() {
               backgroundImage: "none",
             }}
           >
-              <LabTabs comments={request.comments || []} request={request}/>
+            <LabTabs comments={request.comments || []} request={request} />
           </Card>
         </Grid>
       </Grid>
