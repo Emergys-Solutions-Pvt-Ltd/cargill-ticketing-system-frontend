@@ -1,16 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Box,
   Typography,
-  TableContainer,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
   Chip,
   TextField,
-  Paper,
   InputAdornment,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
@@ -20,19 +13,15 @@ import {
 } from "../../../utils/rbacData";
 import SearchIcon from "../../../../src/assets/icons/search.svg";
 import FilterIcon from "../../../../src/assets/icons/filter.svg";
-import Pagination from "../../../components/Pagination";
+import CommonTable from "../../../components/common/CommonTable";
+import CommonChip from "../../../components/common/CommonChip";
 
-const getStatusColor = (status) => {
-  const s = status.toLowerCase();
-  switch (s) {
-    case "in progress":
-      return { bg: "#E1EFFE", text: "#3B82F6", border: "1px solid #C3DDFD" };
-    case "pending":
-    case "on hold":
-      return { bg: "#FEECDC", text: "#C97601", border: "1px solid #FCD9BD" };
-    default:
-      return { bg: "#f1f3f4", text: "#5f6368", border: "1px solid #dadce0" };
-  }
+// ── Page-specific: truncation style reused by two columns ──
+const truncateCellSx = {
+  maxWidth: 200,
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
 };
 
 const RequestList = () => {
@@ -66,6 +55,73 @@ const RequestList = () => {
   const paginatedRequests = filteredRequests.slice(
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage,
+  );
+
+  // ── Page-specific: column definitions ──
+
+  const columns = useMemo(
+    () => [
+      {
+        key: "id",
+        label: "TICKET ID",
+        cellProps: { component: "th", scope: "row" },
+        cellSx: {
+          color: "#1C64F2",
+          fontWeight: 500,
+          "&:hover": { textDecoration: "underline" },
+        },
+      },
+      {
+        key: "title",
+        label: "SHORT DESCRIPTION",
+        cellSx: truncateCellSx,
+      },
+      {
+        key: "description",
+        label: "DESCRIPTION",
+        cellSx: truncateCellSx,
+        render: (value, row) => row.description || row.title,
+      },
+      {
+        key: "ticketType",
+        label: "TICKET TYPE",
+        render: (value) => value || "Service",
+      },
+      {
+        key: "formName",
+        label: "FORM NAME",
+        render: (value) => value || "General Request",
+      },
+      {
+        key: "clientId",
+        label: "CLIENT ID",
+        render: (value) => value || "N/A",
+      },
+      {
+        key: "contact",
+        label: "CONTACT",
+        render: (value) => value || "N/A",
+      },
+      {
+        key: "status",
+        label: "STATUS",
+        render: (_value, row) => {
+          return (
+            <CommonChip status={row.status} label={row.status} />
+          );
+        },
+      },
+      {
+        key: "created",
+        label: "OPENED DATE",
+      },
+      {
+        key: "assignee",
+        label: "STAFF",
+        render: (value) => value || "Unassigned",
+      },
+    ],
+    [],
   );
 
   return (
@@ -163,143 +219,23 @@ const RequestList = () => {
         </Box>
       </Box>
 
-      {/* Table listing */}
-      <TableContainer
-        component={Paper}
-        elevation={0}
-        sx={{
-          mt: 2,
-          borderRadius: "8px",
-          border: "1px solid #D1D5DB",
-        }}
-      >
-        <Table
-          sx={{
-            minWidth: 650,
-            "& .MuiTableCell-root": {
-              borderBottom: "1px solid #E5E7EB",
-            },
-          }}
-          aria-label="Cargill ticket list"
-        >
-          <TableHead>
-            <TableRow>
-              {[
-                "TICKET ID",
-                "SHORT DESCRIPTION",
-                "DESCRIPTION",
-                "TICKET TYPE",
-                "FORM NAME",
-                "CLIENT ID",
-                "CONTACT",
-                "STATUS",
-                "OPENED DATE",
-                "STAFF",
-              ].map((head) => (
-                <TableCell
-                  key={head}
-                  sx={{
-                    fontWeight: 600,
-                    color: "#6B7280",
-                    fontSize: "0.75rem",
-                    textTransform: "uppercase",
-                    py: 1.5,
-                  }}
-                >
-                  {head}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {paginatedRequests.map((row) => {
-              const statusColors = getStatusColor(row.status);
-              return (
-                <TableRow
-                  key={row.id}
-                  hover
-                  sx={{
-                    cursor: "pointer",
-                    "&:last-child td, &:last-child th": { border: 0 },
-                  }}
-                  onClick={() => navigate(`/requests/${row.id}`)}
-                >
-                  <TableCell
-                    component="th"
-                    scope="row"
-                    sx={{
-                      color: "#1C64F2",
-                      fontWeight: 500,
-                      "&:hover": { textDecoration: "underline" },
-                    }}
-                  >
-                    {row.id}
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      maxWidth: 200,
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {row.title}
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      maxWidth: 200,
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {row.description || row.title}
-                  </TableCell>
-                  <TableCell>{row.ticketType || "Service"}</TableCell>
-                  <TableCell>{row.formName || "General Request"}</TableCell>
-                  <TableCell>{row.clientId || "N/A"}</TableCell>
-                  <TableCell>{row.contact || "N/A"}</TableCell>
-                  <TableCell>
-                    <Chip
-                      label={row.status}
-                      size="small"
-                      sx={{
-                        fontWeight: "bold",
-                        fontSize: "0.72rem",
-                        borderRadius: "50px",
-                        bgcolor: statusColors.bg,
-                        color: statusColors.text,
-                        border: statusColors.border,
-                      }}
-                    />
-                  </TableCell>
-                  <TableCell>{row.created}</TableCell>
-                  <TableCell>{row.assignee || "Unassigned"}</TableCell>
-                </TableRow>
-              );
-            })}
-            {paginatedRequests.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={10} align="center" sx={{ py: 4 }}>
-                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                    No matching records found in this view.
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
-
-      {/* Pagination */}
-      <Pagination
-        count={filteredRequests.length}
-        page={page}
-        onPageChange={setPage}
-        rowsPerPage={rowsPerPage}
-        onRowsPerPageChange={(value) => {
-          setRowsPerPage(value);
-          setPage(0);
+      {/* Table — now powered by the reusable CommonTable component */}
+      <CommonTable
+        columns={columns}
+        rows={paginatedRequests}
+        onRowClick={(row) => navigate(`/requests/${row.id}`)}
+        emptyMessage="No matching records found in this view."
+        tableContainerSx={{ mt: 2 }}
+        ariaLabel="Cargill ticket list"
+        pagination={{
+          count: filteredRequests.length,
+          page,
+          onPageChange: setPage,
+          rowsPerPage,
+          onRowsPerPageChange: (value) => {
+            setRowsPerPage(value);
+            setPage(0);
+          },
         }}
       />
     </Box>
