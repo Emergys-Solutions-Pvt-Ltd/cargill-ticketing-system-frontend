@@ -128,6 +128,9 @@ const RequestList = () => {
     <Box
       sx={{
         width: "100%",
+        height: "90vh",
+        display: "flex",
+        flexDirection: "column",
         backgroundColor: "background.default",
         p: { xs: 2, md: 4 },
       }}
@@ -221,11 +224,12 @@ const RequestList = () => {
 
       {/* Table — now powered by the reusable CommonTable component */}
       <CommonTable
+        sx={{ flexGrow: 1, minHeight: 0, mt: 2 }}
         columns={columns}
         rows={paginatedRequests}
         onRowClick={(row) => navigate(`/requests/${row.id}`)}
         emptyMessage="No matching records found in this view."
-        tableContainerSx={{ mt: 2 }}
+        tableContainerSx={{ mt: 0 }}
         ariaLabel="Cargill ticket list"
         pagination={{
           count: filteredRequests.length,

@@ -43,7 +43,7 @@ const Pagination = ({
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        mt: 3,
+        mt: 2,
       }}
     >
       {/* Left Section */}

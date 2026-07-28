@@ -102,13 +102,15 @@ const CommonTable = ({
   const isSelected = (row) => selectedRows.includes(getRowKey(row));
 
   return (
-    <Box sx={rootSx}>
+    <Box sx={{ display: "flex", flexDirection: "column", height: "100%", ...rootSx }}>
       <TableContainer
         component={Paper}
         elevation={0}
         sx={{
           borderRadius: "8px",
           border: "1px solid #D1D5DB",
+          flexGrow: 1,
+          overflow: "auto",
           ...tableContainerSx,
         }}
       >
@@ -118,6 +120,7 @@ const CommonTable = ({
             minWidth,
             "& .MuiTableCell-root": {
               borderBottom: "1px solid #E5E7EB",
+              whiteSpace: "nowrap",
             },
             ...tableSx,
           }}
