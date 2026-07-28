@@ -22,10 +22,30 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import BookIcon from "@mui/icons-material/Book";
+import Avatar from "@mui/material/Avatar";
 import { Link, NavLink } from "react-router-dom";
 import { useThemeContext } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
-import cargillLogo from "../assets/cargill-logo.png";
+import cargillLogo from "../assets/cargill_logo.svg";
+import LogoutIcon from "../assets/icons/logout.svg";
+
+const getDisplayName = (email) => {
+  if (!email) return "Guest User";
+  const namePart = email.split("@")[0];
+  return namePart
+    .split(/[._-]/)
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+};
+
+const getInitials = (name) => {
+  if (!name) return "G";
+  const parts = name.split(" ");
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+  return parts[0][0].toUpperCase();
+};
 
 const kbArticles = [
   {
@@ -128,7 +148,7 @@ export default function Navbar() {
                   component="img"
                   src={cargillLogo}
                   alt="Cargill Logo"
-                  sx={{ height: 24, display: "block" }}
+                  sx={{ height: "36px", width: "84px", display: "block" }}
                 />
               </Link>
             </Typography>
@@ -178,45 +198,66 @@ export default function Navbar() {
               {mode === "dark" ? <LightModeIcon /> : <DarkModeIcon />}
             </IconButton>
 
-            <IconButton
-              size="large"
-              aria-label="account of current user"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleMenu}
-              color="inherit"
-            >
-              <AccountCircle />
-            </IconButton>
-
-            {user && (
+            {user ? (
               <Box
                 sx={{
                   display: "flex",
-                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 1.5,
+                  ml: 2,
                   mr: 1,
                   cursor: "pointer",
                   userSelect: "none",
                 }}
                 onClick={handleMenu}
               >
-                <Typography
-                  variant="body2"
+                <Avatar
                   sx={{
+                    bgcolor: "#0b8043",
+                    color: "white",
                     fontWeight: "bold",
-                    fontSize: "0.85rem",
-                    opacity: 0.9,
+                    width: 36,
+                    height: 36,
+                    fontSize: "1rem",
                   }}
                 >
-                  {user.email}
-                </Typography>
-                <Typography
-                  variant="caption"
-                  sx={{ fontSize: "0.7rem", opacity: 0.7, fontWeight: 600 }}
-                >
-                  {user.role}
-                </Typography>
+                  AJ
+                </Avatar>
+                <Box sx={{ display: "flex", flexDirection: "column" }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: "0.95rem",
+                      color: "text.primary",
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    Alex Johnson
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      fontSize: "0.85rem",
+                      color: "text.secondary",
+                      fontWeight: 500,
+                    }}
+                  >
+                    {user.role}
+                  </Typography>
+                </Box>
               </Box>
+            ) : (
+              <IconButton
+                size="large"
+                aria-label="account of current user"
+                aria-controls="menu-appbar"
+                aria-haspopup="true"
+                onClick={handleMenu}
+                color="inherit"
+              >
+                <AccountCircle />
+              </IconButton>
             )}
 
             <Menu
@@ -244,33 +285,6 @@ export default function Navbar() {
                 },
               }}
             >
-              {user && (
-                <Box sx={{ px: 2, py: 1.5, outline: "none" }}>
-                  <Typography
-                    variant="subtitle2"
-                    sx={{ fontWeight: "bold", color: "text.primary" }}
-                  >
-                    Signed in as
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: "text.secondary",
-                      fontWeight: 500,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {user.email}
-                  </Typography>
-                  <Box sx={{ mt: 1 }}>
-                    <span className="inline-block px-2 py-0.5 text-xs font-bold rounded bg-emerald-50 dark:bg-slate-800 text-emerald-700 dark:text-emerald-400 border border-emerald-100 dark:border-slate-700">
-                      {user.role}
-                    </span>
-                  </Box>
-                </Box>
-              )}
-              <Divider />
               <MenuItem
                 onClick={handleClose}
                 component={Link}
@@ -284,14 +298,15 @@ export default function Navbar() {
                   handleClose();
                   logout();
                 }}
-                sx={{
+                sx={{ display: "flex", alignItems: "center", gap: 1 }}
+              >
+                <Box component="img" src={LogoutIcon} alt="Filter" />
+                <Typography sx={{
                   py: 1.25,
-                  color: "error.main",
+                  color: "#374151",
                   fontWeight: "bold",
                   fontSize: "0.9rem",
-                }}
-              >
-                Logout
+                }}>Logout</Typography>
               </MenuItem>
             </Menu>
           </div>

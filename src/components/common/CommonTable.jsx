@@ -15,48 +15,6 @@ import {
 } from "@mui/material";
 import Pagination from "../Pagination";
 
-/**
- * CommonTable — Reusable data table component.
- *
- * Extracted from the Request List page to serve as a shared table across the application.
- * Preserves the exact visual design: borders, header typography, row hover, empty state, and pagination.
- *
- * Column definition shape:
- * {
- *   key:        string            — Data field name used to read the value from each row object.
- *   label:      string            — Header text displayed in the column header.
- *   render?:    (value, row) => ReactNode — Custom cell renderer. Receives the cell value and full row.
- *   cellSx?:    object            — MUI `sx` overrides applied to every body <TableCell> in this column.
- *   cellProps?: object            — Additional props spread onto the body <TableCell> (e.g. component="th").
- *   headerSx?:  object            — MUI `sx` overrides for the header <TableCell>.
- *   align?:     "left"|"center"|"right" — Text alignment for both header and body cells.
- *   sortable?:  boolean           — Per-column opt-out when global `sortable` is true. Defaults to true.
- * }
- *
- * @param {Object}   props
- * @param {Array}    props.columns              — Column definitions (see shape above).
- * @param {Array}    props.rows                 — Data rows to display.
- * @param {Function} [props.onRowClick]         — Row click handler. Receives the row object.
- * @param {boolean}  [props.loading=false]      — Show a centered spinner instead of rows.
- * @param {string}   [props.emptyMessage]       — Message when rows array is empty.
- * @param {Object}   [props.pagination]         — Pagination config: { count, page, onPageChange, rowsPerPage, onRowsPerPageChange }.
- * @param {boolean}  [props.sortable=false]     — Enable column sorting globally.
- * @param {string}   [props.sortBy]             — Controlled: currently sorted column key.
- * @param {string}   [props.sortDirection]      — Controlled: "asc" or "desc".
- * @param {Function} [props.onSort]             — Controlled sort handler. Receives column key.
- * @param {boolean}  [props.selectable=false]   — Show a checkbox column for row selection.
- * @param {Array}    [props.selectedRows=[]]    — Array of selected row keys.
- * @param {Function} [props.onSelectionChange]  — Selection change handler. Receives updated keys array.
- * @param {string|Function} [props.rowKey="id"] — Field name or function to derive a unique key per row.
- * @param {Function} [props.actions]            — Actions column renderer. Receives row, returns ReactNode.
- * @param {string}   [props.actionsLabel]       — Header label for the actions column.
- * @param {boolean}  [props.stickyHeader=false] — Enable sticky table header.
- * @param {number|string} [props.minWidth=650]  — Minimum table width.
- * @param {Object}   [props.sx]                 — Sx for the root Box wrapper.
- * @param {Object}   [props.tableContainerSx]   — Sx merged into the TableContainer.
- * @param {Object}   [props.tableSx]            — Sx merged into the Table element.
- * @param {string}   [props.ariaLabel]          — aria-label for the <table>.
- */
 const CommonTable = ({
   columns = [],
   rows = [],
@@ -81,7 +39,6 @@ const CommonTable = ({
   tableSx = {},
   ariaLabel = "data table",
 }) => {
-  // ───────── Internal sort state (uncontrolled mode) ─────────
   const [internalSortBy, setInternalSortBy] = useState("");
   const [internalSortDirection, setInternalSortDirection] = useState("asc");
 
@@ -92,7 +49,6 @@ const CommonTable = ({
       ? controlledSortDirection
       : internalSortDirection;
 
-  // ───────── Helpers ─────────
   const getRowKey = (row) => {
     if (typeof rowKey === "function") return rowKey(row);
     return row[rowKey];
@@ -101,7 +57,6 @@ const CommonTable = ({
   const totalColumns =
     columns.length + (selectable ? 1 : 0) + (actions ? 1 : 0);
 
-  // ───────── Sort handlers ─────────
   const handleSort = (columnKey) => {
     if (onSort) {
       onSort(columnKey);
@@ -125,7 +80,6 @@ const CommonTable = ({
     });
   }
 
-  // ───────── Selection handlers ─────────
   const handleSelectAll = (event) => {
     if (!onSelectionChange) return;
     if (event.target.checked) {
@@ -147,7 +101,6 @@ const CommonTable = ({
 
   const isSelected = (row) => selectedRows.includes(getRowKey(row));
 
-  // ───────── Render ─────────
   return (
     <Box sx={rootSx}>
       <TableContainer

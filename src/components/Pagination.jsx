@@ -108,10 +108,10 @@ const Pagination = ({
           sx={{
             width: 35,
             "& .MuiOutlinedInput-root": {
-              height: 32,
+              height: 35,
               borderRadius: "8px",
               backgroundColor: "#FFFFFF",
-              border: "1px solid#00843D",
+              border: "1px solid #00843D",
               fontWeight: 500,
               "& input": {
                 textAlign: "center",
