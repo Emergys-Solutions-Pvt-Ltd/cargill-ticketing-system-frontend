@@ -13,10 +13,11 @@ import {
 } from "../../../utils/rbacData";
 import SearchIcon from "../../../../src/assets/icons/search.svg";
 import FilterIcon from "../../../../src/assets/icons/filter.svg";
+import SelectedFilterIcon from "../../../../src/assets/icons/greenFilter.svg"
 import CommonTable from "../../../components/common/CommonTable";
 import CommonChip from "../../../components/common/CommonChip";
 
-// ── Page-specific: truncation style reused by two columns ──
+// Page-specific: truncation style reused by two columns
 const truncateCellSx = {
   maxWidth: 200,
   whiteSpace: "nowrap",
@@ -31,6 +32,7 @@ const RequestList = () => {
   const [statusFilter, setStatusFilter] = useState("All");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(8);
+  const [activeFilterCount, setActiveFilterCount] = useState(0);
 
   useEffect(() => {
     if (tickets.length === 0) {
@@ -205,19 +207,56 @@ const RequestList = () => {
             }}
           />
           <Box
+            onClick={() => {
+              // TODO: open filter panel
+            }}
             sx={{
               height: "2.125rem",
-              backgroundColor: "background.paper",
               borderRadius: "4px",
-              border: "1px solid #D1D5DB",
               px: 2,
               display: "flex",
               alignItems: "center",
               gap: 1,
+              cursor: "pointer",
+              ...(activeFilterCount > 0
+                ? {
+                  backgroundColor: "#F3FAF7",
+                  border: "1px solid #1B7F37",
+                  color: "#1B7F37",
+                }
+                : {
+                  backgroundColor: "background.paper",
+                  border: "1px solid #D1D5DB",
+                }),
             }}
           >
-            <Box component="img" src={FilterIcon} alt="Filter" />
-            <Typography variant="body2">Filter</Typography>
+            <Box
+              component="img"
+              src={activeFilterCount > 0 ? SelectedFilterIcon : FilterIcon}
+              alt="Filter"
+            />
+            <Typography variant="body2" sx={activeFilterCount > 0 ? { color: "#1B7F37" } : undefined}>
+              Filter
+            </Typography>
+            {activeFilterCount > 0 && (
+              <Box
+                sx={{
+                  minWidth: "18px",
+                  height: "18px",
+                  borderRadius: "50%",
+                  backgroundColor: "#1B7F37",
+                  color: "#fff",
+                  fontSize: "0.7rem",
+                  fontWeight: 600,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  px: "4px",
+                }}
+              >
+                {activeFilterCount}
+              </Box>
+            )}
           </Box>
         </Box>
       </Box>
