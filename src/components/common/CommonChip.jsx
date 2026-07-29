@@ -48,6 +48,36 @@ const STATUS_STYLES = {
         color: "#6B7280",
         border: "1px solid #D1D5DB",
     },
+
+    active: {
+        backgroundColor: "#DEF7EC",
+        color: "#0E9F6E",
+        border: "1px solid #BCF0DA",
+    },
+
+    inactive: {
+        backgroundColor: "#FDE8E8",
+        color: "#F05252",
+        border: "1px solid #F8B4B4",
+    },
+
+    "department admin": {
+        backgroundColor: "#DEF7EC",
+        color: "#0E9F6E",
+        border: "1px solid #BCF0DA",
+    },
+
+    supervisor: {
+        backgroundColor: "#EDE9FE",
+        color: "#7C3AED",
+        border: "1px solid #DDD6FE",
+    },
+
+    user: {
+        backgroundColor: "#E0E7FF",
+        color: "#4338CA",
+        border: "1px solid #C7D2FE",
+    },
 };
 
 const DEFAULT_STYLE = {

@@ -121,6 +121,9 @@ const CommonTable = ({
             "& .MuiTableCell-root": {
               borderBottom: "1px solid #E5E7EB",
               whiteSpace: "nowrap",
+              height: "48px",
+              boxSizing: "border-box",
+              padding: "0 16px",
             },
             ...tableSx,
           }}
@@ -128,13 +131,12 @@ const CommonTable = ({
         >
           {/* ─── Table Head ─── */}
           <TableHead>
-            <TableRow>
+            <TableRow >
               {/* Checkbox header */}
               {selectable && (
                 <TableCell
                   padding="checkbox"
                   sx={{
-                    py: 1.5,
                     fontWeight: 600,
                     color: "#6B7280",
                     fontSize: "0.75rem",
@@ -171,7 +173,6 @@ const CommonTable = ({
                       color: "#6B7280",
                       fontSize: "0.75rem",
                       textTransform: "uppercase",
-                      py: 1.5,
                       ...(col.headerSx || {}),
                     }}
                   >
@@ -209,7 +210,6 @@ const CommonTable = ({
                     color: "#6B7280",
                     fontSize: "0.75rem",
                     textTransform: "uppercase",
-                    py: 1.5,
                   }}
                 >
                   {actionsLabel}

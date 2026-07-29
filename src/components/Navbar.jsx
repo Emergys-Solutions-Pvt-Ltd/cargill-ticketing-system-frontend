@@ -177,6 +177,11 @@ export default function Navbar() {
                     Access Control
                   </NavLink>
                 </li>
+                <li>
+                  <NavLink to="/rbac" style={navLinkStyle}>
+                    RBAC
+                  </NavLink>
+                </li>
               </ul>
             </Box>
           </div>

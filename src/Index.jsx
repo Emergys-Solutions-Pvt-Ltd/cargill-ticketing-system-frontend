@@ -13,6 +13,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import { ThemeContextProvider } from "./context/ThemeContext";
 import { AuthProvider } from "./context/AuthContext";
 import { initMockData } from "./utils/rbacData";
+import Rbac from "./pages/private/RBAC/Rbac";
 
 const router = createBrowserRouter([
   {
@@ -66,6 +67,10 @@ const router = createBrowserRouter([
       {
         path: "uam/roles/:roleName",
         element: <RoleDetails />,
+      },
+      {
+        path: "rbac",
+        element: <Rbac />,
       },
     ],
   },

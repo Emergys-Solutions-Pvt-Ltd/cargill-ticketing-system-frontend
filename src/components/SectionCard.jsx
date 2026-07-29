@@ -1,11 +1,10 @@
 import { useState } from "react";
-import PropTypes from "prop-types";
 import { Box, Tab, Tabs, Card, CardContent } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 
-const SectionCard = ({ tabs, initialTab = 0 }) => {
+const SELECTED_TAB_COLOR = "#1B7F37";
+
+const SectionCard = ({ tabs, initialTab = 0, sx = {} }) => {
   const [value, setValue] = useState(initialTab);
-  const theme = useTheme();
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -22,6 +21,9 @@ const SectionCard = ({ tabs, initialTab = 0 }) => {
         backgroundImage: "none",
         border: "1px solid",
         borderColor: "divider",
+        display: "flex",
+        flexDirection: "column",
+        ...sx,
       }}
     >
       <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
@@ -36,11 +38,11 @@ const SectionCard = ({ tabs, initialTab = 0 }) => {
               color: "text.secondary",
             },
             "& .MuiTab-root.Mui-selected": {
-              color: theme.palette.primary.main,
+              color: SELECTED_TAB_COLOR,
               fontWeight: 600,
             },
             "& .MuiTabs-indicator": {
-              backgroundColor: theme.palette.primary.main,
+              backgroundColor: SELECTED_TAB_COLOR,
             },
             backgroundColor: "#F8F8F8",
             px: 2,
@@ -51,21 +53,11 @@ const SectionCard = ({ tabs, initialTab = 0 }) => {
           ))}
         </Tabs>
       </Box>
-      <CardContent sx={{ p: { xs: 2, md: 3 } }}>
+      <CardContent sx={{ p: { xs: 2, md: 3 }, flexGrow: 1, overflow: "auto" }}>
         {selectedTab && selectedTab.content}
       </CardContent>
     </Card>
   );
-};
-
-SectionCard.propTypes = {
-  tabs: PropTypes.arrayOf(
-    PropTypes.shape({
-      label: PropTypes.string.isRequired,
-      content: PropTypes.node.isRequired,
-    }),
-  ).isRequired,
-  initialTab: PropTypes.number,
 };
 
 export default SectionCard;
