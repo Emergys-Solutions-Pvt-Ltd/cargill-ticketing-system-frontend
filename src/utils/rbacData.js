@@ -1,8 +1,8 @@
-import { networkService } from "./network";
+import { apiService } from "../api/apiService";
 
 export const initMockData = async () => {
   try {
-    const mockData = await networkService.get("/mockData.json", { skipAuth: true });
+    const mockData = await apiService.get("/mockData.json", null, { skipAuth: true });
     if (!localStorage.getItem("rbac_users_v4") && mockData.users) {
       localStorage.setItem("rbac_users_v4", JSON.stringify(mockData.users));
     }
@@ -65,7 +65,7 @@ export const getStoredTicketsAsync = async () => {
   if (data) return JSON.parse(data);
 
   try {
-    const mockData = await networkService.get("/mockData.json", { skipAuth: true });
+    const mockData = await apiService.get("/mockData.json", null, { skipAuth: true });
     const defaultTickets = mockData.tickets || [];
     localStorage.setItem("service_now_tickets_v1", JSON.stringify(defaultTickets));
     return defaultTickets;

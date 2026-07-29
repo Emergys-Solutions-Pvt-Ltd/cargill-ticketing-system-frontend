@@ -41,7 +41,7 @@ import {
   getStoredRoles,
   systemPermissions,
 } from "../../../../utils/rbacData";
-import { networkService } from "../../../../utils/network";
+import { apiService } from "../../../../api/apiService";
 
 const UserDetails = () => {
   const { userId } = useParams();
@@ -59,7 +59,7 @@ const UserDetails = () => {
 
   useEffect(() => {
     let active = true;
-    networkService.get("/mockData.json", { skipAuth: true })
+    apiService.get("/mockData.json", null, { skipAuth: true })
       .then((data) => {
         if (active) {
           setMockData(data);
