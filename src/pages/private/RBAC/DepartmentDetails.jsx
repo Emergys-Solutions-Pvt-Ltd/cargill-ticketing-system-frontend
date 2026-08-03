@@ -5,6 +5,7 @@ import BackNavigation from "../../../components/common/BackNavigation";
 import EntityHeaderCard from "../../../components/common/EntityHeaderCard";
 import SectionCard from "../../../components/SectionCard";
 import SupervisorsTab from "./SupervisorsTab";
+import DepartmentUsersTab from "./DepartmentUsersTab";
 
 const DEFAULT_DEPARTMENT = {
   name: "Human Resources",
@@ -68,12 +69,6 @@ const AdminInformation = ({ adminInfo }) => {
   );
 };
 
-const PlaceholderTab = ({ message }) => (
-  <Typography variant="body2" sx={{ color: "text.secondary" }}>
-    {message}
-  </Typography>
-);
-
 const DepartmentDetails = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -85,7 +80,7 @@ const DepartmentDetails = () => {
   const tabs = [
     { label: "Admin Information", content: <AdminInformation adminInfo={adminInfo} /> },
     { label: "Supervisors", content: <SupervisorsTab departmentName={department.name} /> },
-    { label: "Users", content: <PlaceholderTab message="No users to display yet." /> },
+    { label: "Users", content: <DepartmentUsersTab /> },
   ];
 
   return (
