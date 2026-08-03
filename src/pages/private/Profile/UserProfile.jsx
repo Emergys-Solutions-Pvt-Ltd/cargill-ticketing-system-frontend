@@ -32,7 +32,6 @@ import {
 import profileImg from "../../../assets/profile_avatar.png";
 import { useAuth } from "../../../context/AuthContext";
 import { getStoredRoles, systemPermissions } from "../../../utils/rbacData";
-import { apiService } from "../../../api/apiService";
 
 const UserProfile = () => {
   const { user: authUser } = useAuth();
@@ -42,7 +41,8 @@ const UserProfile = () => {
 
   useEffect(() => {
     let active = true;
-    apiService.get("/mockData.json", null, { skipAuth: true })
+    fetch("/mockData.json")
+      .then((res) => res.json())
       .then((data) => {
         if (active) {
           setMockData(data);
