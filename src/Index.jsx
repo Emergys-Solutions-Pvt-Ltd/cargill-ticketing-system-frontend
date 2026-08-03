@@ -14,6 +14,7 @@ import { ThemeContextProvider } from "./context/ThemeContext";
 import { AuthProvider } from "./context/AuthContext";
 import { initMockData } from "./utils/rbacData";
 import Rbac from "./pages/private/RBAC/Rbac";
+import DepartmentDetails from "./pages/private/RBAC/DepartmentDetails";
 
 const router = createBrowserRouter([
   {
@@ -71,6 +72,10 @@ const router = createBrowserRouter([
       {
         path: "rbac",
         element: <Rbac />,
+      },
+      {
+        path: "rbac/departments/:departmentId",
+        element: <DepartmentDetails />,
       },
     ],
   },
