@@ -4,6 +4,7 @@ import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import BackNavigation from "../../../components/common/BackNavigation";
 import EntityHeaderCard from "../../../components/common/EntityHeaderCard";
 import SectionCard from "../../../components/SectionCard";
+import SupervisorsTab from "./SupervisorsTab";
 
 const DEFAULT_DEPARTMENT = {
   name: "Human Resources",
@@ -83,7 +84,7 @@ const DepartmentDetails = () => {
 
   const tabs = [
     { label: "Admin Information", content: <AdminInformation adminInfo={adminInfo} /> },
-    { label: "Supervisors", content: <PlaceholderTab message="No supervisors to display yet." /> },
+    { label: "Supervisors", content: <SupervisorsTab departmentName={department.name} /> },
     { label: "Users", content: <PlaceholderTab message="No users to display yet." /> },
   ];
 
