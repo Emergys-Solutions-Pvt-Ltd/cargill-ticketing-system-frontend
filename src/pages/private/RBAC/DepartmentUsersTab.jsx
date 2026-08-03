@@ -33,7 +33,7 @@ const USER_TEMPLATES = [
   { name: "Lisa Anderson", email: "lisa.anderson@cargill.com", role: "User", supervisor: "Michael Brown", queuesAssigned: 2, status: "Active", lastLogin: "4 hours ago" },
 ];
 
-const ALL_USERS = Array.from({ length: 40 }, (_, index) => ({
+const MOCK_USERS = Array.from({ length: 40 }, (_, index) => ({
   id: index + 1,
   ...USER_TEMPLATES[index % USER_TEMPLATES.length],
 }));
@@ -69,11 +69,19 @@ const UserRowActions = ({ onEdit, onDeactivate }) => {
   );
 };
 
-const DepartmentUsersTab = () => {
+const DepartmentUsersTab = ({ users = null, loading = false }) => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(8);
 
-  const paginatedUsers = ALL_USERS.slice(
+  const userRows = users ?? MOCK_USERS;
+
+  const [prevUsers, setPrevUsers] = useState(users);
+  if (users !== prevUsers) {
+    setPrevUsers(users);
+    setPage(0);
+  }
+
+  const paginatedUsers = userRows.slice(
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage,
   );
@@ -153,6 +161,7 @@ const DepartmentUsersTab = () => {
         sx={{ flexGrow: 1, minHeight: 0 }}
         columns={userColumns}
         rows={paginatedUsers}
+        loading={loading}
         sortable
         emptyMessage="No users to display yet."
         ariaLabel="Department user list"
@@ -167,7 +176,7 @@ const DepartmentUsersTab = () => {
           />
         )}
         pagination={{
-          count: ALL_USERS.length,
+          count: userRows.length,
           page,
           onPageChange: setPage,
           rowsPerPage,

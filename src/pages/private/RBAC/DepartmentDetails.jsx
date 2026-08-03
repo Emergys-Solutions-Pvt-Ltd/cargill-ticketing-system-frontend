@@ -1,4 +1,5 @@
-import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Box, Typography } from "@mui/material";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import BackNavigation from "../../../components/common/BackNavigation";
@@ -6,6 +7,8 @@ import EntityHeaderCard from "../../../components/common/EntityHeaderCard";
 import SectionCard from "../../../components/SectionCard";
 import SupervisorsTab from "./SupervisorsTab";
 import DepartmentUsersTab from "./DepartmentUsersTab";
+import { getDepartmentUsers } from "../../../api/apiRequests";
+import { nameFromEmail, formatRelativeTime, formatMonthYear } from "../../../utils/format";
 
 const DEFAULT_DEPARTMENT = {
   name: "Human Resources",
@@ -22,6 +25,36 @@ const DEFAULT_DEPARTMENT = {
     memberSince: "Jun 2024",
   },
 };
+
+const mapAdmin = (record) => ({
+  adminName: record.userName || nameFromEmail(record.email),
+  userId: `USR-${record.userId}`,
+  phoneNo: record.phone || "Not provided",
+  email: record.email,
+  workLocation: record.workLocation || "Not provided",
+  memberSince: formatMonthYear(record.createdAt),
+});
+
+const mapSupervisor = (record) => ({
+  id: record.userId,
+  name: record.userName || nameFromEmail(record.email),
+  email: record.email,
+  usersAssigned: record.usersAssigned ?? 0,
+  queuesManaged: record.queuesManaged ?? 0,
+  status: record.isActive ? "Active" : "Inactive",
+  lastLogin: formatRelativeTime(record.lastLogin),
+});
+
+const mapUser = (record) => ({
+  id: record.userId,
+  name: record.userName || nameFromEmail(record.email),
+  email: record.email,
+  role: record.roleName || "User",
+  supervisor: record.supervisorName || "Unassigned",
+  queuesAssigned: record.queuesAssigned ?? 0,
+  status: record.isActive ? "Active" : "Inactive",
+  lastLogin: formatRelativeTime(record.lastLogin),
+});
 
 const AdminInformation = ({ adminInfo }) => {
   const fields = [
@@ -72,15 +105,72 @@ const AdminInformation = ({ adminInfo }) => {
 const DepartmentDetails = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { departmentId } = useParams();
 
-  // TODO: fetch department by :departmentId
   const department = location.state?.department || DEFAULT_DEPARTMENT;
-  const adminInfo = department.adminInfo || DEFAULT_DEPARTMENT.adminInfo;
+
+  const [adminInfo, setAdminInfo] = useState(DEFAULT_DEPARTMENT.adminInfo);
+  const [supervisors, setSupervisors] = useState(null);
+  const [users, setUsers] = useState(null);
+  const [loadingUsers, setLoadingUsers] = useState(true);
+
+  // Re-arm the loading state during render (not in the effect below) whenever
+  // the department changes, so a fresh fetch always shows a loading state.
+  const [loadedDepartmentId, setLoadedDepartmentId] = useState(null);
+  if (departmentId !== loadedDepartmentId && !loadingUsers) {
+    setLoadingUsers(true);
+  }
+
+  useEffect(() => {
+    let active = true;
+    getDepartmentUsers({ departmentId: Number(departmentId) })
+      .then((response) => {
+        if (!active) return;
+        if (!response || !response.data) {
+          setAdminInfo(DEFAULT_DEPARTMENT.adminInfo);
+          setSupervisors(null);
+          setUsers(null);
+          return;
+        }
+
+        const records = response.data;
+        const adminRecord = records.find((record) => record.roleCode === "DEPARTMENT_ADMIN");
+        const supervisorRecords = records.filter((record) => record.roleCode === "SUPERVISOR");
+        const userRecords = records.filter((record) => record.roleCode === "USER");
+
+        setAdminInfo(adminRecord ? mapAdmin(adminRecord) : DEFAULT_DEPARTMENT.adminInfo);
+        setSupervisors(supervisorRecords.map(mapSupervisor));
+        setUsers(userRecords.map(mapUser));
+      })
+      .catch(() => {
+        if (!active) return;
+        setAdminInfo(DEFAULT_DEPARTMENT.adminInfo);
+        setSupervisors(null);
+        setUsers(null);
+      })
+      .finally(() => {
+        if (!active) return;
+        setLoadingUsers(false);
+        setLoadedDepartmentId(departmentId);
+      });
+    return () => {
+      active = false;
+    };
+  }, [departmentId]);
 
   const tabs = [
     { label: "Admin Information", content: <AdminInformation adminInfo={adminInfo} /> },
-    { label: "Supervisors", content: <SupervisorsTab departmentName={department.name} /> },
-    { label: "Users", content: <DepartmentUsersTab /> },
+    {
+      label: "Supervisors",
+      content: (
+        <SupervisorsTab
+          departmentName={department.name}
+          supervisors={supervisors}
+          loading={loadingUsers}
+        />
+      ),
+    },
+    { label: "Users", content: <DepartmentUsersTab users={users} loading={loadingUsers} /> },
   ];
 
   return (

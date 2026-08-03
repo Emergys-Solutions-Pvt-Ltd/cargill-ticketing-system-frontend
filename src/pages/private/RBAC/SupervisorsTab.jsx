@@ -40,7 +40,7 @@ const SUPERVISOR_TEMPLATES = [
   { name: "Amanda Lewis", email: "amanda.lewis@cargill.com", usersAssigned: 3, queuesManaged: 1, status: "Active", lastLogin: "4 hours ago" },
 ];
 
-const ALL_SUPERVISORS = Array.from({ length: 40 }, (_, index) => ({
+const MOCK_SUPERVISORS = Array.from({ length: 40 }, (_, index) => ({
   id: index + 1,
   ...SUPERVISOR_TEMPLATES[index % SUPERVISOR_TEMPLATES.length],
 }));
@@ -76,20 +76,28 @@ const SupervisorRowActions = ({ onView, onRemove }) => {
   );
 };
 
-const SupervisorsTab = ({ departmentName = "Human Resources" }) => {
+const SupervisorsTab = ({ departmentName = "Human Resources", supervisors = null, loading = false }) => {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(8);
 
+  const supervisorRows = supervisors ?? MOCK_SUPERVISORS;
+
+  const [prevSupervisors, setPrevSupervisors] = useState(supervisors);
+  if (supervisors !== prevSupervisors) {
+    setPrevSupervisors(supervisors);
+    setPage(0);
+  }
+
   const filteredSupervisors = useMemo(() => {
     const query = search.trim().toLowerCase();
-    if (!query) return ALL_SUPERVISORS;
-    return ALL_SUPERVISORS.filter(
+    if (!query) return supervisorRows;
+    return supervisorRows.filter(
       (supervisor) =>
         supervisor.name.toLowerCase().includes(query) ||
         supervisor.email.toLowerCase().includes(query),
     );
-  }, [search]);
+  }, [search, supervisorRows]);
 
   const paginatedSupervisors = filteredSupervisors.slice(
     page * rowsPerPage,
@@ -185,6 +193,7 @@ const SupervisorsTab = ({ departmentName = "Human Resources" }) => {
         sx={{ flexGrow: 1, minHeight: 0 }}
         columns={columns}
         rows={paginatedSupervisors}
+        loading={loading}
         sortable
         emptyMessage="No supervisors to display yet."
         ariaLabel="Department supervisors list"
