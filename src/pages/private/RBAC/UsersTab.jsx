@@ -1,12 +1,13 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Box, Typography, Button, Avatar, IconButton, Menu, MenuItem } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import CommonTable from "../../../components/common/CommonTable";
 import CommonChip from "../../../components/common/CommonChip";
+import { getUsers } from "../../../api/apiRequests";
+import { nameFromEmail, formatRelativeTime } from "../../../utils/format";
 
-// TODO: replace with API-backed user data once the endpoint is available
-const users = [
+const MOCK_USERS = [
   { id: 1, name: "John Smith", email: "john.smith@cargill.com", role: "Department Admin", department: "Human Resources", queuesAssigned: 2, status: "Active", lastLogin: "2 hours ago" },
   { id: 2, name: "Alex Johnson", email: "alex.johnson@cargill.com", role: "Supervisor", department: "Human Resources", queuesAssigned: 4, status: "Active", lastLogin: "1 day ago" },
   { id: 3, name: "Rahul Patel", email: "rahul.patel@cargill.com", role: "User", department: "Human Resources", queuesAssigned: 5, status: "Active", lastLogin: "3 hours ago" },
@@ -16,6 +17,17 @@ const users = [
   { id: 7, name: "James Wilson", email: "james.wilson@cargill.com", role: "User", department: "Human Resources", queuesAssigned: 2, status: "Active", lastLogin: "2 days ago" },
   { id: 8, name: "Lisa Anderson", email: "lisa.anderson@cargill.com", role: "User", department: "Human Resources", queuesAssigned: 4, status: "Active", lastLogin: "4 hours ago" },
 ];
+
+const mapUser = (record) => ({
+  id: record.userId,
+  name: record.userName || nameFromEmail(record.email),
+  email: record.email,
+  role: record.roleName || "User",
+  department: record.departmentName || "Unassigned",
+  queuesAssigned: record.queuesAssigned ?? 0,
+  status: record.isActive ? "Active" : "Inactive",
+  lastLogin: formatRelativeTime(record.lastLogin),
+});
 
 const AVATAR_COLORS = [
   { bgcolor: "#E0F2FE", color: "#0369A1" },
@@ -70,8 +82,31 @@ const UserRowActions = ({ onEdit, onDeactivate }) => {
 const UsersTab = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(8);
+  const [users, setUsers] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const paginatedUsers = users.slice(
+  useEffect(() => {
+    let active = true;
+    getUsers({})
+      .then((response) => {
+        if (!active) return;
+        setUsers(response?.data ? response.data.map(mapUser) : null);
+      })
+      .catch(() => {
+        if (!active) return;
+        setUsers(null);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const userRows = users ?? MOCK_USERS;
+
+  const paginatedUsers = userRows.slice(
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage,
   );
@@ -147,6 +182,7 @@ const UsersTab = () => {
         sx={{ flexGrow: 1, minHeight: 0 }}
         columns={userColumns}
         rows={paginatedUsers}
+        loading={loading}
         sortable
         emptyMessage="No users to display yet."
         ariaLabel="Access control user list"
@@ -161,7 +197,7 @@ const UsersTab = () => {
           />
         )}
         pagination={{
-          count: users.length,
+          count: userRows.length,
           page,
           onPageChange: setPage,
           rowsPerPage,
