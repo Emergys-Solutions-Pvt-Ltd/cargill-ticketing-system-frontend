@@ -7,6 +7,7 @@ import SectionCard from "../../../../components/SectionCard";
 import AdminInformationTab from "./AdminInformationTab";
 import SupervisorsTab from "./SupervisorsTab";
 import DepartmentUsersTab from "./DepartmentUsersTab";
+import ChangeDepartmentAdminModal from "./ChangeDepartmentAdminModal";
 import { getDepartmentUsers } from "../../../../api/apiRequests";
 import { nameFromEmail, formatRelativeTime, formatMonthYear } from "../../../../utils/format";
 
@@ -68,6 +69,7 @@ const DepartmentDetails = () => {
   const [users, setUsers] = useState(null);
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [loadedDepartmentId, setLoadedDepartmentId] = useState(null);
+  const [changeAdminOpen, setChangeAdminOpen] = useState(false);
   if (departmentId !== loadedDepartmentId && !loadingUsers) {
     setLoadingUsers(true);
   }
@@ -142,9 +144,7 @@ const DepartmentDetails = () => {
         title={department.name}
         description={department.description}
         actionLabel="Change Admin"
-        onAction={() => {
-          // TODO: add change admin flow
-        }}
+        onAction={() => setChangeAdminOpen(true)}
         stats={[
           { label: "Supervisors", value: department.supervisors },
           { label: "Users", value: department.users },
@@ -153,6 +153,20 @@ const DepartmentDetails = () => {
       />
 
       <SectionCard tabs={tabs} sx={{ flexGrow: 1, minHeight: 0 }} />
+
+      <ChangeDepartmentAdminModal
+        open={changeAdminOpen}
+        onClose={() => setChangeAdminOpen(false)}
+        onConfirm={() => {
+          // TODO: call change department admin API
+          setChangeAdminOpen(false);
+        }}
+        currentAdmin={{
+          name: adminInfo.adminName,
+          email: adminInfo.email,
+          role: "Department Admin",
+        }}
+      />
     </Box>
   );
 };

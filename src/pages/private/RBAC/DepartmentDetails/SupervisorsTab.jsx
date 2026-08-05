@@ -12,6 +12,7 @@ import {
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import CommonTable from "../../../../components/common/CommonTable";
 import CommonChip from "../../../../components/common/CommonChip";
+import DeactivateUserModal from "../DeactivateUserModal";
 import SearchIcon from "../../../../assets/icons/search.svg";
 
 const AVATAR_COLORS = [
@@ -60,7 +61,7 @@ const SupervisorRowActions = ({ onView, onRemove }) => {
             onView?.();
           }}
         >
-          View Profile
+          Edit
         </MenuItem>
         <MenuItem
           onClick={() => {
@@ -69,7 +70,7 @@ const SupervisorRowActions = ({ onView, onRemove }) => {
           }}
           sx={{ color: "#F05252" }}
         >
-          Remove Supervisor
+          Deactivate
         </MenuItem>
       </Menu>
     </>
@@ -80,6 +81,7 @@ const SupervisorsTab = ({ departmentName = "Human Resources", supervisors = null
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(8);
+  const [deactivateTarget, setDeactivateTarget] = useState(null);
 
   const supervisorRows = supervisors ?? MOCK_SUPERVISORS;
 
@@ -197,14 +199,12 @@ const SupervisorsTab = ({ departmentName = "Human Resources", supervisors = null
         sortable
         emptyMessage="No supervisors to display yet."
         ariaLabel="Department supervisors list"
-        actions={() => (
+        actions={(row) => (
           <SupervisorRowActions
             onView={() => {
               // TODO: navigate to supervisor profile
             }}
-            onRemove={() => {
-              // TODO: remove supervisor
-            }}
+            onRemove={() => setDeactivateTarget(row)}
           />
         )}
         pagination={{
@@ -217,6 +217,16 @@ const SupervisorsTab = ({ departmentName = "Human Resources", supervisors = null
             setPage(0);
           },
         }}
+      />
+
+      <DeactivateUserModal
+        open={Boolean(deactivateTarget)}
+        onClose={() => setDeactivateTarget(null)}
+        onConfirm={() => {
+          // TODO: call deactivate supervisor API
+          setDeactivateTarget(null);
+        }}
+        userName={deactivateTarget?.name}
       />
     </Box>
   );

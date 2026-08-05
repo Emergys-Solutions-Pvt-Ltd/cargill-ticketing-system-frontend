@@ -4,6 +4,8 @@ import AddIcon from "@mui/icons-material/Add";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import CommonTable from "../../../../components/common/CommonTable";
 import CommonChip from "../../../../components/common/CommonChip";
+import DeactivateUserModal from "../DeactivateUserModal";
+import AddUserModal from "../AddUserModal";
 
 const AVATAR_COLORS = [
   { bgcolor: "#E0F2FE", color: "#0369A1" },
@@ -72,6 +74,8 @@ const UserRowActions = ({ onEdit, onDeactivate }) => {
 const DepartmentUsersTab = ({ users = null, loading = false }) => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(8);
+  const [deactivateTarget, setDeactivateTarget] = useState(null);
+  const [addUserOpen, setAddUserOpen] = useState(false);
 
   const userRows = users ?? MOCK_USERS;
 
@@ -148,9 +152,7 @@ const DepartmentUsersTab = ({ users = null, loading = false }) => {
         <Button
           variant="outlined"
           startIcon={<AddIcon />}
-          onClick={() => {
-            // TODO: open add user dialog
-          }}
+          onClick={() => setAddUserOpen(true)}
           sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600 }}
         >
           Add User
@@ -165,14 +167,12 @@ const DepartmentUsersTab = ({ users = null, loading = false }) => {
         sortable
         emptyMessage="No users to display yet."
         ariaLabel="Department user list"
-        actions={() => (
+        actions={(row) => (
           <UserRowActions
             onEdit={() => {
               // TODO: edit user
             }}
-            onDeactivate={() => {
-              // TODO: deactivate user
-            }}
+            onDeactivate={() => setDeactivateTarget(row)}
           />
         )}
         pagination={{
@@ -184,6 +184,25 @@ const DepartmentUsersTab = ({ users = null, loading = false }) => {
             setRowsPerPage(value);
             setPage(0);
           },
+        }}
+      />
+
+      <DeactivateUserModal
+        open={Boolean(deactivateTarget)}
+        onClose={() => setDeactivateTarget(null)}
+        onConfirm={() => {
+          // TODO: call deactivate user API
+          setDeactivateTarget(null);
+        }}
+        userName={deactivateTarget?.name}
+      />
+
+      <AddUserModal
+        open={addUserOpen}
+        onClose={() => setAddUserOpen(false)}
+        onSubmit={() => {
+          // TODO: call add user API
+          setAddUserOpen(false);
         }}
       />
     </Box>

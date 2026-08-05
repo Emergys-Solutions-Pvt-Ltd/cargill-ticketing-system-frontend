@@ -4,6 +4,8 @@ import AddIcon from "@mui/icons-material/Add";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import CommonTable from "../../../components/common/CommonTable";
 import CommonChip from "../../../components/common/CommonChip";
+import DeactivateUserModal from "./DeactivateUserModal";
+import AddUserModal from "./AddUserModal";
 import { getUsers } from "../../../api/apiRequests";
 import { nameFromEmail, formatRelativeTime } from "../../../utils/format";
 
@@ -84,6 +86,8 @@ const UsersTab = () => {
   const [rowsPerPage, setRowsPerPage] = useState(8);
   const [users, setUsers] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [deactivateTarget, setDeactivateTarget] = useState(null);
+  const [addUserOpen, setAddUserOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -169,9 +173,7 @@ const UsersTab = () => {
         <Button
           variant="outlined"
           startIcon={<AddIcon />}
-          onClick={() => {
-            // TODO: open add user dialog
-          }}
+          onClick={() => setAddUserOpen(true)}
           sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600 }}
         >
           Add User
@@ -186,14 +188,12 @@ const UsersTab = () => {
         sortable
         emptyMessage="No users to display yet."
         ariaLabel="Access control user list"
-        actions={() => (
+        actions={(row) => (
           <UserRowActions
             onEdit={() => {
               // TODO: wire up edit user
             }}
-            onDeactivate={() => {
-              // TODO: wire up deactivate user
-            }}
+            onDeactivate={() => setDeactivateTarget(row)}
           />
         )}
         pagination={{
@@ -205,6 +205,25 @@ const UsersTab = () => {
             setRowsPerPage(value);
             setPage(0);
           },
+        }}
+      />
+
+      <DeactivateUserModal
+        open={Boolean(deactivateTarget)}
+        onClose={() => setDeactivateTarget(null)}
+        onConfirm={() => {
+          // TODO: wire up deactivate user API
+          setDeactivateTarget(null);
+        }}
+        userName={deactivateTarget?.name}
+      />
+
+      <AddUserModal
+        open={addUserOpen}
+        onClose={() => setAddUserOpen(false)}
+        onSubmit={() => {
+          // TODO: call add user API
+          setAddUserOpen(false);
         }}
       />
     </Box>
