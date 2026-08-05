@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Box, Typography, Button, Avatar, IconButton, Menu, MenuItem } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -82,6 +83,7 @@ const UserRowActions = ({ onEdit, onDeactivate }) => {
 };
 
 const UsersTab = () => {
+  const navigate = useNavigate();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(8);
   const [users, setUsers] = useState(null);
@@ -184,6 +186,7 @@ const UsersTab = () => {
         sx={{ flexGrow: 1, minHeight: 0 }}
         columns={userColumns}
         rows={paginatedUsers}
+        onRowClick={(row) => navigate(`/rbac/users/${row.id}`, { state: { user: row } })}
         loading={loading}
         sortable
         emptyMessage="No users to display yet."

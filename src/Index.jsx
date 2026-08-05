@@ -15,6 +15,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { initMockData } from "./utils/rbacData";
 import Rbac from "./pages/private/RBAC/Rbac";
 import DepartmentDetails from "./pages/private/RBAC/DepartmentDetails/DepartmentDetails";
+import RbacUserDetails from "./pages/private/RBAC/UserDetails/UserDetails";
 
 const router = createBrowserRouter([
   {
@@ -76,6 +77,10 @@ const router = createBrowserRouter([
       {
         path: "rbac/departments/:departmentId",
         element: <DepartmentDetails />,
+      },
+      {
+        path: "rbac/users/:userId",
+        element: <RbacUserDetails />,
       },
     ],
   },

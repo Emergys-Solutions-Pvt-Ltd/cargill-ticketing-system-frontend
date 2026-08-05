@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -78,6 +79,7 @@ const SupervisorRowActions = ({ onView, onRemove }) => {
 };
 
 const SupervisorsTab = ({ departmentName = "Human Resources", supervisors = null, loading = false }) => {
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(8);
@@ -195,15 +197,14 @@ const SupervisorsTab = ({ departmentName = "Human Resources", supervisors = null
         sx={{ flexGrow: 1, minHeight: 0 }}
         columns={columns}
         rows={paginatedSupervisors}
+        onRowClick={(row) => navigate(`/rbac/users/${row.id}`, { state: { user: { ...row, role: "Supervisor" } } })}
         loading={loading}
         sortable
         emptyMessage="No supervisors to display yet."
         ariaLabel="Department supervisors list"
         actions={(row) => (
           <SupervisorRowActions
-            onView={() => {
-              // TODO: navigate to supervisor profile
-            }}
+            onView={() => navigate(`/rbac/users/${row.id}`, { state: { user: { ...row, role: "Supervisor" } } })}
             onRemove={() => setDeactivateTarget(row)}
           />
         )}
