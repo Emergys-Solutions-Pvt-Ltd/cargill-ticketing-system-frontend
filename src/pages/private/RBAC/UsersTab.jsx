@@ -91,7 +91,7 @@ const UsersTab = () => {
 
   useEffect(() => {
     let active = true;
-    getUsers({})
+    getUsers()
       .then((response) => {
         if (!active) return;
         setUsers(response?.data ? response.data.map(mapUser) : null);
