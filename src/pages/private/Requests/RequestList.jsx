@@ -2,20 +2,23 @@ import { useState, useEffect, useMemo } from "react";
 import {
   Box,
   Typography,
-  Chip,
   TextField,
   InputAdornment,
+  Tabs,
+  Tab,
+  IconButton,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
 import {
   getStoredTickets,
   getStoredTicketsAsync,
 } from "../../../utils/rbacData";
 import SearchIcon from "../../../../src/assets/icons/search.svg";
 import FilterIcon from "../../../../src/assets/icons/filter.svg";
-import SelectedFilterIcon from "../../../../src/assets/icons/greenFilter.svg"
+import SelectedFilterIcon from "../../../../src/assets/icons/greenFilter.svg";
+import CloseIcon from "@mui/icons-material/Close";
 import CommonTable from "../../../components/common/CommonTable";
 import CommonChip from "../../../components/common/CommonChip";
+import LabTabs from "../../../components/LabTabs";
 
 // Page-specific: truncation style reused by two columns
 const truncateCellSx = {
@@ -26,13 +29,14 @@ const truncateCellSx = {
 };
 
 const RequestList = () => {
-  const navigate = useNavigate();
   const [tickets, setTickets] = useState(() => getStoredTickets());
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(8);
   const [activeFilterCount, setActiveFilterCount] = useState(0);
+  const [activeTab, setActiveTab] = useState("all-requests");
+  const [openRequestTabs, setOpenRequestTabs] = useState([]);
 
   useEffect(() => {
     if (tickets.length === 0) {
@@ -41,6 +45,11 @@ const RequestList = () => {
       });
     }
   }, [tickets]);
+
+  useEffect(() => {
+    const count = Number(statusFilter !== "All");
+    setActiveFilterCount(count);
+  }, [statusFilter]);
 
   const filteredRequests = tickets.filter((row) => {
     const matchesSearch =
@@ -59,7 +68,33 @@ const RequestList = () => {
     page * rowsPerPage + rowsPerPage,
   );
 
-  // ── Page-specific: column definitions ──
+  const handleOpenRequestTab = (row) => {
+    setOpenRequestTabs((prevTabs) => {
+      const alreadyOpen = prevTabs.some((tab) => tab.id === row.id);
+      if (alreadyOpen) {
+        setActiveTab(row.id);
+        return prevTabs;
+      }
+
+      const nextTabs = [...prevTabs, { id: row.id, request: row }];
+      setActiveTab(row.id);
+      return nextTabs;
+    });
+  };
+
+  const handleCloseRequestTab = (tabId, event) => {
+    event.stopPropagation();
+    setOpenRequestTabs((prevTabs) => {
+      const remainingTabs = prevTabs.filter((tab) => tab.id !== tabId);
+      setActiveTab((currentTab) => {
+        if (currentTab === tabId) {
+          return remainingTabs.length > 0 ? remainingTabs[0].id : "all-requests";
+        }
+        return currentTab;
+      });
+      return remainingTabs;
+    });
+  };
 
   const columns = useMemo(
     () => [
@@ -107,11 +142,7 @@ const RequestList = () => {
       {
         key: "status",
         label: "STATUS",
-        render: (_value, row) => {
-          return (
-            <CommonChip status={row.status} label={row.status} />
-          );
-        },
+        render: (_value, row) => <CommonChip status={row.status} label={row.status} />,
       },
       {
         key: "created",
@@ -130,157 +161,236 @@ const RequestList = () => {
     <Box
       sx={{
         width: "100%",
-        height: "90vh",
+        minHeight: "90vh",
         display: "flex",
         flexDirection: "column",
         backgroundColor: "background.default",
         p: { xs: 2, md: 4 },
       }}
     >
-      <Box
+
+
+      <Tabs
+        value={activeTab}
+        onChange={(_, newValue) => setActiveTab(newValue)}
+        variant="scrollable"
+        scrollButtons="auto"
         sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
+          mb: 2,
+          borderBottom: 1,
+          borderColor: "divider",
+          minHeight: "48px",
+          "& .MuiTab-root": {
+            textTransform: "none",
+            minHeight: "48px",
+            color: "text.secondary",
+          },
+          "& .Mui-selected": {
+            color: "#00843D",
+            fontWeight: 600,
+          },
+          "& .MuiTabs-indicator": {
+            backgroundColor: "#00843D",
+          },
         }}
       >
-        {/* Header */}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <Box>
-            <Typography
-              sx={{ fontWeight: 600, fontSize: "18px", color: "text.primary" }}
+        <Tab label="All Requests" value="all-requests" />
+        {openRequestTabs.map((tab) => (
+          <Tab
+            key={tab.id}
+            value={tab.id}
+            label={
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+                <Typography variant="body2" sx={{ whiteSpace: "nowrap" }}>
+                  {tab.request.id}
+                </Typography>
+                <IconButton
+                  size="small"
+                  onClick={(event) => handleCloseRequestTab(tab.id, event)}
+                  sx={{ p: 0.25, ml: 0.25 }}
+                  aria-label={`Close ${tab.request.id}`}
+                >
+                  <CloseIcon fontSize="small" />
+                </IconButton>
+              </Box>
+            }
+          />
+        ))}
+      </Tabs>
+
+      {activeTab === "all-requests" ? (
+        <Box sx={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "center",
+              gap: 2,
+              mb: 2,
+            }}
+          >
+            <TextField
+              placeholder="Search..."
+              variant="outlined"
+              size="small"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              sx={{
+                flexGrow: 1,
+                maxWidth: "450px",
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "4px",
+                  height: "2.125rem",
+                },
+                backgroundColor: "background.paper",
+              }}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <img src={SearchIcon} alt="Search" width={16} height={16} />
+                    </InputAdornment>
+                  ),
+                },
+              }}
+            />
+
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                gap: 2,
+                mb: 2,
+              }}
             >
-              Requests
-            </Typography>
+
+            </Box>
+            <TextField
+              select
+              size="small"
+              label="Status"
+              value={statusFilter}
+              onChange={(event) => {
+                setStatusFilter(event.target.value);
+                setPage(0);
+              }}
+              sx={{ minWidth: "160px", backgroundColor: "background.paper" }}
+            >
+              <option value="All">All</option>
+              <option value="New">New</option>
+              <option value="Open">Open</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Pending">Pending</option>
+              <option value="Resolved">Resolved</option>
+              <option value="Closed">Closed</option>
+            </TextField>
+            <Box
+              onClick={() => {
+                setStatusFilter((current) => (current === "All" ? "Open" : "All"));
+              }}
+              sx={{
+                height: "2.125rem",
+                borderRadius: "4px",
+                px: 2,
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                cursor: "pointer",
+                ...(activeFilterCount > 0
+                  ? {
+                    backgroundColor: "#F3FAF7",
+                    border: "1px solid #1B7F37",
+                    color: "#1B7F37",
+                  }
+                  : {
+                    backgroundColor: "background.paper",
+                    border: "1px solid #D1D5DB",
+                  }),
+              }}
+            >
+              <Box
+                component="img"
+                src={activeFilterCount > 0 ? SelectedFilterIcon : FilterIcon}
+                alt="Filter"
+              />
+              <Typography variant="body2" sx={activeFilterCount > 0 ? { color: "#1B7F37" } : undefined}>
+                Filter
+              </Typography>
+              {activeFilterCount > 0 && (
+                <Box
+                  sx={{
+                    minWidth: "18px",
+                    height: "18px",
+                    borderRadius: "50%",
+                    backgroundColor: "#1B7F37",
+                    color: "#fff",
+                    fontSize: "0.7rem",
+                    fontWeight: 600,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    px: "4px",
+                  }}
+                >
+                  {activeFilterCount}
+                </Box>
+              )}
+            </Box>
+          </Box>
+          <Box style={{ marginBottom: 20 }}>
             <Typography
               variant="caption"
               sx={{
                 color: "text.secondary",
                 fontWeight: 400,
                 fontSize: "13px",
+
               }}
             >
-              Search, view and stay informed about your requests and their
-              current status.
+              Search, view and stay informed about your requests and their current status.
             </Typography>
           </Box>
-        </Box>
-
-        {/* Search & Filters */}
-        <Box
-          sx={{
-            display: "flex",
-            flexWrap: "wrap",
-            alignItems: "center",
-            gap: 2,
-          }}
-        >
-          <TextField
-            placeholder="Search..."
-            variant="outlined"
-            size="small"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            sx={{
-              flexGrow: 1,
-              maxWidth: "450px",
-              "& .MuiOutlinedInput-root": {
-                borderRadius: "4px",
-                height: "2.125rem",
-              },
-              backgroundColor: "background.paper",
-            }}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <img src={SearchIcon} alt="Search" width={16} height={16} />
-                  </InputAdornment>
-                ),
+          <CommonTable
+            sx={{ flexGrow: 1, minHeight: 0 }}
+            columns={columns}
+            rows={paginatedRequests}
+            onRowClick={handleOpenRequestTab}
+            emptyMessage="No matching records found in this view."
+            tableContainerSx={{ mt: 0 }}
+            ariaLabel="Cargill ticket list"
+            pagination={{
+              count: filteredRequests.length,
+              page,
+              onPageChange: setPage,
+              rowsPerPage,
+              onRowsPerPageChange: (value) => {
+                setRowsPerPage(value);
+                setPage(0);
               },
             }}
           />
-          <Box
-            onClick={() => {
-              // TODO: open filter panel
-            }}
-            sx={{
-              height: "2.125rem",
-              borderRadius: "4px",
-              px: 2,
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-              cursor: "pointer",
-              ...(activeFilterCount > 0
-                ? {
-                  backgroundColor: "#F3FAF7",
-                  border: "1px solid #1B7F37",
-                  color: "#1B7F37",
-                }
-                : {
-                  backgroundColor: "background.paper",
-                  border: "1px solid #D1D5DB",
-                }),
-            }}
-          >
-            <Box
-              component="img"
-              src={activeFilterCount > 0 ? SelectedFilterIcon : FilterIcon}
-              alt="Filter"
-            />
-            <Typography variant="body2" sx={activeFilterCount > 0 ? { color: "#1B7F37" } : undefined}>
-              Filter
-            </Typography>
-            {activeFilterCount > 0 && (
-              <Box
-                sx={{
-                  minWidth: "18px",
-                  height: "18px",
-                  borderRadius: "50%",
-                  backgroundColor: "#1B7F37",
-                  color: "#fff",
-                  fontSize: "0.7rem",
-                  fontWeight: 600,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  px: "4px",
-                }}
-              >
-                {activeFilterCount}
-              </Box>
-            )}
-          </Box>
         </Box>
-      </Box>
-
-      {/* Table — now powered by the reusable CommonTable component */}
-      <CommonTable
-        sx={{ flexGrow: 1, minHeight: 0, mt: 2 }}
-        columns={columns}
-        rows={paginatedRequests}
-        onRowClick={(row) => navigate(`/requests/${row.id}`)}
-        emptyMessage="No matching records found in this view."
-        tableContainerSx={{ mt: 0 }}
-        ariaLabel="Cargill ticket list"
-        pagination={{
-          count: filteredRequests.length,
-          page,
-          onPageChange: setPage,
-          rowsPerPage,
-          onRowsPerPageChange: (value) => {
-            setRowsPerPage(value);
-            setPage(0);
-          },
-        }}
-      />
+      ) : (
+        <Box
+          sx={{
+            border: "1px solid",
+            borderColor: "divider",
+            borderRadius: "8px",
+            backgroundColor: "background.paper",
+            p: { xs: 1, md: 2 },
+            flexGrow: 1,
+          }}
+        >
+          {openRequestTabs
+            .filter((tab) => tab.id === activeTab)
+            .map((tab) => (
+              <Box key={tab.id} sx={{ width: "100%" }}>
+                <LabTabs comments={tab.request.comments || []} request={tab.request} />
+              </Box>
+            ))}
+        </Box>
+      )}
     </Box>
   );
 };
