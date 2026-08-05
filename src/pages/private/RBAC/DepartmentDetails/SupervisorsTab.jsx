@@ -10,9 +10,9 @@ import {
   InputAdornment,
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import CommonTable from "../../../components/common/CommonTable";
-import CommonChip from "../../../components/common/CommonChip";
-import SearchIcon from "../../../assets/icons/search.svg";
+import CommonTable from "../../../../components/common/CommonTable";
+import CommonChip from "../../../../components/common/CommonChip";
+import SearchIcon from "../../../../assets/icons/search.svg";
 
 const AVATAR_COLORS = [
   { bgcolor: "#E0F2FE", color: "#0369A1" },

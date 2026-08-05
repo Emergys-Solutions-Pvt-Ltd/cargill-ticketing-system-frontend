@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { Box, Typography } from "@mui/material";
-import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
-import BackNavigation from "../../../components/common/BackNavigation";
-import EntityHeaderCard from "../../../components/common/EntityHeaderCard";
-import SectionCard from "../../../components/SectionCard";
+import { Box } from "@mui/material";
+import BackNavigation from "../../../../components/common/BackNavigation";
+import EntityHeaderCard from "../../../../components/common/EntityHeaderCard";
+import SectionCard from "../../../../components/SectionCard";
+import AdminInformationTab from "./AdminInformationTab";
 import SupervisorsTab from "./SupervisorsTab";
 import DepartmentUsersTab from "./DepartmentUsersTab";
-import { getDepartmentUsers } from "../../../api/apiRequests";
-import { nameFromEmail, formatRelativeTime, formatMonthYear } from "../../../utils/format";
+import { getDepartmentUsers } from "../../../../api/apiRequests";
+import { nameFromEmail, formatRelativeTime, formatMonthYear } from "../../../../utils/format";
 
 const DEFAULT_DEPARTMENT = {
   name: "Human Resources",
@@ -56,52 +56,6 @@ const mapUser = (record) => ({
   lastLogin: formatRelativeTime(record.lastLogin),
 });
 
-const AdminInformation = ({ adminInfo }) => {
-  const fields = [
-    { label: "Admin Name", value: adminInfo.adminName },
-    { label: "User ID", value: adminInfo.userId },
-    { label: "Phone No", value: adminInfo.phoneNo },
-    { label: "Email", value: adminInfo.email },
-    { label: "Work Location", value: adminInfo.workLocation },
-    { label: "Member since", value: adminInfo.memberSince },
-  ];
-
-  return (
-    <Box>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-        <Typography sx={{ fontWeight: 600, fontSize: "14px", color: "text.primary" }}>
-          User Information
-        </Typography>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "primary.main", cursor: "pointer" }}>
-          <EditOutlinedIcon sx={{ fontSize: 16 }} />
-          <Typography variant="body2" sx={{ fontWeight: 600 }}>
-            Edit Info
-          </Typography>
-        </Box>
-      </Box>
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" },
-          rowGap: 3,
-          columnGap: 4,
-        }}
-      >
-        {fields.map((field) => (
-          <Box key={field.label}>
-            <Typography variant="caption" sx={{ color: "text.secondary", display: "block", mb: 0.5 }}>
-              {field.label}
-            </Typography>
-            <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>
-              {field.value}
-            </Typography>
-          </Box>
-        ))}
-      </Box>
-    </Box>
-  );
-};
-
 const DepartmentDetails = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -113,9 +67,6 @@ const DepartmentDetails = () => {
   const [supervisors, setSupervisors] = useState(null);
   const [users, setUsers] = useState(null);
   const [loadingUsers, setLoadingUsers] = useState(true);
-
-  // Re-arm the loading state during render (not in the effect below) whenever
-  // the department changes, so a fresh fetch always shows a loading state.
   const [loadedDepartmentId, setLoadedDepartmentId] = useState(null);
   if (departmentId !== loadedDepartmentId && !loadingUsers) {
     setLoadingUsers(true);
@@ -159,7 +110,7 @@ const DepartmentDetails = () => {
   }, [departmentId]);
 
   const tabs = [
-    { label: "Admin Information", content: <AdminInformation adminInfo={adminInfo} /> },
+    { label: "Admin Information", content: <AdminInformationTab adminInfo={adminInfo} /> },
     {
       label: "Supervisors",
       content: (

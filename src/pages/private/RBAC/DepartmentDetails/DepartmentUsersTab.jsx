@@ -2,8 +2,8 @@ import { useMemo, useState } from "react";
 import { Box, Typography, Button, Avatar, IconButton, Menu, MenuItem } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import CommonTable from "../../../components/common/CommonTable";
-import CommonChip from "../../../components/common/CommonChip";
+import CommonTable from "../../../../components/common/CommonTable";
+import CommonChip from "../../../../components/common/CommonChip";
 
 const AVATAR_COLORS = [
   { bgcolor: "#E0F2FE", color: "#0369A1" },
