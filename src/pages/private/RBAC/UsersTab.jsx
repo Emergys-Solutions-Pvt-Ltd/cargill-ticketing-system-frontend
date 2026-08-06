@@ -7,8 +7,8 @@ import CommonTable from "../../../components/common/CommonTable";
 import CommonChip from "../../../components/common/CommonChip";
 import DeactivateUserModal from "./DeactivateUserModal";
 import AddUserModal from "./AddUserModal";
-import { getUsers } from "../../../api/apiRequests";
-import { nameFromEmail, formatRelativeTime } from "../../../utils/format";
+import { getUsers, toggleUserStatus } from "../../../api/apiRequests";
+import { nameFromEmail, formatRelativeTime, isActiveStatus } from "../../../utils/format";
 
 const MOCK_USERS = [
   { id: 1, name: "John Smith", email: "john.smith@cargill.com", role: "Department Admin", department: "Human Resources", queuesAssigned: 2, status: "Active", lastLogin: "2 hours ago" },
@@ -51,7 +51,7 @@ const getInitials = (name) =>
     .slice(0, 2)
     .toUpperCase();
 
-const UserRowActions = ({ onEdit, onDeactivate }) => {
+const UserRowActions = ({ onEdit, onToggleStatus, isActive }) => {
   const [anchorEl, setAnchorEl] = useState(null);
 
   return (
@@ -71,11 +71,11 @@ const UserRowActions = ({ onEdit, onDeactivate }) => {
         <MenuItem
           onClick={() => {
             setAnchorEl(null);
-            onDeactivate?.();
+            onToggleStatus?.();
           }}
-          sx={{ color: "#F05252" }}
+          sx={{ color: isActive ? "#F05252" : "primary.main" }}
         >
-          Deactivate
+          {isActive ? "Deactivate" : "Activate"}
         </MenuItem>
       </Menu>
     </>
@@ -89,6 +89,8 @@ const UsersTab = () => {
   const [users, setUsers] = useState(null);
   const [loading, setLoading] = useState(true);
   const [deactivateTarget, setDeactivateTarget] = useState(null);
+  const [statusUpdating, setStatusUpdating] = useState(false);
+  const [statusOverrides, setStatusOverrides] = useState({});
   const [addUserOpen, setAddUserOpen] = useState(false);
 
   useEffect(() => {
@@ -110,12 +112,27 @@ const UsersTab = () => {
     };
   }, []);
 
-  const userRows = users ?? MOCK_USERS;
+  const userRows = (users ?? MOCK_USERS).map((row) =>
+    statusOverrides[row.id] ? { ...row, status: statusOverrides[row.id] } : row,
+  );
 
   const paginatedUsers = userRows.slice(
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage,
   );
+
+  const applyStatusChange = (row, nextIsActive) => {
+    setStatusOverrides((prev) => ({ ...prev, [row.id]: nextIsActive ? "Active" : "Inactive" }));
+  };
+
+  const handleToggleStatus = (row) => {
+    if (isActiveStatus(row.status)) {
+      setDeactivateTarget(row);
+      return;
+    }
+
+    toggleUserStatus({ userId: row.id, isActive: true }).then(() => applyStatusChange(row, true));
+  };
 
   const userColumns = useMemo(
     () => [
@@ -193,10 +210,11 @@ const UsersTab = () => {
         ariaLabel="Access control user list"
         actions={(row) => (
           <UserRowActions
+            isActive={isActiveStatus(row.status)}
             onEdit={() => {
               // TODO: wire up edit user
             }}
-            onDeactivate={() => setDeactivateTarget(row)}
+            onToggleStatus={() => handleToggleStatus(row)}
           />
         )}
         pagination={{
@@ -215,10 +233,16 @@ const UsersTab = () => {
         open={Boolean(deactivateTarget)}
         onClose={() => setDeactivateTarget(null)}
         onConfirm={() => {
-          // TODO: wire up deactivate user API
-          setDeactivateTarget(null);
+          setStatusUpdating(true);
+          toggleUserStatus({ userId: deactivateTarget.id, isActive: false })
+            .then(() => applyStatusChange(deactivateTarget, false))
+            .finally(() => {
+              setStatusUpdating(false);
+              setDeactivateTarget(null);
+            });
         }}
         userName={deactivateTarget?.name}
+        loading={statusUpdating}
       />
 
       <AddUserModal

@@ -7,6 +7,8 @@ import CommonTable from "../../../../components/common/CommonTable";
 import CommonChip from "../../../../components/common/CommonChip";
 import DeactivateUserModal from "../DeactivateUserModal";
 import AddUserModal from "../AddUserModal";
+import { toggleUserStatus } from "../../../../api/apiRequests";
+import { isActiveStatus } from "../../../../utils/format";
 
 const AVATAR_COLORS = [
   { bgcolor: "#E0F2FE", color: "#0369A1" },
@@ -41,7 +43,7 @@ const MOCK_USERS = Array.from({ length: 40 }, (_, index) => ({
   ...USER_TEMPLATES[index % USER_TEMPLATES.length],
 }));
 
-const UserRowActions = ({ onEdit, onDeactivate }) => {
+const UserRowActions = ({ onEdit, onToggleStatus, isActive }) => {
   const [anchorEl, setAnchorEl] = useState(null);
 
   return (
@@ -61,11 +63,11 @@ const UserRowActions = ({ onEdit, onDeactivate }) => {
         <MenuItem
           onClick={() => {
             setAnchorEl(null);
-            onDeactivate?.();
+            onToggleStatus?.();
           }}
-          sx={{ color: "#F05252" }}
+          sx={{ color: isActive ? "#F05252" : "primary.main" }}
         >
-          Deactivate
+          {isActive ? "Deactivate" : "Activate"}
         </MenuItem>
       </Menu>
     </>
@@ -77,20 +79,38 @@ const DepartmentUsersTab = ({ users = null, loading = false }) => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(8);
   const [deactivateTarget, setDeactivateTarget] = useState(null);
+  const [statusUpdating, setStatusUpdating] = useState(false);
+  const [statusOverrides, setStatusOverrides] = useState({});
   const [addUserOpen, setAddUserOpen] = useState(false);
-
-  const userRows = users ?? MOCK_USERS;
 
   const [prevUsers, setPrevUsers] = useState(users);
   if (users !== prevUsers) {
     setPrevUsers(users);
     setPage(0);
+    setStatusOverrides({});
   }
+
+  const userRows = (users ?? MOCK_USERS).map((row) =>
+    statusOverrides[row.id] ? { ...row, status: statusOverrides[row.id] } : row,
+  );
 
   const paginatedUsers = userRows.slice(
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage,
   );
+
+  const applyStatusChange = (row, nextIsActive) => {
+    setStatusOverrides((prev) => ({ ...prev, [row.id]: nextIsActive ? "Active" : "Inactive" }));
+  };
+
+  const handleToggleStatus = (row) => {
+    if (isActiveStatus(row.status)) {
+      setDeactivateTarget(row);
+      return;
+    }
+
+    toggleUserStatus({ userId: row.id, isActive: true }).then(() => applyStatusChange(row, true));
+  };
 
   const userColumns = useMemo(
     () => [
@@ -172,10 +192,11 @@ const DepartmentUsersTab = ({ users = null, loading = false }) => {
         ariaLabel="Department user list"
         actions={(row) => (
           <UserRowActions
+            isActive={isActiveStatus(row.status)}
             onEdit={() => {
               // TODO: edit user
             }}
-            onDeactivate={() => setDeactivateTarget(row)}
+            onToggleStatus={() => handleToggleStatus(row)}
           />
         )}
         pagination={{
@@ -194,10 +215,16 @@ const DepartmentUsersTab = ({ users = null, loading = false }) => {
         open={Boolean(deactivateTarget)}
         onClose={() => setDeactivateTarget(null)}
         onConfirm={() => {
-          // TODO: call deactivate user API
-          setDeactivateTarget(null);
+          setStatusUpdating(true);
+          toggleUserStatus({ userId: deactivateTarget.id, isActive: false })
+            .then(() => applyStatusChange(deactivateTarget, false))
+            .finally(() => {
+              setStatusUpdating(false);
+              setDeactivateTarget(null);
+            });
         }}
         userName={deactivateTarget?.name}
+        loading={statusUpdating}
       />
 
       <AddUserModal

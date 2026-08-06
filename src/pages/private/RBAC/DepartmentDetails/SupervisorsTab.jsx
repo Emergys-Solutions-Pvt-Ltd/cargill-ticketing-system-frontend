@@ -15,6 +15,8 @@ import CommonTable from "../../../../components/common/CommonTable";
 import CommonChip from "../../../../components/common/CommonChip";
 import DeactivateUserModal from "../DeactivateUserModal";
 import SearchIcon from "../../../../assets/icons/search.svg";
+import { toggleUserStatus } from "../../../../api/apiRequests";
+import { isActiveStatus } from "../../../../utils/format";
 
 const AVATAR_COLORS = [
   { bgcolor: "#E0F2FE", color: "#0369A1" },
@@ -47,7 +49,7 @@ const MOCK_SUPERVISORS = Array.from({ length: 40 }, (_, index) => ({
   ...SUPERVISOR_TEMPLATES[index % SUPERVISOR_TEMPLATES.length],
 }));
 
-const SupervisorRowActions = ({ onView, onRemove }) => {
+const SupervisorRowActions = ({ onView, onToggleStatus, isActive }) => {
   const [anchorEl, setAnchorEl] = useState(null);
 
   return (
@@ -67,11 +69,11 @@ const SupervisorRowActions = ({ onView, onRemove }) => {
         <MenuItem
           onClick={() => {
             setAnchorEl(null);
-            onRemove?.();
+            onToggleStatus?.();
           }}
-          sx={{ color: "#F05252" }}
+          sx={{ color: isActive ? "#F05252" : "primary.main" }}
         >
-          Deactivate
+          {isActive ? "Deactivate" : "Activate"}
         </MenuItem>
       </Menu>
     </>
@@ -84,14 +86,32 @@ const SupervisorsTab = ({ departmentName = "Human Resources", supervisors = null
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(8);
   const [deactivateTarget, setDeactivateTarget] = useState(null);
-
-  const supervisorRows = supervisors ?? MOCK_SUPERVISORS;
+  const [statusUpdating, setStatusUpdating] = useState(false);
+  const [statusOverrides, setStatusOverrides] = useState({});
 
   const [prevSupervisors, setPrevSupervisors] = useState(supervisors);
   if (supervisors !== prevSupervisors) {
     setPrevSupervisors(supervisors);
     setPage(0);
+    setStatusOverrides({});
   }
+
+  const supervisorRows = (supervisors ?? MOCK_SUPERVISORS).map((row) =>
+    statusOverrides[row.id] ? { ...row, status: statusOverrides[row.id] } : row,
+  );
+
+  const applyStatusChange = (row, nextIsActive) => {
+    setStatusOverrides((prev) => ({ ...prev, [row.id]: nextIsActive ? "Active" : "Inactive" }));
+  };
+
+  const handleToggleStatus = (row) => {
+    if (isActiveStatus(row.status)) {
+      setDeactivateTarget(row);
+      return;
+    }
+
+    toggleUserStatus({ userId: row.id, isActive: true }).then(() => applyStatusChange(row, true));
+  };
 
   const filteredSupervisors = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -204,8 +224,9 @@ const SupervisorsTab = ({ departmentName = "Human Resources", supervisors = null
         ariaLabel="Department supervisors list"
         actions={(row) => (
           <SupervisorRowActions
+            isActive={isActiveStatus(row.status)}
             onView={() => navigate(`/rbac/users/${row.id}`, { state: { user: { ...row, role: "Supervisor" } } })}
-            onRemove={() => setDeactivateTarget(row)}
+            onToggleStatus={() => handleToggleStatus(row)}
           />
         )}
         pagination={{
@@ -224,10 +245,16 @@ const SupervisorsTab = ({ departmentName = "Human Resources", supervisors = null
         open={Boolean(deactivateTarget)}
         onClose={() => setDeactivateTarget(null)}
         onConfirm={() => {
-          // TODO: call deactivate supervisor API
-          setDeactivateTarget(null);
+          setStatusUpdating(true);
+          toggleUserStatus({ userId: deactivateTarget.id, isActive: false })
+            .then(() => applyStatusChange(deactivateTarget, false))
+            .finally(() => {
+              setStatusUpdating(false);
+              setDeactivateTarget(null);
+            });
         }}
         userName={deactivateTarget?.name}
+        loading={statusUpdating}
       />
     </Box>
   );

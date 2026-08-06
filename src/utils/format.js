@@ -24,6 +24,8 @@ export const formatRelativeTime = (dateString) => {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 };
 
+export const isActiveStatus = (status) => (status || "").toLowerCase() === "active";
+
 export const formatMonthYear = (dateString) => {
   const date = new Date(dateString);
   if (!dateString || Number.isNaN(date.getTime())) return "—";

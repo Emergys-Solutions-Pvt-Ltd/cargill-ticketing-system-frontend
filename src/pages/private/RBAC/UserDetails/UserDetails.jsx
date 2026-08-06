@@ -9,6 +9,8 @@ import UserInformationCard from "./UserInformationCard";
 import AssignedQueuesCard from "./AssignedQueuesCard";
 import SupervisorUsersTab from "./SupervisorUsersTab";
 import DeactivateUserModal from "../DeactivateUserModal";
+import { toggleUserStatus } from "../../../../api/apiRequests";
+import { isActiveStatus } from "../../../../utils/format";
 
 const getInitials = (name = "") =>
   name
@@ -19,6 +21,7 @@ const getInitials = (name = "") =>
     .toUpperCase();
 
 const DEFAULT_USER = {
+  id: 2,
   name: "Alex Johnson",
   email: "alex.johnson@cargill.com",
   status: "Active",
@@ -49,7 +52,19 @@ const UserDetails = () => {
   const isSupervisor = (user.role || "").toLowerCase() === "supervisor";
 
   const [queues, setQueues] = useState(user.queues || []);
+  const [status, setStatus] = useState(user.status);
   const [deactivateOpen, setDeactivateOpen] = useState(false);
+  const [statusUpdating, setStatusUpdating] = useState(false);
+  const isActive = isActiveStatus(status);
+
+  const handleToggleStatus = () => {
+    if (isActive) {
+      setDeactivateOpen(true);
+      return;
+    }
+
+    toggleUserStatus({ userId: user.id, isActive: true }).then(() => setStatus("Active"));
+  };
 
   const infoFields = [
     { label: "User ID", value: user.userId },
@@ -118,7 +133,7 @@ const UserDetails = () => {
               <Typography sx={{ fontWeight: 600, fontSize: "15px", color: "text.primary" }}>
                 {user.name}
               </Typography>
-              <CommonChip status={user.status} label={user.status} />
+              <CommonChip status={status} label={status} />
             </Box>
             <Typography variant="body2" sx={{ color: "text.secondary" }}>
               {isSupervisor ? user.role : user.email}
@@ -132,16 +147,25 @@ const UserDetails = () => {
               variant="outlined"
               size="small"
               startIcon={<PersonRemoveOutlinedIcon sx={{ fontSize: 16 }} />}
-              onClick={() => setDeactivateOpen(true)}
-              sx={{
-                textTransform: "none",
-                fontWeight: 600,
-                color: "#E02424",
-                borderColor: "#F8B4B4",
-                "&:hover": { borderColor: "#E02424", backgroundColor: "#FDF2F2" },
-              }}
+              onClick={handleToggleStatus}
+              sx={
+                isActive
+                  ? {
+                      textTransform: "none",
+                      fontWeight: 600,
+                      color: "#E02424",
+                      borderColor: "#F8B4B4",
+                      "&:hover": { borderColor: "#E02424", backgroundColor: "#FDF2F2" },
+                    }
+                  : {
+                      textTransform: "none",
+                      fontWeight: 600,
+                      color: "primary.main",
+                      borderColor: "divider",
+                    }
+              }
             >
-              Deactivate User
+              {isActive ? "Deactivate User" : "Activate User"}
             </Button>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <Typography variant="caption" sx={{ color: "text.secondary", whiteSpace: "nowrap" }}>
@@ -178,10 +202,16 @@ const UserDetails = () => {
         open={deactivateOpen}
         onClose={() => setDeactivateOpen(false)}
         onConfirm={() => {
-          // TODO: call deactivate user API
-          setDeactivateOpen(false);
+          setStatusUpdating(true);
+          toggleUserStatus({ userId: user.id, isActive: false })
+            .then(() => setStatus("Inactive"))
+            .finally(() => {
+              setStatusUpdating(false);
+              setDeactivateOpen(false);
+            });
         }}
         userName={user.name}
+        loading={statusUpdating}
       />
     </Box>
   );
