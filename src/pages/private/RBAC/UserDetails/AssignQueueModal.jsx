@@ -3,6 +3,14 @@ import Modal from "../../../../components/common/Modal";
 import FormMultiSelect from "../../../../components/common/FormMultiSelect";
 import { getQueues } from "../../../../api/apiRequests";
 
+const MOCK_QUEUES = [
+  { queueId: "q1", queueName: "HR Support" },
+  { queueId: "q2", queueName: "HR NA Feedback" },
+  { queueId: "q3", queueName: "HR LA PRY Benefits" },
+  { queueId: "q4", queueName: "HR APAC Support" },
+  { queueId: "q5", queueName: "HR Payroll Queries" },
+];
+
 const AssignQueueModal = ({ open, onClose, onAssign, departmentId, assignedQueueIds = [] }) => {
   const [queueOptions, setQueueOptions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -16,7 +24,7 @@ const AssignQueueModal = ({ open, onClose, onAssign, departmentId, assignedQueue
     getQueues({ departmentId })
       .then((response) => {
         if (!active) return;
-        const records = response?.data || [];
+        const records = response?.data?.length ? response.data : MOCK_QUEUES;
         setQueueOptions(
           records
             .map((record) => ({ label: record.queueName, value: record.queueId }))
@@ -25,7 +33,11 @@ const AssignQueueModal = ({ open, onClose, onAssign, departmentId, assignedQueue
       })
       .catch(() => {
         if (!active) return;
-        setQueueOptions([]);
+        setQueueOptions(
+          MOCK_QUEUES
+            .map((record) => ({ label: record.queueName, value: record.queueId }))
+            .filter((option) => !assignedQueueIds.includes(option.value)),
+        );
       })
       .finally(() => {
         if (active) setLoading(false);

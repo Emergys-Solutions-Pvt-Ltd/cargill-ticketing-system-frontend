@@ -13,3 +13,6 @@ export const toggleUserStatus = (payload = {}) =>
 
 export const getQueues = (payload = {}) =>
   apiService.post("/v1/rbac/get-queues", payload);
+
+export const getDepartmentSupervisors = () =>
+  apiService.get("/v1/rbac/get-department-supervisors");

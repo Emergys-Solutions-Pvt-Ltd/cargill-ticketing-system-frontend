@@ -4,7 +4,7 @@ import Modal from "../../../components/common/Modal";
 import FormTextField from "../../../components/common/FormTextField";
 import FormSelect from "../../../components/common/FormSelect";
 import FormMultiSelect from "../../../components/common/FormMultiSelect";
-import { getQueues } from "../../../api/apiRequests";
+import { getQueues, getDepartmentSupervisors } from "../../../api/apiRequests";
 
 const USER_ROLE_OPTIONS = [
   { label: "User", value: "user" },
@@ -12,20 +12,55 @@ const USER_ROLE_OPTIONS = [
   { label: "Department Admin", value: "department_admin" },
 ];
 
-const DEPARTMENT_OPTIONS = [
-  { label: "Human Resources", value: "human_resources" },
-  { label: "IT Support", value: "it_support" },
-  { label: "Security Operations", value: "security_operations" },
-  { label: "IT Infrastructure", value: "it_infrastructure" },
+const MOCK_DEPARTMENT_SUPERVISORS = [
+  {
+    departmentId: "1",
+    departmentName: "Human Resources",
+    supervisors: [
+      { userId: "3", userName: "Mike Wilson" },
+      { userId: "4", userName: "Kevin Brown" },
+    ],
+  },
+  {
+    departmentId: "2",
+    departmentName: "Finance",
+    supervisors: [
+      { userId: "11", userName: "Emma Clark" },
+      { userId: "12", userName: "Brian Lewis" },
+    ],
+  },
+  {
+    departmentId: "3",
+    departmentName: "Information Technology",
+    supervisors: [
+      { userId: "20", userName: "Daniel Scott" },
+      { userId: "21", userName: "Peter White" },
+    ],
+  },
+  {
+    departmentId: "4",
+    departmentName: "Operations",
+    supervisors: [
+      { userId: "29", userName: "Jason Reed" },
+      { userId: "30", userName: "Ryan Cooper" },
+    ],
+  },
+  {
+    departmentId: "5",
+    departmentName: "Customer Support",
+    supervisors: [
+      { userId: "38", userName: "Lisa Green" },
+      { userId: "39", userName: "Olivia Moore" },
+    ],
+  },
 ];
 
-const SUPERVISOR_OPTIONS = [
-  { label: "John Smith", value: "john_smith" },
-  { label: "Sarah Lee", value: "sarah_lee" },
-  { label: "Michael Brown", value: "michael_brown" },
-  { label: "Emily Davis", value: "emily_davis" },
-  { label: "David Wilson", value: "david_wilson" },
-  { label: "Amanda Lewis", value: "amanda_lewis" },
+const MOCK_QUEUES = [
+  { queueId: "q1", queueName: "HR Support" },
+  { queueId: "q2", queueName: "HR NA Feedback" },
+  { queueId: "q3", queueName: "HR LA PRY Benefits" },
+  { queueId: "q4", queueName: "HR APAC Support" },
+  { queueId: "q5", queueName: "HR Payroll Queries" },
 ];
 
 const DEFAULT_FORM = {
@@ -42,6 +77,43 @@ const AddUserModal = ({ open, onClose, onSubmit, loading = false }) => {
   const [form, setForm] = useState(DEFAULT_FORM);
   const [queueOptions, setQueueOptions] = useState([]);
   const [queuesLoading, setQueuesLoading] = useState(false);
+  const [departmentSupervisors, setDepartmentSupervisors] = useState([]);
+  const [supervisorsLoading, setSupervisorsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+
+    let active = true;
+    setSupervisorsLoading(true);
+    getDepartmentSupervisors()
+      .then((response) => {
+        if (!active) return;
+        setDepartmentSupervisors(response?.data?.length ? response.data : MOCK_DEPARTMENT_SUPERVISORS);
+      })
+      .catch(() => {
+        if (!active) return;
+        setDepartmentSupervisors(MOCK_DEPARTMENT_SUPERVISORS);
+      })
+      .finally(() => {
+        if (active) setSupervisorsLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [open]);
+
+  const departmentOptions = departmentSupervisors.map((dept) => ({
+    label: dept.departmentName,
+    value: dept.departmentId,
+  }));
+
+  const selectedDepartment = departmentSupervisors.find(
+    (dept) => dept.departmentId === form.department,
+  );
+  const supervisorOptions = (selectedDepartment?.supervisors || []).map((supervisor) => ({
+    label: supervisor.userName,
+    value: supervisor.userId,
+  }));
 
   useEffect(() => {
     if (!form.department) {
@@ -54,12 +126,12 @@ const AddUserModal = ({ open, onClose, onSubmit, loading = false }) => {
     getQueues({ departmentId: form.department })
       .then((response) => {
         if (!active) return;
-        const records = response?.data || [];
+        const records = response?.data?.length ? response.data : MOCK_QUEUES;
         setQueueOptions(records.map((record) => ({ label: record.queueName, value: record.queueId })));
       })
       .catch(() => {
         if (!active) return;
-        setQueueOptions([]);
+        setQueueOptions(MOCK_QUEUES.map((record) => ({ label: record.queueName, value: record.queueId })));
       })
       .finally(() => {
         if (active) setQueuesLoading(false);
@@ -79,7 +151,7 @@ const AddUserModal = ({ open, onClose, onSubmit, loading = false }) => {
     setForm((prev) => ({
       ...prev,
       [field]: value,
-      ...(field === "department" ? { queues: [] } : {}),
+      ...(field === "department" ? { queues: [], supervisor: "" } : {}),
     }));
   };
 
@@ -137,17 +209,17 @@ const AddUserModal = ({ open, onClose, onSubmit, loading = false }) => {
           />
           <FormSelect
             label="Department"
-            placeholder="Select department"
+            placeholder={supervisorsLoading ? "Loading departments..." : "Select department"}
             value={form.department}
             onChange={handleFieldChange("department")}
-            options={DEPARTMENT_OPTIONS}
+            options={departmentOptions}
           />
           <FormSelect
             label="Supervisor"
-            placeholder="Select supervisor"
+            placeholder={form.department ? "Select supervisor" : "Select department first"}
             value={form.supervisor}
             onChange={handleFieldChange("supervisor")}
-            options={SUPERVISOR_OPTIONS}
+            options={supervisorOptions}
           />
         </Box>
 
