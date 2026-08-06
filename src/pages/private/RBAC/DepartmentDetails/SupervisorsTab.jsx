@@ -80,7 +80,12 @@ const SupervisorRowActions = ({ onView, onToggleStatus, isActive }) => {
   );
 };
 
-const SupervisorsTab = ({ departmentName = "Human Resources", supervisors = null, loading = false }) => {
+const SupervisorsTab = ({
+  departmentName = "Human Resources",
+  departmentId = null,
+  supervisors = null,
+  loading = false,
+}) => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
@@ -217,7 +222,7 @@ const SupervisorsTab = ({ departmentName = "Human Resources", supervisors = null
         sx={{ flexGrow: 1, minHeight: 0 }}
         columns={columns}
         rows={paginatedSupervisors}
-        onRowClick={(row) => navigate(`/rbac/users/${row.id}`, { state: { user: { ...row, role: "Supervisor" } } })}
+        onRowClick={(row) => navigate(`/rbac/users/${row.id}`, { state: { user: { ...row, role: "Supervisor", departmentId } } })}
         loading={loading}
         sortable
         emptyMessage="No supervisors to display yet."
@@ -225,7 +230,7 @@ const SupervisorsTab = ({ departmentName = "Human Resources", supervisors = null
         actions={(row) => (
           <SupervisorRowActions
             isActive={isActiveStatus(row.status)}
-            onView={() => navigate(`/rbac/users/${row.id}`, { state: { user: { ...row, role: "Supervisor" } } })}
+            onView={() => navigate(`/rbac/users/${row.id}`, { state: { user: { ...row, role: "Supervisor", departmentId } } })}
             onToggleStatus={() => handleToggleStatus(row)}
           />
         )}

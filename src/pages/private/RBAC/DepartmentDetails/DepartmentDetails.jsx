@@ -36,21 +36,23 @@ const mapAdmin = (record) => ({
   memberSince: formatMonthYear(record.createdAt),
 });
 
-const mapSupervisor = (record) => ({
+const mapSupervisor = (record, departmentId) => ({
   id: record.userId,
   name: record.userName || nameFromEmail(record.email),
   email: record.email,
+  departmentId,
   usersAssigned: record.usersAssigned ?? 0,
   queuesManaged: record.queuesManaged ?? 0,
   status: record.isActive ? "Active" : "Inactive",
   lastLogin: formatRelativeTime(record.lastLogin),
 });
 
-const mapUser = (record) => ({
+const mapUser = (record, departmentId) => ({
   id: record.userId,
   name: record.userName || nameFromEmail(record.email),
   email: record.email,
   role: record.roleName || "User",
+  departmentId,
   supervisor: record.supervisorName || "Unassigned",
   queuesAssigned: record.queuesAssigned ?? 0,
   status: record.isActive ? "Active" : "Inactive",
@@ -91,9 +93,10 @@ const DepartmentDetails = () => {
         const supervisorRecords = records.filter((record) => record.roleCode === "SUPERVISOR");
         const userRecords = records.filter((record) => record.roleCode === "USER");
 
+        const numericDepartmentId = Number(departmentId);
         setAdminInfo(adminRecord ? mapAdmin(adminRecord) : DEFAULT_DEPARTMENT.adminInfo);
-        setSupervisors(supervisorRecords.map(mapSupervisor));
-        setUsers(userRecords.map(mapUser));
+        setSupervisors(supervisorRecords.map((record) => mapSupervisor(record, numericDepartmentId)));
+        setUsers(userRecords.map((record) => mapUser(record, numericDepartmentId)));
       })
       .catch(() => {
         if (!active) return;
@@ -118,12 +121,22 @@ const DepartmentDetails = () => {
       content: (
         <SupervisorsTab
           departmentName={department.name}
+          departmentId={Number(departmentId)}
           supervisors={supervisors}
           loading={loadingUsers}
         />
       ),
     },
-    { label: "Users", content: <DepartmentUsersTab users={users} loading={loadingUsers} /> },
+    {
+      label: "Users",
+      content: (
+        <DepartmentUsersTab
+          users={users}
+          departmentId={Number(departmentId)}
+          loading={loadingUsers}
+        />
+      ),
+    },
   ];
 
   return (

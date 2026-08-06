@@ -1,9 +1,9 @@
-import { Box, Typography, IconButton } from "@mui/material";
+import { Box, Typography, IconButton, CircularProgress } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import LayersOutlinedIcon from "@mui/icons-material/LayersOutlined";
 import TrashIcon from "../../../../assets/icons/trash.svg";
 
-const AssignedQueuesCard = ({ queues = [], onAssignQueue, onRemoveQueue }) => {
+const AssignedQueuesCard = ({ queues = [], loading = false, onAssignQueue, onRemoveQueue }) => {
   return (
     <Box
       sx={{
@@ -31,14 +31,18 @@ const AssignedQueuesCard = ({ queues = [], onAssignQueue, onRemoveQueue }) => {
       </Box>
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-        {queues.length === 0 ? (
+        {loading ? (
+          <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+            <CircularProgress size={24} />
+          </Box>
+        ) : queues.length === 0 ? (
           <Typography variant="body2" sx={{ color: "text.secondary" }}>
             No queues assigned yet.
           </Typography>
         ) : (
           queues.map((queue) => (
             <Box
-              key={queue}
+              key={queue.id}
               sx={{
                 display: "flex",
                 alignItems: "center",
@@ -65,10 +69,10 @@ const AssignedQueuesCard = ({ queues = [], onAssignQueue, onRemoveQueue }) => {
                   <LayersOutlinedIcon sx={{ fontSize: 16, color: "#0E9F6E" }} />
                 </Box>
                 <Typography variant="body2" sx={{ fontWeight: 500, color: "text.primary" }}>
-                  {queue}
+                  {queue.name}
                 </Typography>
               </Box>
-              <IconButton size="small" onClick={() => onRemoveQueue?.(queue)} aria-label={`Remove ${queue}`}>
+              <IconButton size="small" onClick={() => onRemoveQueue?.(queue)} aria-label={`Remove ${queue.name}`}>
                 <img src={TrashIcon} alt="" width={16} height={16} />
               </IconButton>
             </Box>

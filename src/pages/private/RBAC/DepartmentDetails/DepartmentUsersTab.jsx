@@ -74,7 +74,7 @@ const UserRowActions = ({ onEdit, onToggleStatus, isActive }) => {
   );
 };
 
-const DepartmentUsersTab = ({ users = null, loading = false }) => {
+const DepartmentUsersTab = ({ users = null, departmentId = null, loading = false }) => {
   const navigate = useNavigate();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(8);
@@ -185,7 +185,7 @@ const DepartmentUsersTab = ({ users = null, loading = false }) => {
         sx={{ flexGrow: 1, minHeight: 0 }}
         columns={userColumns}
         rows={paginatedUsers}
-        onRowClick={(row) => navigate(`/rbac/users/${row.id}`, { state: { user: row } })}
+        onRowClick={(row) => navigate(`/rbac/users/${row.id}`, { state: { user: { ...row, departmentId } } })}
         loading={loading}
         sortable
         emptyMessage="No users to display yet."

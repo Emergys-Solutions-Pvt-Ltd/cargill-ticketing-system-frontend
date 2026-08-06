@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Box, Typography, Avatar, Button, Divider } from "@mui/material";
 import PersonRemoveOutlinedIcon from "@mui/icons-material/PersonRemoveOutlined";
@@ -7,9 +7,10 @@ import CommonChip from "../../../../components/common/CommonChip";
 import SectionCard from "../../../../components/SectionCard";
 import UserInformationCard from "./UserInformationCard";
 import AssignedQueuesCard from "./AssignedQueuesCard";
+import AssignQueueModal from "./AssignQueueModal";
 import SupervisorUsersTab from "./SupervisorUsersTab";
 import DeactivateUserModal from "../DeactivateUserModal";
-import { toggleUserStatus } from "../../../../api/apiRequests";
+import { toggleUserStatus, getQueues } from "../../../../api/apiRequests";
 import { isActiveStatus } from "../../../../utils/format";
 
 const getInitials = (name = "") =>
@@ -20,8 +21,17 @@ const getInitials = (name = "") =>
     .slice(0, 2)
     .toUpperCase();
 
+const DEFAULT_QUEUES = [
+  { id: 1, name: "HR Support" },
+  { id: 2, name: "HR NA Feedback" },
+  { id: 3, name: "HR LA PRY Benefits" },
+  { id: 4, name: "HR LA PDT Hypercare" },
+  { id: 5, name: "HR EMEA Comp & Mobility" },
+];
+
 const DEFAULT_USER = {
   id: 2,
+  departmentId: 1,
   name: "Alex Johnson",
   email: "alex.johnson@cargill.com",
   status: "Active",
@@ -35,13 +45,6 @@ const DEFAULT_USER = {
   memberSince: "Jun 2024",
   usersAssigned: 18,
   queuesManaged: 4,
-  queues: [
-    "HR Support",
-    "HR NA Feedback",
-    "HR LA PRY Benefits",
-    "HR LA PDT Hypercare",
-    "HR EMEA Comp & Mobility",
-  ],
 };
 
 const UserDetails = () => {
@@ -51,11 +54,39 @@ const UserDetails = () => {
   const user = { ...DEFAULT_USER, ...(location.state?.user || {}) };
   const isSupervisor = (user.role || "").toLowerCase() === "supervisor";
 
-  const [queues, setQueues] = useState(user.queues || []);
+  const [queues, setQueues] = useState([]);
+  const [queuesLoading, setQueuesLoading] = useState(true);
+  const [assignQueueOpen, setAssignQueueOpen] = useState(false);
   const [status, setStatus] = useState(user.status);
   const [deactivateOpen, setDeactivateOpen] = useState(false);
   const [statusUpdating, setStatusUpdating] = useState(false);
   const isActive = isActiveStatus(status);
+
+  useEffect(() => {
+    let active = true;
+    setQueuesLoading(true);
+    getQueues({ userId: user.id })
+      .then((response) => {
+        if (!active) return;
+        const records = response?.data || [];
+        setQueues(
+          records.length > 0
+            ? records.map((record) => ({ id: record.queueId, name: record.queueName }))
+            : DEFAULT_QUEUES,
+        );
+      })
+      .catch(() => {
+        if (!active) return;
+        setQueues(DEFAULT_QUEUES);
+      })
+      .finally(() => {
+        if (active) setQueuesLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user.id]);
 
   const handleToggleStatus = () => {
     if (isActive) {
@@ -89,10 +120,9 @@ const UserDetails = () => {
       <UserInformationCard fields={infoFields} />
       <AssignedQueuesCard
         queues={queues}
-        onAssignQueue={() => {
-          // TODO: open assign queue flow
-        }}
-        onRemoveQueue={(queue) => setQueues((prev) => prev.filter((item) => item !== queue))}
+        loading={queuesLoading}
+        onAssignQueue={() => setAssignQueueOpen(true)}
+        onRemoveQueue={(queue) => setQueues((prev) => prev.filter((item) => item.id !== queue.id))}
       />
     </Box>
   );
@@ -212,6 +242,17 @@ const UserDetails = () => {
         }}
         userName={user.name}
         loading={statusUpdating}
+      />
+
+      <AssignQueueModal
+        open={assignQueueOpen}
+        onClose={() => setAssignQueueOpen(false)}
+        departmentId={user.departmentId}
+        assignedQueueIds={queues.map((queue) => queue.id)}
+        onAssign={(newQueues) => {
+          setQueues((prev) => [...prev, ...newQueues]);
+          setAssignQueueOpen(false);
+        }}
       />
     </Box>
   );

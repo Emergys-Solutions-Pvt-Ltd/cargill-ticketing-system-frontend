@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Box } from "@mui/material";
 import Modal from "../../../components/common/Modal";
 import FormTextField from "../../../components/common/FormTextField";
 import FormSelect from "../../../components/common/FormSelect";
 import FormMultiSelect from "../../../components/common/FormMultiSelect";
+import { getQueues } from "../../../api/apiRequests";
 
 const USER_ROLE_OPTIONS = [
   { label: "User", value: "user" },
@@ -27,14 +28,6 @@ const SUPERVISOR_OPTIONS = [
   { label: "Amanda Lewis", value: "amanda_lewis" },
 ];
 
-const QUEUE_OPTIONS = [
-  { label: "HR Support", value: "hr_support" },
-  { label: "HR NA Feedback", value: "hr_na_feedback" },
-  { label: "HR LA PRY Benefits", value: "hr_la_pry_benefits" },
-  { label: "HR APAC Support", value: "hr_apac_support" },
-  { label: "HR Payroll Queries", value: "hr_payroll_queries" },
-];
-
 const DEFAULT_FORM = {
   role: "user",
   name: "",
@@ -47,6 +40,34 @@ const DEFAULT_FORM = {
 
 const AddUserModal = ({ open, onClose, onSubmit, loading = false }) => {
   const [form, setForm] = useState(DEFAULT_FORM);
+  const [queueOptions, setQueueOptions] = useState([]);
+  const [queuesLoading, setQueuesLoading] = useState(false);
+
+  useEffect(() => {
+    if (!form.department) {
+      setQueueOptions([]);
+      return;
+    }
+
+    let active = true;
+    setQueuesLoading(true);
+    getQueues({ departmentId: form.department })
+      .then((response) => {
+        if (!active) return;
+        const records = response?.data || [];
+        setQueueOptions(records.map((record) => ({ label: record.queueName, value: record.queueId })));
+      })
+      .catch(() => {
+        if (!active) return;
+        setQueueOptions([]);
+      })
+      .finally(() => {
+        if (active) setQueuesLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [form.department]);
 
   const handleClose = () => {
     setForm(DEFAULT_FORM);
@@ -54,7 +75,12 @@ const AddUserModal = ({ open, onClose, onSubmit, loading = false }) => {
   };
 
   const handleFieldChange = (field) => (event) => {
-    setForm((prev) => ({ ...prev, [field]: event.target.value }));
+    const { value } = event.target;
+    setForm((prev) => ({
+      ...prev,
+      [field]: value,
+      ...(field === "department" ? { queues: [] } : {}),
+    }));
   };
 
   const handleQueuesChange = (value) => {
@@ -127,10 +153,10 @@ const AddUserModal = ({ open, onClose, onSubmit, loading = false }) => {
 
         <FormMultiSelect
           label="Assign Queue"
-          placeholder="Select queues"
+          placeholder={queuesLoading ? "Loading queues..." : "Select queues"}
           value={form.queues}
           onChange={handleQueuesChange}
-          options={QUEUE_OPTIONS}
+          options={queueOptions}
         />
       </Box>
     </Modal>

@@ -11,14 +11,14 @@ import { getUsers, toggleUserStatus } from "../../../api/apiRequests";
 import { nameFromEmail, formatRelativeTime, isActiveStatus } from "../../../utils/format";
 
 const MOCK_USERS = [
-  { id: 1, name: "John Smith", email: "john.smith@cargill.com", role: "Department Admin", department: "Human Resources", queuesAssigned: 2, status: "Active", lastLogin: "2 hours ago" },
-  { id: 2, name: "Alex Johnson", email: "alex.johnson@cargill.com", role: "Supervisor", department: "Human Resources", queuesAssigned: 4, status: "Active", lastLogin: "1 day ago" },
-  { id: 3, name: "Rahul Patel", email: "rahul.patel@cargill.com", role: "User", department: "Human Resources", queuesAssigned: 5, status: "Active", lastLogin: "3 hours ago" },
-  { id: 4, name: "Jennifer Garcia", email: "jennifer.garcia@cargill.com", role: "User", department: "Human Resources", queuesAssigned: 3, status: "Active", lastLogin: "5 hours ago" },
-  { id: 5, name: "Michael Chen", email: "michael.chen@cargill.com", role: "User", department: "Human Resources", queuesAssigned: 3, status: "Inactive", lastLogin: "5 days ago" },
-  { id: 6, name: "Priya Sharma", email: "priya.sharma@cargill.com", role: "User", department: "Human Resources", queuesAssigned: 4, status: "Active", lastLogin: "1 day ago" },
-  { id: 7, name: "James Wilson", email: "james.wilson@cargill.com", role: "User", department: "Human Resources", queuesAssigned: 2, status: "Active", lastLogin: "2 days ago" },
-  { id: 8, name: "Lisa Anderson", email: "lisa.anderson@cargill.com", role: "User", department: "Human Resources", queuesAssigned: 4, status: "Active", lastLogin: "4 hours ago" },
+  { id: 1, name: "John Smith", email: "john.smith@cargill.com", role: "Department Admin", department: "Human Resources", departmentId: 1, queuesAssigned: 2, status: "Active", lastLogin: "2 hours ago" },
+  { id: 2, name: "Alex Johnson", email: "alex.johnson@cargill.com", role: "Supervisor", department: "Human Resources", departmentId: 1, queuesAssigned: 4, status: "Active", lastLogin: "1 day ago" },
+  { id: 3, name: "Rahul Patel", email: "rahul.patel@cargill.com", role: "User", department: "Human Resources", departmentId: 1, queuesAssigned: 5, status: "Active", lastLogin: "3 hours ago" },
+  { id: 4, name: "Jennifer Garcia", email: "jennifer.garcia@cargill.com", role: "User", department: "Human Resources", departmentId: 1, queuesAssigned: 3, status: "Active", lastLogin: "5 hours ago" },
+  { id: 5, name: "Michael Chen", email: "michael.chen@cargill.com", role: "User", department: "Human Resources", departmentId: 1, queuesAssigned: 3, status: "Inactive", lastLogin: "5 days ago" },
+  { id: 6, name: "Priya Sharma", email: "priya.sharma@cargill.com", role: "User", department: "Human Resources", departmentId: 1, queuesAssigned: 4, status: "Active", lastLogin: "1 day ago" },
+  { id: 7, name: "James Wilson", email: "james.wilson@cargill.com", role: "User", department: "Human Resources", departmentId: 1, queuesAssigned: 2, status: "Active", lastLogin: "2 days ago" },
+  { id: 8, name: "Lisa Anderson", email: "lisa.anderson@cargill.com", role: "User", department: "Human Resources", departmentId: 1, queuesAssigned: 4, status: "Active", lastLogin: "4 hours ago" },
 ];
 
 const mapUser = (record) => ({
@@ -27,6 +27,7 @@ const mapUser = (record) => ({
   email: record.email,
   role: record.roleName || "User",
   department: record.departmentName || "Unassigned",
+  departmentId: record.departmentId,
   queuesAssigned: record.queuesAssigned ?? 0,
   status: record.isActive ? "Active" : "Inactive",
   lastLogin: formatRelativeTime(record.lastLogin),
