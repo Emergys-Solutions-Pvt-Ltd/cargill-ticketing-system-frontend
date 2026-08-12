@@ -66,7 +66,7 @@ const DepartmentsTab = () => {
           No departments to display yet.
         </Typography>
       ) : (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 2 }}>
           {departments.map((dept) => (
             <DepartmentListItem
               key={dept.id}
@@ -74,7 +74,6 @@ const DepartmentsTab = () => {
               supervisors={dept.supervisors}
               users={dept.users}
               queues={dept.queues}
-              adminName={dept.adminName}
               onClick={() =>
                 navigate(`/rbac/departments/${dept.id}`, { state: { department: dept } })
               }
