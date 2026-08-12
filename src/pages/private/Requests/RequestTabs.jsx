@@ -48,7 +48,7 @@ const RequestTabs = ({ activeTab, onTabChange, openRequestTabs, onCloseTab }) =>
               pl: 1.25,
               pr: 1,
               py: 0.5,
-              backgroundColor: isActive ? "#DEF7EC" : "background.paper",
+              backgroundColor: isActive ? "#00843D1A" : "background.paper",
               borderLeft: "1px solid",
               borderRight: "1px solid",
               borderColor: "divider"
