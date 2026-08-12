@@ -1,13 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import {
-  Box,
-  Typography,
-  TextField,
-  InputAdornment,
-  Tabs,
-  Tab,
-  IconButton,
-} from "@mui/material";
+import { Box, Typography, TextField, InputAdornment } from "@mui/material";
 import {
   getStoredTickets,
   getStoredTicketsAsync,
@@ -15,10 +7,10 @@ import {
 import SearchIcon from "../../../../src/assets/icons/search.svg";
 import FilterIcon from "../../../../src/assets/icons/filter.svg";
 import SelectedFilterIcon from "../../../../src/assets/icons/greenFilter.svg";
-import CloseIcon from "@mui/icons-material/Close";
 import CommonTable from "../../../components/common/CommonTable";
 import CommonChip from "../../../components/common/CommonChip";
 import LabTabs from "../../../components/LabTabs";
+import RequestTabs from "./RequestTabs";
 
 // Page-specific: truncation style reused by two columns
 const truncateCellSx = {
@@ -168,67 +160,37 @@ const RequestList = () => {
         p: { xs: 2, md: 4 },
       }}
     >
+      <RequestTabs
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        openRequestTabs={openRequestTabs}
+        onCloseTab={handleCloseRequestTab}
+      />
 
+      {activeTab === "all-requests" && (
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: 2,
+            mb: 2,
+          }}
+        >
+          <Box>
+            <Typography sx={{ fontWeight: 600, fontSize: "18px", color: "text.primary" }}>
+              Requests
+            </Typography>
+            <Typography
+              variant="caption"
+              sx={{ color: "text.secondary", fontWeight: 400, fontSize: "13px" }}
+            >
+              Search, review, and stay informed about your active and completed requests.
+            </Typography>
+          </Box>
 
-      <Tabs
-        value={activeTab}
-        onChange={(_, newValue) => setActiveTab(newValue)}
-        variant="scrollable"
-        scrollButtons="auto"
-        sx={{
-          mb: 2,
-          borderBottom: 1,
-          borderColor: "divider",
-          minHeight: "48px",
-          "& .MuiTab-root": {
-            textTransform: "none",
-            minHeight: "48px",
-            color: "text.secondary",
-          },
-          "& .Mui-selected": {
-            color: "#00843D",
-            fontWeight: 600,
-          },
-          "& .MuiTabs-indicator": {
-            backgroundColor: "#00843D",
-          },
-        }}
-      >
-        <Tab label="All Requests" value="all-requests" />
-        {openRequestTabs.map((tab) => (
-          <Tab
-            key={tab.id}
-            value={tab.id}
-            label={
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-                <Typography variant="body2" sx={{ whiteSpace: "nowrap" }}>
-                  {tab.request.id}
-                </Typography>
-                <IconButton
-                  size="small"
-                  onClick={(event) => handleCloseRequestTab(tab.id, event)}
-                  sx={{ p: 0.25, ml: 0.25 }}
-                  aria-label={`Close ${tab.request.id}`}
-                >
-                  <CloseIcon fontSize="small" />
-                </IconButton>
-              </Box>
-            }
-          />
-        ))}
-      </Tabs>
-
-      {activeTab === "all-requests" ? (
-        <Box sx={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
-          <Box
-            sx={{
-              display: "flex",
-              flexWrap: "wrap",
-              alignItems: "center",
-              gap: 2,
-              mb: 2,
-            }}
-          >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <TextField
               placeholder="Search..."
               variant="outlined"
@@ -236,10 +198,9 @@ const RequestList = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               sx={{
-                flexGrow: 1,
-                maxWidth: "450px",
+                width: "260px",
                 "& .MuiOutlinedInput-root": {
-                  borderRadius: "4px",
+                  borderRadius: "8px",
                   height: "2.125rem",
                 },
                 backgroundColor: "background.paper",
@@ -256,42 +217,12 @@ const RequestList = () => {
             />
 
             <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                gap: 2,
-                mb: 2,
-              }}
-            >
-
-            </Box>
-            <TextField
-              select
-              size="small"
-              label="Status"
-              value={statusFilter}
-              onChange={(event) => {
-                setStatusFilter(event.target.value);
-                setPage(0);
-              }}
-              sx={{ minWidth: "160px", backgroundColor: "background.paper" }}
-            >
-              <option value="All">All</option>
-              <option value="New">New</option>
-              <option value="Open">Open</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Pending">Pending</option>
-              <option value="Resolved">Resolved</option>
-              <option value="Closed">Closed</option>
-            </TextField>
-            <Box
               onClick={() => {
                 setStatusFilter((current) => (current === "All" ? "Open" : "All"));
               }}
               sx={{
                 height: "2.125rem",
-                borderRadius: "4px",
+                borderRadius: "8px",
                 px: 2,
                 display: "flex",
                 alignItems: "center",
@@ -338,19 +269,11 @@ const RequestList = () => {
               )}
             </Box>
           </Box>
-          <Box style={{ marginBottom: 20 }}>
-            <Typography
-              variant="caption"
-              sx={{
-                color: "text.secondary",
-                fontWeight: 400,
-                fontSize: "13px",
+        </Box>
+      )}
 
-              }}
-            >
-              Search, view and stay informed about your requests and their current status.
-            </Typography>
-          </Box>
+      {activeTab === "all-requests" ? (
+        <Box sx={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
           <CommonTable
             sx={{ flexGrow: 1, minHeight: 0 }}
             columns={columns}
