@@ -157,7 +157,6 @@ const RequestList = () => {
         display: "flex",
         flexDirection: "column",
         backgroundColor: "background.default",
-        p: { xs: 2, md: 4 },
       }}
     >
       <RequestTabs
@@ -167,6 +166,15 @@ const RequestList = () => {
         onCloseTab={handleCloseRequestTab}
       />
 
+      <Box
+        sx={{
+          width: "100%",
+          flexGrow: 1,
+          display: "flex",
+          flexDirection: "column",
+          p: { xs: 2, md: 4 },
+        }}
+      >
       {activeTab === "all-requests" && (
         <Box
           sx={{
@@ -314,6 +322,7 @@ const RequestList = () => {
             ))}
         </Box>
       )}
+      </Box>
     </Box>
   );
 };

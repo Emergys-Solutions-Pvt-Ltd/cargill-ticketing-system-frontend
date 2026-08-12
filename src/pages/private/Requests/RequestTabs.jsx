@@ -4,13 +4,19 @@ import CloseIcon from "@mui/icons-material/Close";
 const RequestTabs = ({ activeTab, onTabChange, openRequestTabs, onCloseTab }) => {
   const isAllRequestsActive = activeTab === "all-requests";
 
+  if (openRequestTabs.length === 0) {
+    return null;
+  }
+
   return (
     <Box
       sx={{
         display: "flex",
         alignItems: "center",
         flexWrap: "wrap",
-        mb: 2,
+        backgroundColor: "background.paper",
+        border: "1px solid",
+        borderColor: "divider"
       }}
     >
       <Typography
@@ -20,8 +26,6 @@ const RequestTabs = ({ activeTab, onTabChange, openRequestTabs, onCloseTab }) =>
           cursor: "pointer",
           whiteSpace: "nowrap",
           fontSize: "13px",
-          border: "1px solid",
-          borderColor: "divider",
           backgroundColor: "background.paper",
           py: 0.5,
           px: 1
@@ -45,7 +49,8 @@ const RequestTabs = ({ activeTab, onTabChange, openRequestTabs, onCloseTab }) =>
               pr: 1,
               py: 0.5,
               backgroundColor: isActive ? "#DEF7EC" : "background.paper",
-              border: "1px solid",
+              borderLeft: "1px solid",
+              borderRight: "1px solid",
               borderColor: "divider"
             }}
           >
