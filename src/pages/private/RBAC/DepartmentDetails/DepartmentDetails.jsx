@@ -4,6 +4,7 @@ import { Box } from "@mui/material";
 import BackNavigation from "../../../../components/common/BackNavigation";
 import EntityHeaderCard from "../../../../components/common/EntityHeaderCard";
 import SectionCard from "../../../../components/SectionCard";
+import DepartmentGroupsTab from "./DepartmentGroupsTab";
 import DepartmentUsersTab from "./DepartmentUsersTab";
 import ChangeDepartmentAdminModal from "./ChangeDepartmentAdminModal";
 import { getDepartmentUsers } from "../../../../api/apiRequests";
@@ -97,6 +98,10 @@ const DepartmentDetails = () => {
   }, [departmentId]);
 
   const tabs = [
+    {
+      label: "Groups",
+      content: <DepartmentGroupsTab />,
+    },
     {
       label: "Users",
       content: (
