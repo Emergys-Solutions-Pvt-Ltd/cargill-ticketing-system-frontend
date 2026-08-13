@@ -66,7 +66,13 @@ const DepartmentsTab = () => {
           No departments to display yet.
         </Typography>
       ) : (
-        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 2 }}>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: departments.length === 1 ? "1fr" : "repeat(2, 1fr)",
+            gap: 2,
+          }}
+        >
           {departments.map((dept) => (
             <DepartmentListItem
               key={dept.id}
