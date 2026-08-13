@@ -6,20 +6,20 @@ import { getDepartments } from "../../../api/apiRequests";
 
 const mapDepartment = (dept) => ({
   id: dept.departmentId,
+  code: dept.departmentCode,
   name: dept.departmentName,
   description: dept.departmentDescription || "",
-  supervisors: dept.supervisorCount,
+  supervisors: dept.superUserCount,
   users: dept.userCount,
-  queues: dept.queueCount,
-  adminName: dept.departmentAdminName || "Unassigned",
+  queues: dept.groupCount,
 });
 
 // TODO: remove once the departments API is stable; used as a fallback when the API has no response/errors
 const MOCK_DEPARTMENTS = [
-  { id: 1, name: "Human Resources", description: "Handles all operational service requests and processes across regions.", supervisors: 3, users: 24, queues: 5, adminName: "John Smith" },
-  { id: 2, name: "IT Support", description: "Handles technical support requests and infrastructure incidents.", supervisors: 4, users: 31, queues: 7, adminName: "Alex Johnson" },
-  { id: 3, name: "Security Operations", description: "Handles security incidents and access control requests.", supervisors: 2, users: 12, queues: 3, adminName: "Priya Sharma" },
-  { id: 4, name: "IT Infrastructure", description: "Handles infrastructure provisioning and maintenance requests.", supervisors: 3, users: 18, queues: 4, adminName: "Michael Chen" },
+  { id: 1, code: "HR", name: "Human Resources", description: "Handles all operational service requests and processes across regions.", supervisors: 3, users: 24, queues: 5 },
+  { id: 2, code: "IT", name: "IT Support", description: "Handles technical support requests and infrastructure incidents.", supervisors: 4, users: 31, queues: 7 },
+  { id: 3, code: "SEC", name: "Security Operations", description: "Handles security incidents and access control requests.", supervisors: 2, users: 12, queues: 3 },
+  { id: 4, code: "INFRA", name: "IT Infrastructure", description: "Handles infrastructure provisioning and maintenance requests.", supervisors: 3, users: 18, queues: 4 },
 ];
 
 const DepartmentsTab = () => {
