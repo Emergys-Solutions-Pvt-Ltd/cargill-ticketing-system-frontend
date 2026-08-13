@@ -4,8 +4,6 @@ import { Box } from "@mui/material";
 import BackNavigation from "../../../../components/common/BackNavigation";
 import EntityHeaderCard from "../../../../components/common/EntityHeaderCard";
 import SectionCard from "../../../../components/SectionCard";
-import AdminInformationTab from "./AdminInformationTab";
-import SupervisorsTab from "./SupervisorsTab";
 import DepartmentUsersTab from "./DepartmentUsersTab";
 import ChangeDepartmentAdminModal from "./ChangeDepartmentAdminModal";
 import { getDepartmentUsers } from "../../../../api/apiRequests";
@@ -36,17 +34,6 @@ const mapAdmin = (record) => ({
   memberSince: formatMonthYear(record.createdAt),
 });
 
-const mapSupervisor = (record, departmentId) => ({
-  id: record.userId,
-  name: record.userName || nameFromEmail(record.email),
-  email: record.email,
-  departmentId,
-  usersAssigned: record.usersAssigned ?? 0,
-  queuesManaged: record.queuesManaged ?? 0,
-  status: record.isActive ? "Active" : "Inactive",
-  lastLogin: formatRelativeTime(record.lastLogin),
-});
-
 const mapUser = (record, departmentId) => ({
   id: record.userId,
   name: record.userName || nameFromEmail(record.email),
@@ -67,7 +54,6 @@ const DepartmentDetails = () => {
   const department = location.state?.department || DEFAULT_DEPARTMENT;
 
   const [adminInfo, setAdminInfo] = useState(DEFAULT_DEPARTMENT.adminInfo);
-  const [supervisors, setSupervisors] = useState(null);
   const [users, setUsers] = useState(null);
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [loadedDepartmentId, setLoadedDepartmentId] = useState(null);
@@ -83,25 +69,21 @@ const DepartmentDetails = () => {
         if (!active) return;
         if (!response || !response.data) {
           setAdminInfo(DEFAULT_DEPARTMENT.adminInfo);
-          setSupervisors(null);
           setUsers(null);
           return;
         }
 
         const records = response.data;
         const adminRecord = records.find((record) => record.roleCode === "DEPARTMENT_ADMIN");
-        const supervisorRecords = records.filter((record) => record.roleCode === "SUPERVISOR");
         const userRecords = records.filter((record) => record.roleCode === "USER");
 
         const numericDepartmentId = Number(departmentId);
         setAdminInfo(adminRecord ? mapAdmin(adminRecord) : DEFAULT_DEPARTMENT.adminInfo);
-        setSupervisors(supervisorRecords.map((record) => mapSupervisor(record, numericDepartmentId)));
         setUsers(userRecords.map((record) => mapUser(record, numericDepartmentId)));
       })
       .catch(() => {
         if (!active) return;
         setAdminInfo(DEFAULT_DEPARTMENT.adminInfo);
-        setSupervisors(null);
         setUsers(null);
       })
       .finally(() => {
@@ -115,18 +97,6 @@ const DepartmentDetails = () => {
   }, [departmentId]);
 
   const tabs = [
-    { label: "Admin Information", content: <AdminInformationTab adminInfo={adminInfo} /> },
-    {
-      label: "Supervisors",
-      content: (
-        <SupervisorsTab
-          departmentName={department.name}
-          departmentId={Number(departmentId)}
-          supervisors={supervisors}
-          loading={loadingUsers}
-        />
-      ),
-    },
     {
       label: "Users",
       content: (
