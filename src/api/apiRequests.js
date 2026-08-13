@@ -1,5 +1,7 @@
 import { apiService } from "./apiService";
 
+// Apis for RBAC
+
 export const getDepartments = (payload = {}) =>
   apiService.post("/v1/rbac/get-departments", payload);
 
