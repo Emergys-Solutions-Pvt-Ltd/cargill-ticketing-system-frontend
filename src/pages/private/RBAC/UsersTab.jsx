@@ -190,7 +190,7 @@ const UsersTab = () => {
         }}
       >
         <Typography sx={{ fontWeight: 600, fontSize: "14px", color: "text.primary" }}>
-          List of Users
+          List of Users ({userRows.length})
         </Typography>
         <Button
           variant="outlined"

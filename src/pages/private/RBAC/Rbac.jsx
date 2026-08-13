@@ -2,10 +2,12 @@ import { Box, Typography } from "@mui/material";
 import SectionCard from "../../../components/SectionCard";
 import DepartmentsTab from "./DepartmentsTab";
 import UsersTab from "./UsersTab";
+import GroupsTab from "./GroupsTab";
 
 const tabs = [
   { label: "Departments", content: <DepartmentsTab /> },
   { label: "Users", content: <UsersTab /> },
+  { label: "Groups", content: <GroupsTab /> },
 ];
 
 const Rbac = () => {
