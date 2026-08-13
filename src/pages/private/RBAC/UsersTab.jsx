@@ -26,7 +26,7 @@ const mapUser = (record) => ({
   name: record.userName || nameFromEmail(record.email),
   email: record.email,
   role: record.roleName || "User",
-  reportsTo: record.supervisorName || "-",
+  reportsTo: record.reportsToName || "-",
   department: record.departmentName || "Unassigned",
   departmentId: record.departmentId,
   groupsAssigned: record.groupsAssigned ?? 0,
@@ -100,7 +100,7 @@ const UsersTab = () => {
     getUsers()
       .then((response) => {
         if (!active) return;
-        setUsers(response?.data ? response.data.map(mapUser) : null);
+        setUsers(response?.data?.users ? response.data.users.map(mapUser) : null);
       })
       .catch(() => {
         if (!active) return;
