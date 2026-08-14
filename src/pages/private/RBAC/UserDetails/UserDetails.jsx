@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Box, Typography, Avatar } from "@mui/material";
-import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
-import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
-import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
-import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
-import ApartmentOutlinedIcon from "@mui/icons-material/ApartmentOutlined";
-import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
+import UserIdIcon from "../../../../assets/icons/userId.svg";
+import PhoneNoIcon from "../../../../assets/icons/phoneNo.svg";
+import DepartmentIcon from "../../../../assets/icons/department.svg";
+import ReportsToIcon from "../../../../assets/icons/reportsTo.svg";
+import LocationIcon from "../../../../assets/icons/location.svg";
+import MemberSinceIcon from "../../../../assets/icons/memberSince.svg";
 import BackNavigation from "../../../../components/common/BackNavigation";
 import CommonChip from "../../../../components/common/CommonChip";
 import UserInformationCard from "./UserInformationCard";
@@ -87,12 +87,12 @@ const UserDetails = () => {
   }, [user.id]);
 
   const infoFields = [
-    { label: "User ID", value: user.userId, icon: BadgeOutlinedIcon },
-    { label: "Phone No", value: user.phoneNo, icon: PhoneOutlinedIcon },
-    { label: "Department", value: user.department, icon: ApartmentOutlinedIcon },
-    { label: "Reports To", value: user.reportsTo, icon: ShieldOutlinedIcon },
-    { label: "Location", value: user.workLocation, icon: PlaceOutlinedIcon },
-    { label: "Member since", value: user.memberSince, icon: CalendarTodayOutlinedIcon },
+    { label: "User ID", value: user.userId, icon: UserIdIcon },
+    { label: "Phone No", value: user.phoneNo, icon: PhoneNoIcon },
+    { label: "Department", value: user.department, icon: DepartmentIcon },
+    { label: "Reports To", value: user.reportsTo, icon: ReportsToIcon },
+    { label: "Location", value: user.workLocation, icon: LocationIcon },
+    { label: "Member since", value: user.memberSince, icon: MemberSinceIcon },
   ];
 
   return (

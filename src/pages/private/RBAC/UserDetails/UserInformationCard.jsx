@@ -33,37 +33,21 @@ const UserInformationCard = ({ title = "User Information", fields = [] }) => {
           columnGap: 4,
         }}
       >
-        {fields.map((field) => {
-          const Icon = field.icon;
-          return (
-            <Box key={field.label} sx={{ display: "flex", alignItems: "flex-start", gap: 1.5, minWidth: 0 }}>
-              {Icon && (
-                <Box
-                  sx={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: "50%",
-                    backgroundColor: "#DEF7EC",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
-                  }}
-                >
-                  <Icon sx={{ fontSize: 16, color: "#0E9F6E" }} />
-                </Box>
-              )}
-              <Box sx={{ minWidth: 0 }}>
-                <Typography variant="caption" sx={{ color: "text.secondary", display: "block", mb: 0.25 }}>
-                  {field.label}
-                </Typography>
-                <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>
-                  {field.value}
-                </Typography>
-              </Box>
+        {fields.map((field) => (
+          <Box key={field.label} sx={{ display: "flex", alignItems: "flex-start", gap: 1.5, minWidth: 0 }}>
+            {field.icon && (
+              <Box component="img" src={field.icon} alt="" sx={{ width: 32, height: 32, flexShrink: 0 }} />
+            )}
+            <Box sx={{ minWidth: 0 }}>
+              <Typography variant="caption" sx={{ color: "text.secondary", display: "block", mb: 0.25 }}>
+                {field.label}
+              </Typography>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>
+                {field.value}
+              </Typography>
             </Box>
-          );
-        })}
+          </Box>
+        ))}
       </Box>
     </Box>
   );
