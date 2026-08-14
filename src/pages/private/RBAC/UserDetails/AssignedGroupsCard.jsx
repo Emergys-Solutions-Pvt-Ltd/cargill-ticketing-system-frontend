@@ -69,7 +69,7 @@ const AssignedGroupsCard = ({ groups = [], loading = false, onAssignGroup }) => 
         </Typography>
         <Box
           onClick={onAssignGroup}
-          sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "primary.main", cursor: "pointer" }}
+          sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "#1C64F2", cursor: "pointer" }}
         >
           <AddIcon sx={{ fontSize: 16 }} />
           <Typography variant="body2" sx={{ fontWeight: 600 }}>

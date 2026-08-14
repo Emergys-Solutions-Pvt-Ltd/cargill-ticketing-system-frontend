@@ -17,7 +17,7 @@ const UserInformationCard = ({ title = "User Information", fields = [] }) => {
         <Typography sx={{ fontWeight: 600, fontSize: "14px", color: "text.primary" }}>
           {title}
         </Typography>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "primary.main", cursor: "pointer" }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "#1C64F2", cursor: "pointer" }}>
           <EditOutlinedIcon sx={{ fontSize: 16 }} />
           <Typography variant="body2" sx={{ fontWeight: 600 }}>
             Edit Info
