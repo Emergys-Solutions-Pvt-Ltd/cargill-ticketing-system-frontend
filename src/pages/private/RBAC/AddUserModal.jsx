@@ -8,8 +8,7 @@ import { getQueues, getDepartmentSupervisors } from "../../../api/apiRequests";
 
 const USER_ROLE_OPTIONS = [
   { label: "User", value: "user" },
-  { label: "Supervisor", value: "supervisor" },
-  { label: "Department Admin", value: "department_admin" },
+  { label: "Super User", value: "super_user" },
 ];
 
 const MOCK_DEPARTMENT_SUPERVISORS = [
@@ -64,7 +63,7 @@ const MOCK_QUEUES = [
 ];
 
 const DEFAULT_FORM = {
-  role: "user",
+  role: "",
   name: "",
   email: "",
   mobile: "",
@@ -191,45 +190,62 @@ const AddUserModal = ({ open, onClose, onSubmit, loading = false }) => {
           />
           <FormTextField
             label="User Name"
-            placeholder="Enter user name"
+            placeholder="Enter"
             value={form.name}
             onChange={handleFieldChange("name")}
           />
           <FormTextField
             label="Email"
-            placeholder="user@cargill.com"
+            placeholder="Enter"
             value={form.email}
             onChange={handleFieldChange("email")}
           />
           <FormTextField
-            label="Mobile Number"
-            placeholder="+1 (415) 555-0138"
+            label={
+              <>
+                Mobile Number{" "}
+                <Box component="span" sx={{ fontStyle: "italic", fontWeight: 400, color: "text.secondary" }}>
+                  (optional)
+                </Box>
+              </>
+            }
+            placeholder="Enter"
             value={form.mobile}
             onChange={handleFieldChange("mobile")}
           />
-          <FormSelect
-            label="Department"
-            placeholder={supervisorsLoading ? "Loading departments..." : "Select department"}
-            value={form.department}
-            onChange={handleFieldChange("department")}
-            options={departmentOptions}
-          />
-          <FormSelect
-            label="Supervisor"
-            placeholder={form.department ? "Select supervisor" : "Select department first"}
-            value={form.supervisor}
-            onChange={handleFieldChange("supervisor")}
-            options={supervisorOptions}
-          />
+
+          {form.role && (
+            <Box sx={{ gridColumn: form.role === "user" ? "auto" : "1 / -1" }}>
+              <FormSelect
+                label="Department"
+                placeholder={supervisorsLoading ? "Loading departments..." : "Select department"}
+                value={form.department}
+                onChange={handleFieldChange("department")}
+                options={departmentOptions}
+              />
+            </Box>
+          )}
+
+          {form.role === "user" && (
+            <FormSelect
+              label="Reports To"
+              placeholder={form.department ? "Select" : "Select department first"}
+              value={form.supervisor}
+              onChange={handleFieldChange("supervisor")}
+              options={supervisorOptions}
+            />
+          )}
         </Box>
 
-        <FormMultiSelect
-          label="Assign Queue"
-          placeholder={queuesLoading ? "Loading queues..." : "Select queues"}
-          value={form.queues}
-          onChange={handleQueuesChange}
-          options={queueOptions}
-        />
+        {form.role === "user" && (
+          <FormMultiSelect
+            label="Assign Group"
+            placeholder={queuesLoading ? "Loading groups..." : "Select groups"}
+            value={form.queues}
+            onChange={handleQueuesChange}
+            options={queueOptions}
+          />
+        )}
       </Box>
     </Modal>
   );
