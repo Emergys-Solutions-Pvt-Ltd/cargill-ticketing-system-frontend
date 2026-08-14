@@ -61,13 +61,7 @@ const STATUS_STYLES = {
         border: "1px solid #F8B4B4",
     },
 
-    "department admin": {
-        backgroundColor: "#DEF7EC",
-        color: "#0E9F6E",
-        border: "1px solid #BCF0DA",
-    },
-
-    supervisor: {
+    "super user": {
         backgroundColor: "#EDE9FE",
         color: "#7C3AED",
         border: "1px solid #DDD6FE",

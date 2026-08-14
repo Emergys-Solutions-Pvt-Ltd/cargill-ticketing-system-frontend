@@ -7,12 +7,13 @@ import CommonTable from "../../../components/common/CommonTable";
 import CommonChip from "../../../components/common/CommonChip";
 import DeactivateUserModal from "./DeactivateUserModal";
 import AddUserModal from "./AddUserModal";
+import EditUserModal from "./EditUserModal";
 import { getUsers, toggleUserStatus } from "../../../api/apiRequests";
 import { nameFromEmail, formatRelativeTime, isActiveStatus } from "../../../utils/format";
 
 const MOCK_USERS = [
-  { id: 1, name: "John Smith", email: "john.smith@cargill.com", role: "Department Admin", reportsTo: "-", department: "Human Resources", departmentId: 1, groupsAssigned: 2, status: "Active", lastLogin: "2 hours ago" },
-  { id: 2, name: "Alex Johnson", email: "alex.johnson@cargill.com", role: "Supervisor", reportsTo: "-", department: "Human Resources", departmentId: 1, groupsAssigned: 4, status: "Active", lastLogin: "1 day ago" },
+  { id: 1, name: "John Smith", email: "john.smith@cargill.com", role: "Super User", reportsTo: "-", department: "Human Resources", departmentId: 1, groupsAssigned: 2, status: "Active", lastLogin: "2 hours ago" },
+  { id: 2, name: "Alex Johnson", email: "alex.johnson@cargill.com", role: "Super User", reportsTo: "-", department: "Human Resources", departmentId: 1, groupsAssigned: 4, status: "Active", lastLogin: "1 day ago" },
   { id: 3, name: "Rahul Patel", email: "rahul.patel@cargill.com", role: "User", reportsTo: "Alex Johnson", department: "Human Resources", departmentId: 1, groupsAssigned: 5, status: "Active", lastLogin: "3 hours ago" },
   { id: 4, name: "Jennifer Garcia", email: "jennifer.garcia@cargill.com", role: "User", reportsTo: "Alex Johnson", department: "Human Resources", departmentId: 1, groupsAssigned: 3, status: "Active", lastLogin: "5 hours ago" },
   { id: 5, name: "Michael Chen", email: "michael.chen@cargill.com", role: "User", reportsTo: "Alex Johnson", department: "Human Resources", departmentId: 1, groupsAssigned: 3, status: "Inactive", lastLogin: "5 days ago" },
@@ -94,6 +95,7 @@ const UsersTab = () => {
   const [statusUpdating, setStatusUpdating] = useState(false);
   const [statusOverrides, setStatusOverrides] = useState({});
   const [addUserOpen, setAddUserOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState(null);
 
   useEffect(() => {
     let active = true;
@@ -214,9 +216,7 @@ const UsersTab = () => {
         actions={(row) => (
           <UserRowActions
             isActive={isActiveStatus(row.status)}
-            onEdit={() => {
-              // TODO: wire up edit user
-            }}
+            onEdit={() => setEditTarget(row)}
             onToggleStatus={() => handleToggleStatus(row)}
           />
         )}
@@ -254,6 +254,16 @@ const UsersTab = () => {
         onSubmit={() => {
           // TODO: call add user API
           setAddUserOpen(false);
+        }}
+      />
+
+      <EditUserModal
+        open={Boolean(editTarget)}
+        user={editTarget}
+        onClose={() => setEditTarget(null)}
+        onSubmit={() => {
+          // TODO: call edit user API
+          setEditTarget(null);
         }}
       />
     </Box>

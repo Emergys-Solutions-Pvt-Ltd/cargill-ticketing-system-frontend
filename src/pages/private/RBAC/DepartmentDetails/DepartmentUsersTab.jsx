@@ -7,6 +7,7 @@ import CommonTable from "../../../../components/common/CommonTable";
 import CommonChip from "../../../../components/common/CommonChip";
 import DeactivateUserModal from "../DeactivateUserModal";
 import AddUserModal from "../AddUserModal";
+import EditUserModal from "../EditUserModal";
 import { toggleUserStatus } from "../../../../api/apiRequests";
 import { isActiveStatus } from "../../../../utils/format";
 
@@ -82,6 +83,7 @@ const DepartmentUsersTab = ({ users = null, departmentId = null, loading = false
   const [statusUpdating, setStatusUpdating] = useState(false);
   const [statusOverrides, setStatusOverrides] = useState({});
   const [addUserOpen, setAddUserOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState(null);
 
   const [prevUsers, setPrevUsers] = useState(users);
   if (users !== prevUsers) {
@@ -142,7 +144,7 @@ const DepartmentUsersTab = ({ users = null, departmentId = null, loading = false
         label: "ROLE",
         render: (value) => <CommonChip status={value} label={value} />,
       },
-      { key: "supervisor", label: "SUPERVISOR" },
+      { key: "supervisor", label: "REPORTS TO" },
       {
         key: "queuesAssigned",
         label: "QUEUES ASSIGNED",
@@ -193,9 +195,7 @@ const DepartmentUsersTab = ({ users = null, departmentId = null, loading = false
         actions={(row) => (
           <UserRowActions
             isActive={isActiveStatus(row.status)}
-            onEdit={() => {
-              // TODO: edit user
-            }}
+            onEdit={() => setEditTarget({ ...row, departmentId })}
             onToggleStatus={() => handleToggleStatus(row)}
           />
         )}
@@ -233,6 +233,16 @@ const DepartmentUsersTab = ({ users = null, departmentId = null, loading = false
         onSubmit={() => {
           // TODO: call add user API
           setAddUserOpen(false);
+        }}
+      />
+
+      <EditUserModal
+        open={Boolean(editTarget)}
+        user={editTarget}
+        onClose={() => setEditTarget(null)}
+        onSubmit={() => {
+          // TODO: call edit user API
+          setEditTarget(null);
         }}
       />
     </Box>

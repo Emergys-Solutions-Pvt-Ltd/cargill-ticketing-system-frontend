@@ -69,15 +69,44 @@ const DEFAULT_FORM = {
   mobile: "",
   department: "",
   supervisor: "",
+  workLocation: "",
   queues: [],
 };
 
-const AddUserModal = ({ open, onClose, onSubmit, loading = false }) => {
+const normalizeRole = (role = "") =>
+  role.toLowerCase().includes("super") ? "super_user" : "user";
+
+const formFromUser = (user) => ({
+  role: normalizeRole(user.role),
+  name: user.name || "",
+  email: user.email || "",
+  mobile: user.mobile || user.phoneNo || "",
+  department: user.departmentId != null ? String(user.departmentId) : "",
+  supervisor: "",
+  workLocation: user.workLocation || "",
+  queues: [],
+  reportsToName:
+    user.reportsTo && user.reportsTo !== "-"
+      ? user.reportsTo
+      : user.supervisor && user.supervisor !== "Unassigned"
+        ? user.supervisor
+        : "",
+});
+
+const AddUserModal = ({ open, onClose, onSubmit, user, loading = false }) => {
+  const isEditMode = Boolean(user);
+
   const [form, setForm] = useState(DEFAULT_FORM);
   const [queueOptions, setQueueOptions] = useState([]);
   const [queuesLoading, setQueuesLoading] = useState(false);
   const [departmentSupervisors, setDepartmentSupervisors] = useState([]);
   const [supervisorsLoading, setSupervisorsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    setForm(isEditMode ? formFromUser(user) : DEFAULT_FORM);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, user]);
 
   useEffect(() => {
     if (!open) return;
@@ -113,6 +142,17 @@ const AddUserModal = ({ open, onClose, onSubmit, loading = false }) => {
     label: supervisor.userName,
     value: supervisor.userId,
   }));
+
+  // Once supervisor options for the pre-filled department are available, resolve
+  // the edited user's "reports to" name into the matching option value.
+  useEffect(() => {
+    if (!isEditMode || !form.reportsToName || form.supervisor) return;
+    const match = supervisorOptions.find((option) => option.label === form.reportsToName);
+    if (match) {
+      setForm((prev) => ({ ...prev, supervisor: match.value }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [supervisorOptions, isEditMode]);
 
   useEffect(() => {
     if (!form.department) {
@@ -162,14 +202,116 @@ const AddUserModal = ({ open, onClose, onSubmit, loading = false }) => {
     onSubmit?.(form);
   };
 
+  const gridFields = [
+    {
+      key: "role",
+      node: (
+        <FormSelect
+          label="User Role"
+          value={form.role}
+          onChange={handleFieldChange("role")}
+          options={USER_ROLE_OPTIONS}
+        />
+      ),
+    },
+    {
+      key: "name",
+      node: (
+        <FormTextField
+          label="User Name"
+          placeholder="Enter"
+          value={form.name}
+          onChange={handleFieldChange("name")}
+        />
+      ),
+    },
+    {
+      key: "email",
+      node: (
+        <FormTextField
+          label="Email"
+          placeholder="Enter"
+          value={form.email}
+          onChange={handleFieldChange("email")}
+          disabled={isEditMode}
+        />
+      ),
+    },
+    {
+      key: "mobile",
+      node: (
+        <FormTextField
+          label={
+            <>
+              Mobile Number{" "}
+              <Box component="span" sx={{ fontStyle: "italic", fontWeight: 400, color: "text.secondary" }}>
+                (optional)
+              </Box>
+            </>
+          }
+          placeholder="Enter"
+          value={form.mobile}
+          onChange={handleFieldChange("mobile")}
+        />
+      ),
+    },
+  ];
+
+  if (form.role) {
+    gridFields.push({
+      key: "department",
+      node: (
+        <FormSelect
+          label="Department"
+          placeholder={supervisorsLoading ? "Loading departments..." : "Select department"}
+          value={form.department}
+          onChange={handleFieldChange("department")}
+          options={departmentOptions}
+          disabled={isEditMode}
+        />
+      ),
+    });
+  }
+
+  if (form.role === "user") {
+    gridFields.push({
+      key: "reportsTo",
+      node: (
+        <FormSelect
+          label="Reports To"
+          placeholder={form.department ? "Select" : "Select department first"}
+          value={form.supervisor}
+          onChange={handleFieldChange("supervisor")}
+          options={supervisorOptions}
+        />
+      ),
+    });
+  }
+
+  if (isEditMode) {
+    gridFields.push({
+      key: "workLocation",
+      node: (
+        <FormTextField
+          label="Work Location"
+          placeholder="Enter"
+          value={form.workLocation}
+          onChange={handleFieldChange("workLocation")}
+        />
+      ),
+    });
+  }
+
+  const isLastFieldFullWidth = gridFields.length % 2 !== 0;
+
   return (
     <Modal
       open={open}
       onClose={handleClose}
-      title="Add New User"
+      title={isEditMode ? "Edit User" : "Add New User"}
       onCancel={handleClose}
       onConfirm={handleSubmit}
-      confirmLabel="Add"
+      confirmLabel={isEditMode ? "Save Changes" : "Add"}
       confirmColor="success"
       confirmLoading={loading}
     >
@@ -182,62 +324,19 @@ const AddUserModal = ({ open, onClose, onSubmit, loading = false }) => {
             rowGap: 3,
           }}
         >
-          <FormSelect
-            label="User Role"
-            value={form.role}
-            onChange={handleFieldChange("role")}
-            options={USER_ROLE_OPTIONS}
-          />
-          <FormTextField
-            label="User Name"
-            placeholder="Enter"
-            value={form.name}
-            onChange={handleFieldChange("name")}
-          />
-          <FormTextField
-            label="Email"
-            placeholder="Enter"
-            value={form.email}
-            onChange={handleFieldChange("email")}
-          />
-          <FormTextField
-            label={
-              <>
-                Mobile Number{" "}
-                <Box component="span" sx={{ fontStyle: "italic", fontWeight: 400, color: "text.secondary" }}>
-                  (optional)
-                </Box>
-              </>
-            }
-            placeholder="Enter"
-            value={form.mobile}
-            onChange={handleFieldChange("mobile")}
-          />
-
-          {form.role && (
-            <Box sx={{ gridColumn: form.role === "user" ? "auto" : "1 / -1" }}>
-              <FormSelect
-                label="Department"
-                placeholder={supervisorsLoading ? "Loading departments..." : "Select department"}
-                value={form.department}
-                onChange={handleFieldChange("department")}
-                options={departmentOptions}
-              />
+          {gridFields.map((field, index) => (
+            <Box
+              key={field.key}
+              sx={{
+                gridColumn: isLastFieldFullWidth && index === gridFields.length - 1 ? "1 / -1" : "auto",
+              }}
+            >
+              {field.node}
             </Box>
-          )}
-
-          {form.role === "user" && (
-            <FormSelect
-              label="Reports To"
-              placeholder={form.department ? "Select" : "Select department first"}
-              value={form.supervisor}
-              onChange={handleFieldChange("supervisor")}
-              options={supervisorOptions}
-            />
-          )}
+          ))}
         </Box>
 
-        {form.role === "user" && (
+        {!isEditMode && form.role === "user" && (
           <FormMultiSelect
             label="Assign Group"
             placeholder={queuesLoading ? "Loading groups..." : "Select groups"}
