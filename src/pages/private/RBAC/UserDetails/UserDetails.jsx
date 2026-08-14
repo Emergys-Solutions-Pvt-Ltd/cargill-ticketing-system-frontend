@@ -1,17 +1,18 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Box, Typography, Avatar, Button, Divider } from "@mui/material";
-import PersonRemoveOutlinedIcon from "@mui/icons-material/PersonRemoveOutlined";
+import { Box, Typography, Avatar } from "@mui/material";
+import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
+import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
+import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
+import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
+import ApartmentOutlinedIcon from "@mui/icons-material/ApartmentOutlined";
+import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
 import BackNavigation from "../../../../components/common/BackNavigation";
 import CommonChip from "../../../../components/common/CommonChip";
-import SectionCard from "../../../../components/SectionCard";
 import UserInformationCard from "./UserInformationCard";
-import AssignedQueuesCard from "./AssignedQueuesCard";
-import AssignQueueModal from "./AssignQueueModal";
-import SupervisorUsersTab from "./SupervisorUsersTab";
-import DeactivateUserModal from "../DeactivateUserModal";
-import { toggleUserStatus, getQueues } from "../../../../api/apiRequests";
-import { isActiveStatus } from "../../../../utils/format";
+import AssignedGroupsCard from "./AssignedGroupsCard";
+import AssignGroupModal from "./AssignGroupModal";
+import { getQueues } from "../../../../api/apiRequests";
 
 const getInitials = (name = "") =>
   name
@@ -21,12 +22,13 @@ const getInitials = (name = "") =>
     .slice(0, 2)
     .toUpperCase();
 
-const DEFAULT_QUEUES = [
-  { id: 1, name: "HR Support" },
-  { id: 2, name: "HR NA Feedback" },
-  { id: 3, name: "HR LA PRY Benefits" },
-  { id: 4, name: "HR LA PDT Hypercare" },
-  { id: 5, name: "HR EMEA Comp & Mobility" },
+const DEFAULT_GROUPS = [
+  { id: 1, name: "Technical Support", queueCount: 8 },
+  { id: 2, name: "Escalation Team", queueCount: 15 },
+  { id: 3, name: "Quality Assurance", queueCount: 5 },
+  { id: 4, name: "Operations Team", queueCount: 22 },
+  { id: 5, name: "Business Development", queueCount: 11 },
+  { id: 6, name: "Sales Operations", queueCount: 3 },
 ];
 
 const DEFAULT_USER = {
@@ -39,12 +41,9 @@ const DEFAULT_USER = {
   userId: "USR-10482",
   phoneNo: "+1 (415) 555-0138",
   department: "Human Resources",
-  supervisor: "John Smith",
-  reportsTo: "Sarah Lee",
+  reportsTo: "John Smith",
   workLocation: "San Francisco, CA",
-  memberSince: "Jun 2024",
-  usersAssigned: 18,
-  queuesManaged: 4,
+  memberSince: "12 Jun 2024",
 };
 
 const UserDetails = () => {
@@ -52,35 +51,34 @@ const UserDetails = () => {
   const location = useLocation();
 
   const user = { ...DEFAULT_USER, ...(location.state?.user || {}) };
-  const isSupervisor = (user.role || "").toLowerCase() === "supervisor";
 
-  const [queues, setQueues] = useState([]);
-  const [queuesLoading, setQueuesLoading] = useState(true);
-  const [assignQueueOpen, setAssignQueueOpen] = useState(false);
-  const [status, setStatus] = useState(user.status);
-  const [deactivateOpen, setDeactivateOpen] = useState(false);
-  const [statusUpdating, setStatusUpdating] = useState(false);
-  const isActive = isActiveStatus(status);
+  const [groups, setGroups] = useState([]);
+  const [groupsLoading, setGroupsLoading] = useState(true);
+  const [assignGroupOpen, setAssignGroupOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
-    setQueuesLoading(true);
+    setGroupsLoading(true);
     getQueues({ userId: user.id })
       .then((response) => {
         if (!active) return;
         const records = response?.data || [];
-        setQueues(
+        setGroups(
           records.length > 0
-            ? records.map((record) => ({ id: record.queueId, name: record.queueName }))
-            : DEFAULT_QUEUES,
+            ? records.map((record) => ({
+                id: record.queueId,
+                name: record.queueName,
+                queueCount: record.queueCount ?? 0,
+              }))
+            : DEFAULT_GROUPS,
         );
       })
       .catch(() => {
         if (!active) return;
-        setQueues(DEFAULT_QUEUES);
+        setGroups(DEFAULT_GROUPS);
       })
       .finally(() => {
-        if (active) setQueuesLoading(false);
+        if (active) setGroupsLoading(false);
       });
     return () => {
       active = false;
@@ -88,44 +86,14 @@ const UserDetails = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user.id]);
 
-  const handleToggleStatus = () => {
-    if (isActive) {
-      setDeactivateOpen(true);
-      return;
-    }
-
-    toggleUserStatus({ userId: user.id, isActive: true }).then(() => setStatus("Active"));
-  };
-
   const infoFields = [
-    { label: "User ID", value: user.userId },
-    ...(isSupervisor ? [{ label: "Email", value: user.email }] : []),
-    { label: "Phone No", value: user.phoneNo },
-    { label: "Department", value: user.department },
-    { label: isSupervisor ? "Reports To" : "Supervisor", value: isSupervisor ? user.reportsTo : user.supervisor },
-    { label: "Work Location", value: user.workLocation },
-    { label: "Member since", value: user.memberSince },
+    { label: "User ID", value: user.userId, icon: BadgeOutlinedIcon },
+    { label: "Phone No", value: user.phoneNo, icon: PhoneOutlinedIcon },
+    { label: "Department", value: user.department, icon: ApartmentOutlinedIcon },
+    { label: "Reports To", value: user.reportsTo, icon: ShieldOutlinedIcon },
+    { label: "Location", value: user.workLocation, icon: PlaceOutlinedIcon },
+    { label: "Member since", value: user.memberSince, icon: CalendarTodayOutlinedIcon },
   ];
-
-  const informationContent = (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: { xs: "column", md: "row" },
-        gap: 3,
-        flexGrow: 1,
-        minHeight: 0,
-      }}
-    >
-      <UserInformationCard fields={infoFields} />
-      <AssignedQueuesCard
-        queues={queues}
-        loading={queuesLoading}
-        onAssignQueue={() => setAssignQueueOpen(true)}
-        onRemoveQueue={(queue) => setQueues((prev) => prev.filter((item) => item.id !== queue.id))}
-      />
-    </Box>
-  );
 
   return (
     <Box
@@ -145,7 +113,6 @@ const UserDetails = () => {
         sx={{
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between",
           gap: 2,
           p: 2,
           borderRadius: "8px",
@@ -154,104 +121,47 @@ const UserDetails = () => {
           backgroundColor: "background.paper",
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <Avatar sx={{ width: 48, height: 48, fontSize: "1rem", fontWeight: 600, bgcolor: "#00843D" }}>
-            {getInitials(user.name)}
-          </Avatar>
-          <Box>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Typography sx={{ fontWeight: 600, fontSize: "15px", color: "text.primary" }}>
-                {user.name}
-              </Typography>
-              <CommonChip status={status} label={status} />
-            </Box>
-            <Typography variant="body2" sx={{ color: "text.secondary" }}>
-              {isSupervisor ? user.role : user.email}
+        <Avatar sx={{ width: 48, height: 48, fontSize: "1rem", fontWeight: 600, bgcolor: "#00843D" }}>
+          {getInitials(user.name)}
+        </Avatar>
+        <Box>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Typography sx={{ fontWeight: 600, fontSize: "15px", color: "text.primary" }}>
+              {user.name}
             </Typography>
+            <CommonChip status={user.status} label={user.status} />
           </Box>
+          <Typography variant="body2" sx={{ color: "text.secondary" }}>
+            Role: {user.role} | Email: {user.email}
+          </Typography>
         </Box>
-
-        {isSupervisor && (
-          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 1 }}>
-            <Button
-              variant="outlined"
-              size="small"
-              startIcon={<PersonRemoveOutlinedIcon sx={{ fontSize: 16 }} />}
-              onClick={handleToggleStatus}
-              sx={
-                isActive
-                  ? {
-                      textTransform: "none",
-                      fontWeight: 600,
-                      color: "#E02424",
-                      borderColor: "#F8B4B4",
-                      "&:hover": { borderColor: "#E02424", backgroundColor: "#FDF2F2" },
-                    }
-                  : {
-                      textTransform: "none",
-                      fontWeight: 600,
-                      color: "primary.main",
-                      borderColor: "divider",
-                    }
-              }
-            >
-              {isActive ? "Deactivate User" : "Activate User"}
-            </Button>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Typography variant="caption" sx={{ color: "text.secondary", whiteSpace: "nowrap" }}>
-                <Box component="span" sx={{ fontWeight: 600, color: "text.primary" }}>
-                  {user.usersAssigned}
-                </Box>{" "}
-                Assigned Users
-              </Typography>
-              <Divider orientation="vertical" flexItem sx={{ height: "12px", alignSelf: "center" }} />
-              <Typography variant="caption" sx={{ color: "text.secondary", whiteSpace: "nowrap" }}>
-                <Box component="span" sx={{ fontWeight: 600, color: "text.primary" }}>
-                  {String(user.queuesManaged).padStart(2, "0")}
-                </Box>{" "}
-                Queues Managed
-              </Typography>
-            </Box>
-          </Box>
-        )}
       </Box>
 
-      {isSupervisor ? (
-        <SectionCard
-          sx={{ flexGrow: 1, minHeight: 0 }}
-          tabs={[
-            { label: "Supervisor Information", content: informationContent },
-            { label: "Users", content: <SupervisorUsersTab /> },
-          ]}
-        />
-      ) : (
-        informationContent
-      )}
-
-      <DeactivateUserModal
-        open={deactivateOpen}
-        onClose={() => setDeactivateOpen(false)}
-        onConfirm={() => {
-          setStatusUpdating(true);
-          toggleUserStatus({ userId: user.id, isActive: false })
-            .then(() => setStatus("Inactive"))
-            .finally(() => {
-              setStatusUpdating(false);
-              setDeactivateOpen(false);
-            });
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 3,
+          flexGrow: 1,
+          minHeight: 0,
         }}
-        userName={user.name}
-        loading={statusUpdating}
-      />
+      >
+        <UserInformationCard fields={infoFields} />
+        <AssignedGroupsCard
+          groups={groups}
+          loading={groupsLoading}
+          onAssignGroup={() => setAssignGroupOpen(true)}
+        />
+      </Box>
 
-      <AssignQueueModal
-        open={assignQueueOpen}
-        onClose={() => setAssignQueueOpen(false)}
+      <AssignGroupModal
+        open={assignGroupOpen}
+        onClose={() => setAssignGroupOpen(false)}
         departmentId={user.departmentId}
-        assignedQueueIds={queues.map((queue) => queue.id)}
-        onAssign={(newQueues) => {
-          setQueues((prev) => [...prev, ...newQueues]);
-          setAssignQueueOpen(false);
+        assignedGroupIds={groups.map((group) => group.id)}
+        onAssign={(newGroups) => {
+          setGroups((prev) => [...prev, ...newGroups]);
+          setAssignGroupOpen(false);
         }}
       />
     </Box>

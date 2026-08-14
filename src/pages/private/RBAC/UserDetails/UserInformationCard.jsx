@@ -5,7 +5,7 @@ const UserInformationCard = ({ title = "User Information", fields = [] }) => {
   return (
     <Box
       sx={{
-        flex: 1,
+        width: "100%",
         p: 3,
         borderRadius: "8px",
         border: "1px solid",
@@ -25,17 +25,45 @@ const UserInformationCard = ({ title = "User Information", fields = [] }) => {
         </Box>
       </Box>
 
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
-        {fields.map((field) => (
-          <Box key={field.label}>
-            <Typography variant="caption" sx={{ color: "text.secondary", display: "block", mb: 0.5 }}>
-              {field.label}
-            </Typography>
-            <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>
-              {field.value}
-            </Typography>
-          </Box>
-        ))}
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" },
+          rowGap: 3,
+          columnGap: 4,
+        }}
+      >
+        {fields.map((field) => {
+          const Icon = field.icon;
+          return (
+            <Box key={field.label} sx={{ display: "flex", alignItems: "flex-start", gap: 1.5, minWidth: 0 }}>
+              {Icon && (
+                <Box
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: "50%",
+                    backgroundColor: "#DEF7EC",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}
+                >
+                  <Icon sx={{ fontSize: 16, color: "#0E9F6E" }} />
+                </Box>
+              )}
+              <Box sx={{ minWidth: 0 }}>
+                <Typography variant="caption" sx={{ color: "text.secondary", display: "block", mb: 0.25 }}>
+                  {field.label}
+                </Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>
+                  {field.value}
+                </Typography>
+              </Box>
+            </Box>
+          );
+        })}
       </Box>
     </Box>
   );
