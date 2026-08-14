@@ -6,9 +6,8 @@ import EntityHeaderCard from "../../../../components/common/EntityHeaderCard";
 import SectionCard from "../../../../components/SectionCard";
 import DepartmentGroupsTab from "./DepartmentGroupsTab";
 import DepartmentUsersTab from "./DepartmentUsersTab";
-import ChangeDepartmentAdminModal from "./ChangeDepartmentAdminModal";
 import { getDepartmentUsers } from "../../../../api/apiRequests";
-import { nameFromEmail, formatRelativeTime, formatMonthYear } from "../../../../utils/format";
+import { nameFromEmail, formatRelativeTime } from "../../../../utils/format";
 
 const DEFAULT_DEPARTMENT = {
   name: "Human Resources",
@@ -16,24 +15,7 @@ const DEFAULT_DEPARTMENT = {
   supervisors: 8,
   users: 62,
   queues: 12,
-  adminInfo: {
-    adminName: "John Smith",
-    userId: "USR-10482",
-    phoneNo: "+1 (415) 555-0138",
-    email: "john.smith@cargill.com",
-    workLocation: "San Francisco, CA",
-    memberSince: "Jun 2024",
-  },
 };
-
-const mapAdmin = (record) => ({
-  adminName: record.userName || nameFromEmail(record.email),
-  userId: `USR-${record.userId}`,
-  phoneNo: record.phone || "Not provided",
-  email: record.email,
-  workLocation: record.workLocation || "Not provided",
-  memberSince: formatMonthYear(record.createdAt),
-});
 
 const mapUser = (record, departmentId) => ({
   id: record.userId,
@@ -54,11 +36,9 @@ const DepartmentDetails = () => {
 
   const department = location.state?.department || DEFAULT_DEPARTMENT;
 
-  const [adminInfo, setAdminInfo] = useState(DEFAULT_DEPARTMENT.adminInfo);
   const [users, setUsers] = useState(null);
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [loadedDepartmentId, setLoadedDepartmentId] = useState(null);
-  const [changeAdminOpen, setChangeAdminOpen] = useState(false);
   if (departmentId !== loadedDepartmentId && !loadingUsers) {
     setLoadingUsers(true);
   }
@@ -69,22 +49,18 @@ const DepartmentDetails = () => {
       .then((response) => {
         if (!active) return;
         if (!response || !response.data) {
-          setAdminInfo(DEFAULT_DEPARTMENT.adminInfo);
           setUsers(null);
           return;
         }
 
         const records = response.data;
-        const adminRecord = records.find((record) => record.roleCode === "DEPARTMENT_ADMIN");
         const userRecords = records.filter((record) => record.roleCode === "USER");
 
         const numericDepartmentId = Number(departmentId);
-        setAdminInfo(adminRecord ? mapAdmin(adminRecord) : DEFAULT_DEPARTMENT.adminInfo);
         setUsers(userRecords.map((record) => mapUser(record, numericDepartmentId)));
       })
       .catch(() => {
         if (!active) return;
-        setAdminInfo(DEFAULT_DEPARTMENT.adminInfo);
         setUsers(null);
       })
       .finally(() => {
@@ -131,30 +107,14 @@ const DepartmentDetails = () => {
       <EntityHeaderCard
         title={department.name}
         description={department.description}
-        actionLabel="Change Admin"
-        onAction={() => setChangeAdminOpen(true)}
         stats={[
-          { label: "Supervisors", value: department.supervisors },
+          { label: "Super User", value: department.supervisors },
           { label: "Users", value: department.users },
-          { label: "Queues", value: department.queues },
+          { label: "Groups", value: department.queues },
         ]}
       />
 
       <SectionCard tabs={tabs} sx={{ flexGrow: 1, minHeight: 0 }} />
-
-      <ChangeDepartmentAdminModal
-        open={changeAdminOpen}
-        onClose={() => setChangeAdminOpen(false)}
-        onConfirm={() => {
-          // TODO: call change department admin API
-          setChangeAdminOpen(false);
-        }}
-        currentAdmin={{
-          name: adminInfo.adminName,
-          email: adminInfo.email,
-          role: "Department Admin",
-        }}
-      />
     </Box>
   );
 };
