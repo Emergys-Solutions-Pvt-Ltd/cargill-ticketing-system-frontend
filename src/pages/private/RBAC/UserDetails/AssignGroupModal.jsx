@@ -75,7 +75,7 @@ const AssignGroupModal = ({ open, onClose, onAssign, departmentId, assignedGroup
       confirmDisabled={selected.length === 0}
     >
       <FormMultiSelect
-        label="Groups"
+        label="Select Group to Assign"
         placeholder={loading ? "Loading groups..." : "Select groups"}
         value={selected}
         onChange={setSelected}

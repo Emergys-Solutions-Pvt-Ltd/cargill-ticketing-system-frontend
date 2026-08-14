@@ -3,8 +3,9 @@ import AddIcon from "@mui/icons-material/Add";
 import GroupsIcon from "../../../../assets/icons/groups.svg";
 import TrashIcon from "../../../../assets/icons/trash.svg";
 
-const GroupItem = ({ group }) => (
+const GroupItem = ({ group, onViewGroup }) => (
   <Box
+    onClick={() => onViewGroup?.(group)}
     sx={{
       display: "flex",
       alignItems: "center",
@@ -16,6 +17,7 @@ const GroupItem = ({ group }) => (
       border: "1px solid",
       borderColor: "divider",
       backgroundColor: "transparent",
+      cursor: "pointer",
       transition: "border-color 0.15s ease, background-color 0.15s ease",
       "&:hover": {
         borderColor: "#1B7F37",
@@ -41,14 +43,18 @@ const GroupItem = ({ group }) => (
       <Typography variant="caption" sx={{ color: "text.secondary", fontStyle: "italic", whiteSpace: "nowrap" }}>
         {group.queueCount} queues
       </Typography>
-      <IconButton size="small" aria-label={`Remove ${group.name}`}>
+      <IconButton
+        size="small"
+        onClick={(event) => event.stopPropagation()}
+        aria-label={`Remove ${group.name}`}
+      >
         <img src={TrashIcon} alt="" width={16} height={16} />
       </IconButton>
     </Box>
   </Box>
 );
 
-const AssignedGroupsCard = ({ groups = [], loading = false, onAssignGroup }) => {
+const AssignedGroupsCard = ({ groups = [], loading = false, onAssignGroup, onViewGroup }) => {
   const leftColumn = groups.filter((_, index) => index % 2 === 0);
   const rightColumn = groups.filter((_, index) => index % 2 === 1);
 
@@ -90,7 +96,7 @@ const AssignedGroupsCard = ({ groups = [], loading = false, onAssignGroup }) => 
         <Box sx={{ display: "flex", alignItems: "stretch", gap: 2 }}>
           <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 1.5, minWidth: 0 }}>
             {leftColumn.map((group) => (
-              <GroupItem key={group.id} group={group} />
+              <GroupItem key={group.id} group={group} onViewGroup={onViewGroup} />
             ))}
           </Box>
 
@@ -99,7 +105,7 @@ const AssignedGroupsCard = ({ groups = [], loading = false, onAssignGroup }) => 
               <Divider orientation="vertical" flexItem sx={{ borderColor: "divider" }} />
               <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 1.5, minWidth: 0 }}>
                 {rightColumn.map((group) => (
-                  <GroupItem key={group.id} group={group} />
+                  <GroupItem key={group.id} group={group} onViewGroup={onViewGroup} />
                 ))}
               </Box>
             </>

@@ -12,6 +12,7 @@ import CommonChip from "../../../../components/common/CommonChip";
 import UserInformationCard from "./UserInformationCard";
 import AssignedGroupsCard from "./AssignedGroupsCard";
 import AssignGroupModal from "./AssignGroupModal";
+import ViewGroupModal from "./ViewGroupModal";
 import { getQueues } from "../../../../api/apiRequests";
 
 const getInitials = (name = "") =>
@@ -55,6 +56,7 @@ const UserDetails = () => {
   const [groups, setGroups] = useState([]);
   const [groupsLoading, setGroupsLoading] = useState(true);
   const [assignGroupOpen, setAssignGroupOpen] = useState(false);
+  const [viewGroup, setViewGroup] = useState(null);
 
   useEffect(() => {
     let active = true;
@@ -151,6 +153,7 @@ const UserDetails = () => {
           groups={groups}
           loading={groupsLoading}
           onAssignGroup={() => setAssignGroupOpen(true)}
+          onViewGroup={setViewGroup}
         />
       </Box>
 
@@ -163,6 +166,12 @@ const UserDetails = () => {
           setGroups((prev) => [...prev, ...newGroups]);
           setAssignGroupOpen(false);
         }}
+      />
+
+      <ViewGroupModal
+        open={Boolean(viewGroup)}
+        onClose={() => setViewGroup(null)}
+        group={viewGroup}
       />
     </Box>
   );
