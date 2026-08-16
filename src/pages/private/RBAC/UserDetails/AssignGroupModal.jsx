@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
 import Modal from "../../../../components/common/Modal";
 import FormMultiSelect from "../../../../components/common/FormMultiSelect";
-import { getQueues } from "../../../../api/apiRequests";
+import { getGroups } from "../../../../api/apiRequests";
 
 const MOCK_GROUPS = [
-  { queueId: "q1", queueName: "HR Support" },
-  { queueId: "q2", queueName: "HR NA Feedback" },
-  { queueId: "q3", queueName: "HR LA PRY Benefits" },
-  { queueId: "q4", queueName: "HR APAC Support" },
-  { queueId: "q5", queueName: "HR Payroll Queries" },
+  { groupId: "1", groupName: "HR Support", queuesAssigned: 3 },
+  { groupId: "2", groupName: "HR NA Feedback", queuesAssigned: 2 },
+  { groupId: "3", groupName: "HR LA PRY Benefits", queuesAssigned: 4 },
+  { groupId: "4", groupName: "HR APAC Support", queuesAssigned: 3 },
+  { groupId: "5", groupName: "HR Payroll Queries", queuesAssigned: 1 },
 ];
 
-const AssignGroupModal = ({ open, onClose, onAssign, departmentId, assignedGroupIds = [] }) => {
+const AssignGroupModal = ({ open, onClose, onAssign, departmentId, assignedGroupIds = [], loading: assigning = false }) => {
   const [groupOptions, setGroupOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState([]);
@@ -21,13 +21,17 @@ const AssignGroupModal = ({ open, onClose, onAssign, departmentId, assignedGroup
 
     let active = true;
     setLoading(true);
-    getQueues({ departmentId })
+    getGroups({ departmentId })
       .then((response) => {
         if (!active) return;
-        const records = response?.data?.length ? response.data : MOCK_GROUPS;
+        const records = response?.data?.groups?.length ? response.data.groups : MOCK_GROUPS;
         setGroupOptions(
           records
-            .map((record) => ({ label: record.queueName, value: record.queueId }))
+            .map((record) => ({
+              label: record.groupName,
+              value: record.groupId,
+              queueCount: record.queuesAssigned ?? 0,
+            }))
             .filter((option) => !assignedGroupIds.includes(option.value)),
         );
       })
@@ -35,7 +39,11 @@ const AssignGroupModal = ({ open, onClose, onAssign, departmentId, assignedGroup
         if (!active) return;
         setGroupOptions(
           MOCK_GROUPS
-            .map((record) => ({ label: record.queueName, value: record.queueId }))
+            .map((record) => ({
+              label: record.groupName,
+              value: record.groupId,
+              queueCount: record.queuesAssigned ?? 0,
+            }))
             .filter((option) => !assignedGroupIds.includes(option.value)),
         );
       })
@@ -57,9 +65,8 @@ const AssignGroupModal = ({ open, onClose, onAssign, departmentId, assignedGroup
   const handleAssign = () => {
     const selectedGroups = groupOptions
       .filter((option) => selected.includes(option.value))
-      .map((option) => ({ id: option.value, name: option.label, queueCount: 0 }));
+      .map((option) => ({ id: option.value, name: option.label, queueCount: option.queueCount }));
     onAssign?.(selectedGroups);
-    setSelected([]);
   };
 
   return (
@@ -73,6 +80,7 @@ const AssignGroupModal = ({ open, onClose, onAssign, departmentId, assignedGroup
       confirmLabel="Assign"
       confirmColor="success"
       confirmDisabled={selected.length === 0}
+      confirmLoading={assigning}
     >
       <FormMultiSelect
         label="Select Group to Assign"

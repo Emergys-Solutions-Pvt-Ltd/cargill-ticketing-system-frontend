@@ -15,7 +15,7 @@ import UserInformationCard from "./UserInformationCard";
 import AssignedGroupsCard from "./AssignedGroupsCard";
 import AssignGroupModal from "./AssignGroupModal";
 import ViewGroupModal from "./ViewGroupModal";
-import { getQueues } from "../../../../api/apiRequests";
+import { getQueues, assignGroupToUser } from "../../../../api/apiRequests";
 
 const getInitials = (name = "") =>
   name
@@ -58,6 +58,7 @@ const UserDetails = () => {
   const [groups, setGroups] = useState([]);
   const [groupsLoading, setGroupsLoading] = useState(true);
   const [assignGroupOpen, setAssignGroupOpen] = useState(false);
+  const [assignGroupLoading, setAssignGroupLoading] = useState(false);
   const [viewGroup, setViewGroup] = useState(null);
   const [removeTarget, setRemoveTarget] = useState(null);
 
@@ -166,9 +167,19 @@ const UserDetails = () => {
         onClose={() => setAssignGroupOpen(false)}
         departmentId={user.departmentId}
         assignedGroupIds={groups.map((group) => group.id)}
+        loading={assignGroupLoading}
         onAssign={(newGroups) => {
-          setGroups((prev) => [...prev, ...newGroups]);
-          setAssignGroupOpen(false);
+          setAssignGroupLoading(true);
+          assignGroupToUser({
+            userId: Number(user.id),
+            groupIds: newGroups.map((group) => Number(group.id)),
+          })
+            .then(() => {
+              setGroups((prev) => [...prev, ...newGroups]);
+              setAssignGroupOpen(false);
+            })
+            .catch(() => {})
+            .finally(() => setAssignGroupLoading(false));
         }}
       />
 

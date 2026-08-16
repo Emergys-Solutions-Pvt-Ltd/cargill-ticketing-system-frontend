@@ -13,7 +13,7 @@ const MOCK_QUEUES = [
   { queueId: "q5", queueName: "HR Payroll Queries" },
 ];
 
-const AddQueueModal = ({ open, onClose, onAdd, groupName, departmentId, assignedQueueIds = [] }) => {
+const AddQueueModal = ({ open, onClose, onAdd, groupName, departmentId, assignedQueueIds = [], loading: adding = false }) => {
   const [queueOptions, setQueueOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState([]);
@@ -61,7 +61,6 @@ const AddQueueModal = ({ open, onClose, onAdd, groupName, departmentId, assigned
       .filter((option) => selected.includes(option.value))
       .map((option) => ({ id: option.value, name: option.label }));
     onAdd?.(selectedQueues);
-    setSelected([]);
   };
 
   return (
@@ -75,6 +74,7 @@ const AddQueueModal = ({ open, onClose, onAdd, groupName, departmentId, assigned
       confirmLabel="Add"
       confirmColor="success"
       confirmDisabled={selected.length === 0}
+      confirmLoading={adding}
     >
       <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
         <FormTextField label="Group Name" value={groupName} disabled />

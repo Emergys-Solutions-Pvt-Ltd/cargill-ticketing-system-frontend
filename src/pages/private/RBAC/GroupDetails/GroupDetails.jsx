@@ -9,6 +9,7 @@ import ConfirmDialog from "../../../../components/common/ConfirmDialog";
 import GroupsIcon from "../../../../assets/icons/groups.svg";
 import TrashIcon from "../../../../assets/icons/trash.svg";
 import AddQueueModal from "./AddQueueModal";
+import { addQueuesToGroup } from "../../../../api/apiRequests";
 
 const DEFAULT_GROUP = {
   name: "Technical Support",
@@ -39,6 +40,7 @@ const GroupDetails = () => {
   const group = { ...DEFAULT_GROUP, ...(location.state?.group || {}) };
   const [queues, setQueues] = useState(DEFAULT_QUEUES);
   const [addQueueOpen, setAddQueueOpen] = useState(false);
+  const [addQueueLoading, setAddQueueLoading] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
 
   const renderQueueRow = (queue) => (
@@ -145,9 +147,19 @@ const GroupDetails = () => {
         groupName={group.name}
         departmentId={group.departmentId}
         assignedQueueIds={queues.map((queue) => queue.id)}
+        loading={addQueueLoading}
         onAdd={(newQueues) => {
-          setQueues((prev) => [...prev, ...newQueues]);
-          setAddQueueOpen(false);
+          setAddQueueLoading(true);
+          addQueuesToGroup({
+            groupId: Number(group.id),
+            queueIds: newQueues.map((queue) => Number(queue.id)),
+          })
+            .then(() => {
+              setQueues((prev) => [...prev, ...newQueues]);
+              setAddQueueOpen(false);
+            })
+            .catch(() => {})
+            .finally(() => setAddQueueLoading(false));
         }}
       />
 

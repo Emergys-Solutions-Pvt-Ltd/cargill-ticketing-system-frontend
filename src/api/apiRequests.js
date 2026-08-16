@@ -26,5 +26,11 @@ export const getGroups = (payload = {}) =>
 export const addGroup = (payload = {}) =>
   apiService.post("/v1/rbac/add-group", payload);
 
+export const addQueuesToGroup = (payload = {}) =>
+  apiService.post("/v1/rbac/add-queues-to-group", payload);
+
+export const assignGroupToUser = (payload = {}) =>
+  apiService.post("/v1/rbac/assign-group-to-user", payload);
+
 export const getDepartmentSupervisors = () =>
   apiService.get("/v1/rbac/get-department-supervisors");
