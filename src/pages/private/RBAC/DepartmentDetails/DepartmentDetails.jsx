@@ -43,11 +43,10 @@ const DepartmentDetails = () => {
     setLoadingUsers(true);
   }
 
-  useEffect(() => {
-    let active = true;
-    getDepartmentUsers({ departmentId: Number(departmentId) })
+  const fetchUsers = () => {
+    setLoadingUsers(true);
+    return getDepartmentUsers({ departmentId: Number(departmentId) })
       .then((response) => {
-        if (!active) return;
         if (!response || !response.data) {
           setUsers(null);
           return;
@@ -60,17 +59,17 @@ const DepartmentDetails = () => {
         setUsers(userRecords.map((record) => mapUser(record, numericDepartmentId)));
       })
       .catch(() => {
-        if (!active) return;
         setUsers(null);
       })
       .finally(() => {
-        if (!active) return;
         setLoadingUsers(false);
         setLoadedDepartmentId(departmentId);
       });
-    return () => {
-      active = false;
-    };
+  };
+
+  useEffect(() => {
+    fetchUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [departmentId]);
 
   const tabs = [
@@ -89,7 +88,9 @@ const DepartmentDetails = () => {
         <DepartmentUsersTab
           users={users}
           departmentId={Number(departmentId)}
+          departmentName={department.name}
           loading={loadingUsers}
+          onUserAdded={fetchUsers}
         />
       ),
     },

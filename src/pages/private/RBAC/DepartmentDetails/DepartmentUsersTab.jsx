@@ -6,10 +6,10 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import CommonTable from "../../../../components/common/CommonTable";
 import CommonChip from "../../../../components/common/CommonChip";
 import ConfirmDialog from "../../../../components/common/ConfirmDialog";
-import AddUserModal from "../AddUserModal";
+import AddUserModal, { buildAddUserPayload } from "../AddUserModal";
 import EditUserModal from "../EditUserModal";
 import DeactivateUserIcon from "../../../../assets/icons/deactivateUser.svg";
-import { toggleUserStatus } from "../../../../api/apiRequests";
+import { toggleUserStatus, addUser } from "../../../../api/apiRequests";
 import { isActiveStatus } from "../../../../utils/format";
 
 const AVATAR_COLORS = [
@@ -76,7 +76,13 @@ const UserRowActions = ({ onEdit, onToggleStatus, isActive }) => {
   );
 };
 
-const DepartmentUsersTab = ({ users = null, departmentId = null, loading = false }) => {
+const DepartmentUsersTab = ({
+  users = null,
+  departmentId = null,
+  departmentName = null,
+  loading = false,
+  onUserAdded,
+}) => {
   const navigate = useNavigate();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(8);
@@ -84,6 +90,7 @@ const DepartmentUsersTab = ({ users = null, departmentId = null, loading = false
   const [statusUpdating, setStatusUpdating] = useState(false);
   const [statusOverrides, setStatusOverrides] = useState({});
   const [addUserOpen, setAddUserOpen] = useState(false);
+  const [addUserLoading, setAddUserLoading] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
 
   const [prevUsers, setPrevUsers] = useState(users);
@@ -239,9 +246,18 @@ const DepartmentUsersTab = ({ users = null, departmentId = null, loading = false
       <AddUserModal
         open={addUserOpen}
         onClose={() => setAddUserOpen(false)}
-        onSubmit={() => {
-          // TODO: call add user API
-          setAddUserOpen(false);
+        loading={addUserLoading}
+        lockedDepartmentId={departmentId}
+        lockedDepartmentName={departmentName}
+        onSubmit={(form) => {
+          setAddUserLoading(true);
+          addUser(buildAddUserPayload(form))
+            .then(() => {
+              setAddUserOpen(false);
+              return onUserAdded?.();
+            })
+            .catch(() => {})
+            .finally(() => setAddUserLoading(false));
         }}
       />
 

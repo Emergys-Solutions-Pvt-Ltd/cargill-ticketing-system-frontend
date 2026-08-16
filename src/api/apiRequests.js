@@ -8,6 +8,9 @@ export const getDepartments = (payload = {}) =>
 export const getUsers = (payload = {}) =>
   apiService.post("/v1/rbac/get-users", payload);
 
+export const addUser = (payload = {}) =>
+  apiService.post("/v1/rbac/add-user", payload);
+
 export const getDepartmentUsers = (payload = {}) =>
   apiService.post("/v1/rbac/get-department-users", payload);
 

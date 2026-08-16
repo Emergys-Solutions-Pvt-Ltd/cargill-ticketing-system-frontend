@@ -6,10 +6,10 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import CommonTable from "../../../components/common/CommonTable";
 import CommonChip from "../../../components/common/CommonChip";
 import ConfirmDialog from "../../../components/common/ConfirmDialog";
-import AddUserModal from "./AddUserModal";
+import AddUserModal, { buildAddUserPayload } from "./AddUserModal";
 import EditUserModal from "./EditUserModal";
 import DeactivateUserIcon from "../../../assets/icons/deactivateUser.svg";
-import { getUsers, toggleUserStatus } from "../../../api/apiRequests";
+import { getUsers, toggleUserStatus, addUser } from "../../../api/apiRequests";
 import { nameFromEmail, formatRelativeTime, isActiveStatus } from "../../../utils/format";
 
 const MOCK_USERS = [
@@ -96,25 +96,26 @@ const UsersTab = () => {
   const [statusUpdating, setStatusUpdating] = useState(false);
   const [statusOverrides, setStatusOverrides] = useState({});
   const [addUserOpen, setAddUserOpen] = useState(false);
+  const [addUserLoading, setAddUserLoading] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
 
-  useEffect(() => {
-    let active = true;
-    getUsers()
+  const fetchUsers = () => {
+    setLoading(true);
+    return getUsers()
       .then((response) => {
-        if (!active) return;
         setUsers(response?.data?.users ? response.data.users.map(mapUser) : null);
       })
       .catch(() => {
-        if (!active) return;
         setUsers(null);
       })
       .finally(() => {
-        if (active) setLoading(false);
+        setLoading(false);
       });
-    return () => {
-      active = false;
-    };
+  };
+
+  useEffect(() => {
+    fetchUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const userRows = (users ?? MOCK_USERS).map((row) =>
@@ -260,9 +261,16 @@ const UsersTab = () => {
       <AddUserModal
         open={addUserOpen}
         onClose={() => setAddUserOpen(false)}
-        onSubmit={() => {
-          // TODO: call add user API
-          setAddUserOpen(false);
+        loading={addUserLoading}
+        onSubmit={(form) => {
+          setAddUserLoading(true);
+          addUser(buildAddUserPayload(form))
+            .then(() => {
+              setAddUserOpen(false);
+              return fetchUsers();
+            })
+            .catch(() => {})
+            .finally(() => setAddUserLoading(false));
         }}
       />
 
