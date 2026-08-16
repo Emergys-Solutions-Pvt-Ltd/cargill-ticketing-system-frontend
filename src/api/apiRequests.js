@@ -23,5 +23,8 @@ export const getQueues = (payload = {}) =>
 export const getGroups = (payload = {}) =>
   apiService.post("/v1/rbac/get-groups", payload, { params: { pageSize: 30 } });
 
+export const addGroup = (payload = {}) =>
+  apiService.post("/v1/rbac/add-group", payload);
+
 export const getDepartmentSupervisors = () =>
   apiService.get("/v1/rbac/get-department-supervisors");

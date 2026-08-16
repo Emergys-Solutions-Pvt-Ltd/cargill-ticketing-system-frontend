@@ -29,6 +29,14 @@ const DEFAULT_FORM = {
   queues: [],
 };
 
+// Builds the /v1/rbac/add-group request body from the modal's internal form state.
+export const buildCreateGroupPayload = (form) => ({
+  groupName: form.name.trim(),
+  groupDescription: form.description.trim(),
+  departmentId: String(form.department),
+  assignedQueueIds: form.queues.map(Number),
+});
+
 const CreateGroupModal = ({
   open,
   onClose,

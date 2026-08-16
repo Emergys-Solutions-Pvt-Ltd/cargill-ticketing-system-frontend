@@ -13,9 +13,9 @@ import AddIcon from "@mui/icons-material/Add";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import CommonTable from "../../../components/common/CommonTable";
 import SearchIcon from "../../../assets/icons/search.svg";
-import CreateGroupModal from "./CreateGroupModal";
+import CreateGroupModal, { buildCreateGroupPayload } from "./CreateGroupModal";
 import EditGroupModal from "./EditGroupModal";
-import { getGroups } from "../../../api/apiRequests";
+import { getGroups, addGroup } from "../../../api/apiRequests";
 
 const AVATAR_COLORS = [
   { bgcolor: "#E0F2FE", color: "#0369A1" },
@@ -74,27 +74,28 @@ const GroupsTab = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(8);
   const [createGroupOpen, setCreateGroupOpen] = useState(false);
+  const [createGroupLoading, setCreateGroupLoading] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
   const [groups, setGroups] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    let active = true;
-    getGroups()
+  const fetchGroups = () => {
+    setLoading(true);
+    return getGroups()
       .then((response) => {
-        if (!active) return;
         setGroups(response?.data?.groups?.length ? response.data.groups.map(mapGroup) : null);
       })
       .catch(() => {
-        if (!active) return;
         setGroups(null);
       })
       .finally(() => {
-        if (active) setLoading(false);
+        setLoading(false);
       });
-    return () => {
-      active = false;
-    };
+  };
+
+  useEffect(() => {
+    fetchGroups();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const groupRows = groups ?? MOCK_GROUPS;
@@ -232,10 +233,17 @@ const GroupsTab = () => {
       <CreateGroupModal
         open={createGroupOpen}
         onClose={() => setCreateGroupOpen(false)}
+        loading={createGroupLoading}
         existingGroupNames={groupRows.map((group) => group.name)}
-        onSubmit={() => {
-          // TODO: call create group API
-          setCreateGroupOpen(false);
+        onSubmit={(form) => {
+          setCreateGroupLoading(true);
+          addGroup(buildCreateGroupPayload(form))
+            .then(() => {
+              setCreateGroupOpen(false);
+              return fetchGroups();
+            })
+            .catch(() => {})
+            .finally(() => setCreateGroupLoading(false));
         }}
       />
 
