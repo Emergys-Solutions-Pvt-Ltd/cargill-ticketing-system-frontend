@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Box, Typography, Button, IconButton, CircularProgress } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
+import { Box, Typography, IconButton, CircularProgress } from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import BackNavigation from "../../../../components/common/BackNavigation";
 import EntityHeaderCard from "../../../../components/common/EntityHeaderCard";
 import ConfirmDialog from "../../../../components/common/ConfirmDialog";
+import AddButton from "../../../../components/common/AddButton";
 import GroupsIcon from "../../../../assets/icons/groups.svg";
 import TrashIcon from "../../../../assets/icons/trash.svg";
 import AddQueueModal from "./AddQueueModal";
@@ -141,14 +141,7 @@ const GroupDetails = () => {
           <Typography sx={{ fontWeight: 600, fontSize: "14px", color: "text.primary" }}>
             Queues ({queues.length})
           </Typography>
-          <Button
-            variant="outlined"
-            startIcon={<AddIcon />}
-            onClick={() => setAddQueueOpen(true)}
-            sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600 }}
-          >
-            Add Queue
-          </Button>
+          <AddButton onClick={() => setAddQueueOpen(true)}>Add Queue</AddButton>
         </Box>
 
         {queuesLoading ? (

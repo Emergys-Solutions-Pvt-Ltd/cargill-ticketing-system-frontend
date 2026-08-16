@@ -3,15 +3,14 @@ import { useNavigate } from "react-router-dom";
 import {
   Box,
   Typography,
-  Button,
   Avatar,
   IconButton,
   TextField,
   InputAdornment,
 } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import CommonTable from "../../../../components/common/CommonTable";
+import AddButton from "../../../../components/common/AddButton";
 import SearchIcon from "../../../../assets/icons/search.svg";
 import CreateGroupModal, { buildCreateGroupPayload } from "../CreateGroupModal";
 import EditGroupModal from "../EditGroupModal";
@@ -187,14 +186,7 @@ const DepartmentGroupsTab = ({ departmentId, departmentName }) => {
               },
             }}
           />
-          <Button
-            variant="outlined"
-            startIcon={<AddIcon />}
-            onClick={() => setCreateGroupOpen(true)}
-            sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, whiteSpace: "nowrap" }}
-          >
-            Add Group
-          </Button>
+          <AddButton onClick={() => setCreateGroupOpen(true)}>Add Group</AddButton>
         </Box>
       </Box>
 

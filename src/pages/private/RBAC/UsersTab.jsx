@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Typography, Button, Avatar, IconButton, Menu, MenuItem } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
+import { Box, Typography, Avatar, IconButton, Menu, MenuItem } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import CommonTable from "../../../components/common/CommonTable";
 import CommonChip from "../../../components/common/CommonChip";
 import ConfirmDialog from "../../../components/common/ConfirmDialog";
+import AddButton from "../../../components/common/AddButton";
 import AddUserModal, { buildAddUserPayload } from "./AddUserModal";
 import EditUserModal from "./EditUserModal";
 import DeactivateUserIcon from "../../../assets/icons/deactivateUser.svg";
@@ -196,14 +196,7 @@ const UsersTab = () => {
         <Typography sx={{ fontWeight: 600, fontSize: "14px", color: "text.primary" }}>
           List of Users ({userRows.length})
         </Typography>
-        <Button
-          variant="outlined"
-          startIcon={<AddIcon />}
-          onClick={() => setAddUserOpen(true)}
-          sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600 }}
-        >
-          Add User
-        </Button>
+        <AddButton onClick={() => setAddUserOpen(true)}>Add User</AddButton>
       </Box>
 
       <CommonTable
