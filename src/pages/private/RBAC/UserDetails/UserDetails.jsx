@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Box, Typography, Avatar } from "@mui/material";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import UserIdIcon from "../../../../assets/icons/userId.svg";
 import PhoneNoIcon from "../../../../assets/icons/phoneNo.svg";
 import DepartmentIcon from "../../../../assets/icons/department.svg";
@@ -9,6 +10,7 @@ import LocationIcon from "../../../../assets/icons/location.svg";
 import MemberSinceIcon from "../../../../assets/icons/memberSince.svg";
 import BackNavigation from "../../../../components/common/BackNavigation";
 import CommonChip from "../../../../components/common/CommonChip";
+import ConfirmDialog from "../../../../components/common/ConfirmDialog";
 import UserInformationCard from "./UserInformationCard";
 import AssignedGroupsCard from "./AssignedGroupsCard";
 import AssignGroupModal from "./AssignGroupModal";
@@ -57,6 +59,7 @@ const UserDetails = () => {
   const [groupsLoading, setGroupsLoading] = useState(true);
   const [assignGroupOpen, setAssignGroupOpen] = useState(false);
   const [viewGroup, setViewGroup] = useState(null);
+  const [removeTarget, setRemoveTarget] = useState(null);
 
   useEffect(() => {
     let active = true;
@@ -154,6 +157,7 @@ const UserDetails = () => {
           loading={groupsLoading}
           onAssignGroup={() => setAssignGroupOpen(true)}
           onViewGroup={setViewGroup}
+          onRemoveGroup={setRemoveTarget}
         />
       </Box>
 
@@ -172,6 +176,25 @@ const UserDetails = () => {
         open={Boolean(viewGroup)}
         onClose={() => setViewGroup(null)}
         group={viewGroup}
+      />
+
+      <ConfirmDialog
+        open={Boolean(removeTarget)}
+        onClose={() => setRemoveTarget(null)}
+        onConfirm={() => {
+          // TODO: call remove group API
+          setGroups((prev) => prev.filter((group) => group.id !== removeTarget.id));
+          setRemoveTarget(null);
+        }}
+        icon={DeleteOutlineIcon}
+        title="Are you sure?"
+        message={
+          <>
+            Do you really want to remove the group "<strong>{removeTarget?.name}</strong>" for this user?
+          </>
+        }
+        confirmLabel="Remove"
+        confirmColor="danger"
       />
     </Box>
   );

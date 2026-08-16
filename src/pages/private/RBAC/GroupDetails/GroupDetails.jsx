@@ -2,12 +2,13 @@ import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Box, Typography, Button, IconButton } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import BackNavigation from "../../../../components/common/BackNavigation";
 import EntityHeaderCard from "../../../../components/common/EntityHeaderCard";
+import ConfirmDialog from "../../../../components/common/ConfirmDialog";
 import GroupsIcon from "../../../../assets/icons/groups.svg";
 import TrashIcon from "../../../../assets/icons/trash.svg";
 import AddQueueModal from "./AddQueueModal";
-import DeleteQueueModal from "./DeleteQueueModal";
 
 const DEFAULT_GROUP = {
   name: "Technical Support",
@@ -150,14 +151,22 @@ const GroupDetails = () => {
         }}
       />
 
-      <DeleteQueueModal
+      <ConfirmDialog
         open={Boolean(deleteTarget)}
         onClose={() => setDeleteTarget(null)}
         onConfirm={() => {
           setQueues((prev) => prev.filter((queue) => queue.id !== deleteTarget.id));
           setDeleteTarget(null);
         }}
-        queueName={deleteTarget?.name}
+        icon={DeleteOutlineIcon}
+        title="Are you sure?"
+        message={
+          <>
+            Do you really want to delete this queue "<strong>{deleteTarget?.name}</strong>"?
+          </>
+        }
+        confirmLabel="Delete"
+        confirmColor="danger"
       />
     </Box>
   );

@@ -76,6 +76,8 @@ const DEFAULT_FORM = {
 const normalizeRole = (role = "") =>
   role.toLowerCase().includes("super") ? "super_user" : "user";
 
+const EDIT_COMPARE_FIELDS = ["role", "name", "email", "mobile", "department", "supervisor", "workLocation"];
+
 const formFromUser = (user) => ({
   role: normalizeRole(user.role),
   name: user.name || "",
@@ -97,6 +99,7 @@ const AddUserModal = ({ open, onClose, onSubmit, user, loading = false }) => {
   const isEditMode = Boolean(user);
 
   const [form, setForm] = useState(DEFAULT_FORM);
+  const [initialForm, setInitialForm] = useState(null);
   const [queueOptions, setQueueOptions] = useState([]);
   const [queuesLoading, setQueuesLoading] = useState(false);
   const [departmentSupervisors, setDepartmentSupervisors] = useState([]);
@@ -104,7 +107,9 @@ const AddUserModal = ({ open, onClose, onSubmit, user, loading = false }) => {
 
   useEffect(() => {
     if (!open) return;
-    setForm(isEditMode ? formFromUser(user) : DEFAULT_FORM);
+    const nextForm = isEditMode ? formFromUser(user) : DEFAULT_FORM;
+    setForm(nextForm);
+    setInitialForm(isEditMode ? nextForm : null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, user]);
 
@@ -150,6 +155,7 @@ const AddUserModal = ({ open, onClose, onSubmit, user, loading = false }) => {
     const match = supervisorOptions.find((option) => option.label === form.reportsToName);
     if (match) {
       setForm((prev) => ({ ...prev, supervisor: match.value }));
+      setInitialForm((prev) => (prev ? { ...prev, supervisor: match.value } : prev));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [supervisorOptions, isEditMode]);
@@ -180,8 +186,14 @@ const AddUserModal = ({ open, onClose, onSubmit, user, loading = false }) => {
     };
   }, [form.department]);
 
+  const isFormUnchanged =
+    isEditMode && initialForm
+      ? EDIT_COMPARE_FIELDS.every((key) => form[key] === initialForm[key])
+      : false;
+
   const handleClose = () => {
     setForm(DEFAULT_FORM);
+    setInitialForm(null);
     onClose?.();
   };
 
@@ -313,6 +325,7 @@ const AddUserModal = ({ open, onClose, onSubmit, user, loading = false }) => {
       onConfirm={handleSubmit}
       confirmLabel={isEditMode ? "Save Changes" : "Add"}
       confirmColor="success"
+      confirmDisabled={isFormUnchanged}
       confirmLoading={loading}
     >
       <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>

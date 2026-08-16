@@ -5,9 +5,10 @@ import AddIcon from "@mui/icons-material/Add";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import CommonTable from "../../../components/common/CommonTable";
 import CommonChip from "../../../components/common/CommonChip";
-import DeactivateUserModal from "./DeactivateUserModal";
+import ConfirmDialog from "../../../components/common/ConfirmDialog";
 import AddUserModal from "./AddUserModal";
 import EditUserModal from "./EditUserModal";
+import DeactivateUserIcon from "../../../assets/icons/deactivateUser.svg";
 import { getUsers, toggleUserStatus } from "../../../api/apiRequests";
 import { nameFromEmail, formatRelativeTime, isActiveStatus } from "../../../utils/format";
 
@@ -232,7 +233,7 @@ const UsersTab = () => {
         }}
       />
 
-      <DeactivateUserModal
+      <ConfirmDialog
         open={Boolean(deactivateTarget)}
         onClose={() => setDeactivateTarget(null)}
         onConfirm={() => {
@@ -244,8 +245,16 @@ const UsersTab = () => {
               setDeactivateTarget(null);
             });
         }}
-        userName={deactivateTarget?.name}
-        loading={statusUpdating}
+        icon={DeactivateUserIcon}
+        title="Are you sure?"
+        message={
+          <>
+            Do you really want to deactivate this user "<strong>{deactivateTarget?.name}</strong>"?
+          </>
+        }
+        confirmLabel="Deactivate"
+        confirmColor="danger"
+        confirmLoading={statusUpdating}
       />
 
       <AddUserModal

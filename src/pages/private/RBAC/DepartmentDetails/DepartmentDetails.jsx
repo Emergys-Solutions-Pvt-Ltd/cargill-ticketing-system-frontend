@@ -24,7 +24,7 @@ const mapUser = (record, departmentId) => ({
   role: record.roleName || "User",
   departmentId,
   supervisor: record.supervisorName || "Unassigned",
-  queuesAssigned: record.queuesAssigned ?? 0,
+  groupsAssigned: record.groupsAssigned ?? 0,
   status: record.isActive ? "Active" : "Inactive",
   lastLogin: formatRelativeTime(record.lastLogin),
 });

@@ -3,7 +3,7 @@ import AddIcon from "@mui/icons-material/Add";
 import GroupsIcon from "../../../../assets/icons/groups.svg";
 import TrashIcon from "../../../../assets/icons/trash.svg";
 
-const GroupItem = ({ group, onViewGroup }) => (
+const GroupItem = ({ group, onViewGroup, onRemoveGroup }) => (
   <Box
     onClick={() => onViewGroup?.(group)}
     sx={{
@@ -45,7 +45,10 @@ const GroupItem = ({ group, onViewGroup }) => (
       </Typography>
       <IconButton
         size="small"
-        onClick={(event) => event.stopPropagation()}
+        onClick={(event) => {
+          event.stopPropagation();
+          onRemoveGroup?.(group);
+        }}
         aria-label={`Remove ${group.name}`}
       >
         <img src={TrashIcon} alt="" width={16} height={16} />
@@ -54,7 +57,7 @@ const GroupItem = ({ group, onViewGroup }) => (
   </Box>
 );
 
-const AssignedGroupsCard = ({ groups = [], loading = false, onAssignGroup, onViewGroup }) => {
+const AssignedGroupsCard = ({ groups = [], loading = false, onAssignGroup, onViewGroup, onRemoveGroup }) => {
   const leftColumn = groups.filter((_, index) => index % 2 === 0);
   const rightColumn = groups.filter((_, index) => index % 2 === 1);
 
@@ -96,7 +99,12 @@ const AssignedGroupsCard = ({ groups = [], loading = false, onAssignGroup, onVie
         <Box sx={{ display: "flex", alignItems: "stretch", gap: 2 }}>
           <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 1.5, minWidth: 0 }}>
             {leftColumn.map((group) => (
-              <GroupItem key={group.id} group={group} onViewGroup={onViewGroup} />
+              <GroupItem
+                key={group.id}
+                group={group}
+                onViewGroup={onViewGroup}
+                onRemoveGroup={onRemoveGroup}
+              />
             ))}
           </Box>
 
@@ -105,7 +113,12 @@ const AssignedGroupsCard = ({ groups = [], loading = false, onAssignGroup, onVie
               <Divider orientation="vertical" flexItem sx={{ borderColor: "divider" }} />
               <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 1.5, minWidth: 0 }}>
                 {rightColumn.map((group) => (
-                  <GroupItem key={group.id} group={group} onViewGroup={onViewGroup} />
+                  <GroupItem
+                    key={group.id}
+                    group={group}
+                    onViewGroup={onViewGroup}
+                    onRemoveGroup={onRemoveGroup}
+                  />
                 ))}
               </Box>
             </>
