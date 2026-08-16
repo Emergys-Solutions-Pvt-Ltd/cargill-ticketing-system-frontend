@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -12,6 +13,8 @@ import AddIcon from "@mui/icons-material/Add";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import CommonTable from "../../../components/common/CommonTable";
 import SearchIcon from "../../../assets/icons/search.svg";
+import CreateGroupModal from "./CreateGroupModal";
+import EditGroupModal from "./EditGroupModal";
 
 const AVATAR_COLORS = [
   { bgcolor: "#E0F2FE", color: "#0369A1" },
@@ -56,9 +59,12 @@ const MOCK_GROUPS = Array.from({ length: 50 }, (_, index) => ({
 }));
 
 const GroupsTab = () => {
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(8);
+  const [createGroupOpen, setCreateGroupOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState(null);
 
   const filteredGroups = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -152,9 +158,7 @@ const GroupsTab = () => {
           <Button
             variant="outlined"
             startIcon={<AddIcon />}
-            onClick={() => {
-              // TODO: open add group dialog
-            }}
+            onClick={() => setCreateGroupOpen(true)}
             sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, whiteSpace: "nowrap" }}
           >
             New Group
@@ -166,15 +170,14 @@ const GroupsTab = () => {
         sx={{ flexGrow: 1, minHeight: 0 }}
         columns={columns}
         rows={paginatedGroups}
+        onRowClick={(row) => navigate(`/rbac/groups/${row.id}`, { state: { group: row } })}
         sortable
         emptyMessage="No groups to display yet."
         ariaLabel="Groups list"
-        actions={() => (
+        actions={(row) => (
           <IconButton
             size="small"
-            onClick={() => {
-              // TODO: open edit group dialog
-            }}
+            onClick={() => setEditTarget(row)}
             aria-label="Edit group"
           >
             <EditOutlinedIcon fontSize="small" />
@@ -189,6 +192,29 @@ const GroupsTab = () => {
             setRowsPerPage(value);
             setPage(0);
           },
+        }}
+      />
+
+      <CreateGroupModal
+        open={createGroupOpen}
+        onClose={() => setCreateGroupOpen(false)}
+        existingGroupNames={MOCK_GROUPS.map((group) => group.name)}
+        onSubmit={() => {
+          // TODO: call create group API
+          setCreateGroupOpen(false);
+        }}
+      />
+
+      <EditGroupModal
+        open={Boolean(editTarget)}
+        group={editTarget}
+        onClose={() => setEditTarget(null)}
+        existingGroupNames={MOCK_GROUPS.filter((group) => group.id !== editTarget?.id).map(
+          (group) => group.name,
+        )}
+        onSubmit={() => {
+          // TODO: call edit group API
+          setEditTarget(null);
         }}
       />
     </Box>

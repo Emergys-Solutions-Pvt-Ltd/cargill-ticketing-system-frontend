@@ -16,6 +16,7 @@ import { initMockData } from "./utils/rbacData";
 import Rbac from "./pages/private/RBAC/Rbac";
 import DepartmentDetails from "./pages/private/RBAC/DepartmentDetails/DepartmentDetails";
 import RbacUserDetails from "./pages/private/RBAC/UserDetails/UserDetails";
+import GroupDetails from "./pages/private/RBAC/GroupDetails/GroupDetails";
 
 const router = createBrowserRouter([
   {
@@ -81,6 +82,10 @@ const router = createBrowserRouter([
       {
         path: "rbac/users/:userId",
         element: <RbacUserDetails />,
+      },
+      {
+        path: "rbac/groups/:groupId",
+        element: <GroupDetails />,
       },
     ],
   },

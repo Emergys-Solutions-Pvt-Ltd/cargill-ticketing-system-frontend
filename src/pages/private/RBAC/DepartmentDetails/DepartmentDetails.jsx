@@ -76,7 +76,12 @@ const DepartmentDetails = () => {
   const tabs = [
     {
       label: "Groups",
-      content: <DepartmentGroupsTab />,
+      content: (
+        <DepartmentGroupsTab
+          departmentId={Number(departmentId)}
+          departmentName={department.name}
+        />
+      ),
     },
     {
       label: "Users",

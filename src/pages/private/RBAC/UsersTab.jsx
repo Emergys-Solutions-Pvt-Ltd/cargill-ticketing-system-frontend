@@ -76,7 +76,7 @@ const UserRowActions = ({ onEdit, onToggleStatus, isActive }) => {
             setAnchorEl(null);
             onToggleStatus?.();
           }}
-          sx={{ color: isActive ? "#F05252" : "primary.main" }}
+          sx={{ color: isActive ? "#F05252" : "#0E9F6E" }}
         >
           {isActive ? "Deactivate" : "Activate"}
         </MenuItem>
