@@ -202,7 +202,7 @@ const DepartmentGroupsTab = ({ departmentId, departmentName }) => {
         sx={{ flexGrow: 1, minHeight: 0 }}
         columns={columns}
         rows={paginatedGroups}
-        onRowClick={(row) => navigate(`/rbac/groups/${row.id}`, { state: { group: row } })}
+        onRowClick={(row) => navigate(`/rbac/groups/${row.id}`, { state: { group: { ...row, departmentId } } })}
         loading={loading}
         sortable
         emptyMessage="No groups to display yet."

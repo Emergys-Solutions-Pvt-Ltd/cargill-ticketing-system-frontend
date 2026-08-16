@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Box, Typography, Button, IconButton } from "@mui/material";
+import { Box, Typography, Button, IconButton, CircularProgress } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import BackNavigation from "../../../../components/common/BackNavigation";
@@ -9,7 +9,7 @@ import ConfirmDialog from "../../../../components/common/ConfirmDialog";
 import GroupsIcon from "../../../../assets/icons/groups.svg";
 import TrashIcon from "../../../../assets/icons/trash.svg";
 import AddQueueModal from "./AddQueueModal";
-import { addQueuesToGroup } from "../../../../api/apiRequests";
+import { addQueuesToGroup, getQueues } from "../../../../api/apiRequests";
 
 const DEFAULT_GROUP = {
   name: "Technical Support",
@@ -17,7 +17,6 @@ const DEFAULT_GROUP = {
   assignedUsers: 62,
 };
 
-// TODO: replace with the real "queues in group" API once available
 const DEFAULT_QUEUES = [
   { id: 1, name: "HR Support" },
   { id: 2, name: "HR NA Feedback" },
@@ -39,9 +38,35 @@ const GroupDetails = () => {
 
   const group = { ...DEFAULT_GROUP, ...(location.state?.group || {}) };
   const [queues, setQueues] = useState(DEFAULT_QUEUES);
+  const [queuesLoading, setQueuesLoading] = useState(true);
   const [addQueueOpen, setAddQueueOpen] = useState(false);
   const [addQueueLoading, setAddQueueLoading] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
+
+  useEffect(() => {
+    if (!group.id) return;
+
+    let active = true;
+    setQueuesLoading(true);
+    getQueues({ groupId: Number(group.id) })
+      .then((response) => {
+        if (!active) return;
+        const records = response?.data?.length ? response.data : DEFAULT_QUEUES;
+        setQueues(records.map((record) => ({ id: record.queueId, name: record.queueName })));
+      })
+      .catch(() => {
+        if (!active) return;
+        setQueues(DEFAULT_QUEUES);
+      })
+      .finally(() => {
+        if (active) setQueuesLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [group.id]);
 
   const renderQueueRow = (queue) => (
     <Box
@@ -126,19 +151,25 @@ const GroupDetails = () => {
           </Button>
         </Box>
 
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)" },
-            columnGap: 2,
-            rowGap: 1.5,
-            flexGrow: 1,
-            minHeight: 0,
-            overflowY: "auto",
-          }}
-        >
-          {queues.map((queue) => renderQueueRow(queue))}
-        </Box>
+        {queuesLoading ? (
+          <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+            <CircularProgress size={24} />
+          </Box>
+        ) : (
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)" },
+              columnGap: 2,
+              rowGap: 1.5,
+              flexGrow: 1,
+              minHeight: 0,
+              overflowY: "auto",
+            }}
+          >
+            {queues.map((queue) => renderQueueRow(queue))}
+          </Box>
+        )}
       </Box>
 
       <AddQueueModal

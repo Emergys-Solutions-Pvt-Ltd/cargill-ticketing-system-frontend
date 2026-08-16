@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Box, Typography, Avatar } from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlineOutlined";
@@ -15,7 +15,7 @@ import UserInformationCard from "./UserInformationCard";
 import AssignedGroupsCard from "./AssignedGroupsCard";
 import AssignGroupModal from "./AssignGroupModal";
 import ViewGroupModal from "./ViewGroupModal";
-import { getQueues, assignGroupToUser } from "../../../../api/apiRequests";
+import { assignGroupToUser } from "../../../../api/apiRequests";
 
 const getInitials = (name = "") =>
   name
@@ -55,42 +55,15 @@ const UserDetails = () => {
 
   const user = { ...DEFAULT_USER, ...(location.state?.user || {}) };
 
-  const [groups, setGroups] = useState([]);
-  const [groupsLoading, setGroupsLoading] = useState(true);
+  // TODO: wire up the real "groups assigned to user" API once available.
+  // get-queues only supports { groupId } / { departmentId } filters, not { userId },
+  // so this stays on mock data for now rather than firing an invalid request.
+  const [groups, setGroups] = useState(DEFAULT_GROUPS);
+  const [groupsLoading] = useState(false);
   const [assignGroupOpen, setAssignGroupOpen] = useState(false);
   const [assignGroupLoading, setAssignGroupLoading] = useState(false);
   const [viewGroup, setViewGroup] = useState(null);
   const [removeTarget, setRemoveTarget] = useState(null);
-
-  useEffect(() => {
-    let active = true;
-    setGroupsLoading(true);
-    getQueues({ userId: user.id })
-      .then((response) => {
-        if (!active) return;
-        const records = response?.data || [];
-        setGroups(
-          records.length > 0
-            ? records.map((record) => ({
-                id: record.queueId,
-                name: record.queueName,
-                queueCount: record.queueCount ?? 0,
-              }))
-            : DEFAULT_GROUPS,
-        );
-      })
-      .catch(() => {
-        if (!active) return;
-        setGroups(DEFAULT_GROUPS);
-      })
-      .finally(() => {
-        if (active) setGroupsLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user.id]);
 
   const infoFields = [
     { label: "User ID", value: user.userId, icon: UserIdIcon },
