@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -15,6 +15,7 @@ import CommonTable from "../../../components/common/CommonTable";
 import SearchIcon from "../../../assets/icons/search.svg";
 import CreateGroupModal from "./CreateGroupModal";
 import EditGroupModal from "./EditGroupModal";
+import { getGroups } from "../../../api/apiRequests";
 
 const AVATAR_COLORS = [
   { bgcolor: "#E0F2FE", color: "#0369A1" },
@@ -58,6 +59,15 @@ const MOCK_GROUPS = Array.from({ length: 50 }, (_, index) => ({
   ...GROUP_TEMPLATES[index % GROUP_TEMPLATES.length],
 }));
 
+const mapGroup = (record) => ({
+  id: record.groupId,
+  name: record.groupName,
+  description: record.groupDescription || "",
+  department: record.departmentName || "Unassigned",
+  queues: record.queuesAssigned ?? 0,
+  assignedUsers: record.usersAssigned ?? 0,
+});
+
 const GroupsTab = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
@@ -65,12 +75,35 @@ const GroupsTab = () => {
   const [rowsPerPage, setRowsPerPage] = useState(8);
   const [createGroupOpen, setCreateGroupOpen] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
+  const [groups, setGroups] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    getGroups()
+      .then((response) => {
+        if (!active) return;
+        setGroups(response?.data?.groups?.length ? response.data.groups.map(mapGroup) : null);
+      })
+      .catch(() => {
+        if (!active) return;
+        setGroups(null);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const groupRows = groups ?? MOCK_GROUPS;
 
   const filteredGroups = useMemo(() => {
     const query = search.trim().toLowerCase();
-    if (!query) return MOCK_GROUPS;
-    return MOCK_GROUPS.filter((group) => group.name.toLowerCase().includes(query));
-  }, [search]);
+    if (!query) return groupRows;
+    return groupRows.filter((group) => group.name.toLowerCase().includes(query));
+  }, [search, groupRows]);
 
   const paginatedGroups = filteredGroups.slice(
     page * rowsPerPage,
@@ -171,6 +204,7 @@ const GroupsTab = () => {
         columns={columns}
         rows={paginatedGroups}
         onRowClick={(row) => navigate(`/rbac/groups/${row.id}`, { state: { group: row } })}
+        loading={loading}
         sortable
         emptyMessage="No groups to display yet."
         ariaLabel="Groups list"
@@ -198,7 +232,7 @@ const GroupsTab = () => {
       <CreateGroupModal
         open={createGroupOpen}
         onClose={() => setCreateGroupOpen(false)}
-        existingGroupNames={MOCK_GROUPS.map((group) => group.name)}
+        existingGroupNames={groupRows.map((group) => group.name)}
         onSubmit={() => {
           // TODO: call create group API
           setCreateGroupOpen(false);
@@ -209,7 +243,7 @@ const GroupsTab = () => {
         open={Boolean(editTarget)}
         group={editTarget}
         onClose={() => setEditTarget(null)}
-        existingGroupNames={MOCK_GROUPS.filter((group) => group.id !== editTarget?.id).map(
+        existingGroupNames={groupRows.filter((group) => group.id !== editTarget?.id).map(
           (group) => group.name,
         )}
         onSubmit={() => {

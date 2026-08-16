@@ -27,7 +27,7 @@ const mapUser = (record) => ({
   id: record.userId,
   name: record.userName || nameFromEmail(record.email),
   email: record.email,
-  role: record.roleName || "User",
+  role: record.roleCode === "SUPERUSER" ? "Super User" : record.roleName || "User",
   reportsTo: record.reportsToName || "-",
   department: record.departmentName || "Unassigned",
   departmentId: record.departmentId,
