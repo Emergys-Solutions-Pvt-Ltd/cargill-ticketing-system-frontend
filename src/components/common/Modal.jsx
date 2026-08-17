@@ -44,7 +44,7 @@ const Modal = ({
       fullWidth={fullWidth}
       slotProps={{
         paper: {
-          sx: { borderRadius: "12px" },
+          sx: { borderRadius: "8px" },
         },
       }}
     >
@@ -74,6 +74,8 @@ const Modal = ({
 
       <Box sx={{ px: 3, py: 3 }}>{children}</Box>
 
+      {showActions && <Divider />}
+
       {showActions && (
         <Box
           sx={{
@@ -81,19 +83,24 @@ const Modal = ({
             justifyContent: "flex-end",
             gap: 1.5,
             px: 3,
-            pb: 3,
+            py: 2,
           }}
         >
           {footer ?? (
             <>
               <Button
-                variant="outlined"
+                variant="contained"
                 onClick={onCancel ?? onClose}
                 sx={{
                   textTransform: "none",
-                  fontWeight: 600,
-                  borderColor: "divider",
-                  color: "text.primary",
+                  fontWeight: 500,
+                  borderRadius: "4px",
+                  width: "107px",
+                  height: "37px",
+                  flexShrink: 0,
+                  color: "#fff",
+                  backgroundColor: "#6B7280",
+                  "&:hover": { backgroundColor: "#4B5563" },
                 }}
               >
                 {cancelLabel}
@@ -104,13 +111,16 @@ const Modal = ({
                 disabled={confirmDisabled || confirmLoading}
                 sx={{
                   textTransform: "none",
-                  fontWeight: 600,
+                  fontWeight: 500,
+                  borderRadius: "4px",
+                  width: "107px",
+                  height: "37px",
+                  flexShrink: 0,
                   color: "#fff",
                   ...confirmStyle,
                   "&.Mui-disabled": {
-                    backgroundColor: confirmStyle.backgroundColor,
+                    backgroundColor: "#99CEB1",
                     color: "#fff",
-                    opacity: 0.5,
                   },
                 }}
               >
