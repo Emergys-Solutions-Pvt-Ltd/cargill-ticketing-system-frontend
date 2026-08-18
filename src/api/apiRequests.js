@@ -35,6 +35,9 @@ export const editGroup = (payload = {}) =>
 export const addQueuesToGroup = (payload = {}) =>
   apiService.post("/v1/rbac/add-queues-to-group", payload);
 
+export const removeQueuesFromGroup = (payload = {}) =>
+  apiService.post("/v1/rbac/remove-queues-from-group", payload);
+
 export const assignGroupToUser = (payload = {}) =>
   apiService.post("/v1/rbac/assign-group-to-user", payload);
 
