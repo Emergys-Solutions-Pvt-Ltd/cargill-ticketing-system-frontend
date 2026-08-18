@@ -38,8 +38,5 @@ export const removeQueuesFromGroup = (payload = {}) =>
 export const assignGroupToUser = (payload = {}) =>
   apiService.post("/v1/rbac/assign-group-to-user", payload);
 
-export const getDepartmentSupervisors = () =>
-  apiService.get("/v1/rbac/get-department-supervisors");
-
 export const getUserDetails = (payload = {}) =>
   apiService.post("/v1/rbac/get-user-details", payload);

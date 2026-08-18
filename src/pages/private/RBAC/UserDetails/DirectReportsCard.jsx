@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import { Box, Typography, Avatar, CircularProgress } from "@mui/material";
 import PersonAddAlt1OutlinedIcon from "@mui/icons-material/PersonAddAlt1Outlined";
 
@@ -21,9 +20,8 @@ const getInitials = (name = "") =>
     .slice(0, 2)
     .toUpperCase();
 
-const DirectReportItem = ({ report, onClick }) => (
+const DirectReportItem = ({ report }) => (
   <Box
-    onClick={onClick}
     sx={{
       display: "flex",
       alignItems: "center",
@@ -33,12 +31,6 @@ const DirectReportItem = ({ report, onClick }) => (
       borderRadius: "8px",
       border: "1px solid",
       borderColor: "divider",
-      cursor: "pointer",
-      transition: "border-color 0.15s ease, background-color 0.15s ease",
-      "&:hover": {
-        borderColor: "#1B7F37",
-        backgroundColor: "#F3FAF7",
-      },
     }}
   >
     <Avatar
@@ -76,8 +68,6 @@ const DirectReportItem = ({ report, onClick }) => (
 // Users who report directly to this Super User. Shown alongside InheritedGroupsCard
 // in place of the regular AssignedGroupsCard on the Super User variant of UserDetails.
 const DirectReportsCard = ({ reports = [], loading = false }) => {
-  const navigate = useNavigate();
-
   return (
     <Box
       sx={{
@@ -148,11 +138,7 @@ const DirectReportsCard = ({ reports = [], loading = false }) => {
           }}
         >
           {reports.map((report) => (
-            <DirectReportItem
-              key={report.id}
-              report={report}
-              onClick={() => navigate(`/rbac/users/${report.id}`, { state: { user: report } })}
-            />
+            <DirectReportItem key={report.id} report={report} />
           ))}
         </Box>
       )}

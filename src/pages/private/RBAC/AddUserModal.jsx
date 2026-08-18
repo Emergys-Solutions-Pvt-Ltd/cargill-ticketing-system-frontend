@@ -4,54 +4,28 @@ import Modal from "../../../components/common/Modal";
 import FormTextField from "../../../components/common/FormTextField";
 import FormSelect from "../../../components/common/FormSelect";
 import FormMultiSelect from "../../../components/common/FormMultiSelect";
-import { getGroups, getDepartmentSupervisors } from "../../../api/apiRequests";
+import { getGroups, getDepartments, getUsers } from "../../../api/apiRequests";
 
 const USER_ROLE_OPTIONS = [
   { label: "User", value: "user" },
   { label: "Super User", value: "super_user" },
 ];
 
-const MOCK_DEPARTMENT_SUPERVISORS = [
-  {
-    departmentId: "1",
-    departmentName: "Human Resources",
-    supervisors: [
-      { userId: "3", userName: "Mike Wilson" },
-      { userId: "4", userName: "Kevin Brown" },
-    ],
-  },
-  {
-    departmentId: "2",
-    departmentName: "Finance",
-    supervisors: [
-      { userId: "11", userName: "Emma Clark" },
-      { userId: "12", userName: "Brian Lewis" },
-    ],
-  },
-  {
-    departmentId: "3",
-    departmentName: "Information Technology",
-    supervisors: [
-      { userId: "20", userName: "Daniel Scott" },
-      { userId: "21", userName: "Peter White" },
-    ],
-  },
-  {
-    departmentId: "4",
-    departmentName: "Operations",
-    supervisors: [
-      { userId: "29", userName: "Jason Reed" },
-      { userId: "30", userName: "Ryan Cooper" },
-    ],
-  },
-  {
-    departmentId: "5",
-    departmentName: "Customer Support",
-    supervisors: [
-      { userId: "38", userName: "Lisa Green" },
-      { userId: "39", userName: "Olivia Moore" },
-    ],
-  },
+const MOCK_DEPARTMENTS = [
+  { departmentId: "1", departmentName: "Human Resources" },
+  { departmentId: "2", departmentName: "Finance" },
+  { departmentId: "3", departmentName: "Information Technology" },
+  { departmentId: "4", departmentName: "Operations" },
+  { departmentId: "5", departmentName: "Customer Support" },
+];
+
+// "Reports To" now lists Super Users of the selected department — there's no
+// separate supervisor concept anymore.
+const MOCK_SUPERUSERS = [
+  { userId: "3", userName: "Mike Wilson", roleCode: "SUPERUSER" },
+  { userId: "4", userName: "Kevin Brown", roleCode: "SUPERUSER" },
+  { userId: "11", userName: "Emma Clark", roleCode: "SUPERUSER" },
+  { userId: "12", userName: "Brian Lewis", roleCode: "SUPERUSER" },
 ];
 
 const MOCK_GROUPS_FOR_ASSIGNMENT = [
@@ -147,7 +121,9 @@ const AddUserModal = ({
   const [initialForm, setInitialForm] = useState(null);
   const [groupOptions, setGroupOptions] = useState([]);
   const [groupsLoading, setGroupsLoading] = useState(false);
-  const [departmentSupervisors, setDepartmentSupervisors] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [departmentsLoading, setDepartmentsLoading] = useState(false);
+  const [supervisorOptions, setSupervisorOptions] = useState([]);
   const [supervisorsLoading, setSupervisorsLoading] = useState(false);
 
   useEffect(() => {
@@ -160,19 +136,61 @@ const AddUserModal = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, user, isDepartmentLocked, lockedDepartmentId]);
 
+  // Department is disabled/locked whenever it can't be changed (edit mode or a
+  // locked-department context), so there's no need to hit the API for its options
+  // there — the current department's own name/id is already known.
   useEffect(() => {
-    if (!open) return;
+    if (!open || isEditMode || isDepartmentLocked) return;
 
     let active = true;
-    setSupervisorsLoading(true);
-    getDepartmentSupervisors()
+    setDepartmentsLoading(true);
+    getDepartments()
       .then((response) => {
         if (!active) return;
-        setDepartmentSupervisors(response?.data?.length ? response.data : MOCK_DEPARTMENT_SUPERVISORS);
+        setDepartments(response?.data?.length ? response.data : MOCK_DEPARTMENTS);
       })
       .catch(() => {
         if (!active) return;
-        setDepartmentSupervisors(MOCK_DEPARTMENT_SUPERVISORS);
+        setDepartments(MOCK_DEPARTMENTS);
+      })
+      .finally(() => {
+        if (active) setDepartmentsLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [open, isEditMode, isDepartmentLocked]);
+
+  const departmentOptions = isDepartmentLocked
+    ? [{ label: lockedDepartmentName, value: String(lockedDepartmentId) }]
+    : isEditMode
+      ? [{ label: user?.department || "", value: form.department }]
+      : departments.map((dept) => ({
+          label: dept.departmentName,
+          value: dept.departmentId,
+        }));
+
+  // "Reports To" only renders for role "user" (Super Users don't report to anyone),
+  // so skip fetching it otherwise. Lists this department's Super Users, fetched
+  // whenever the selected department changes.
+  useEffect(() => {
+    if (form.role !== "user" || !form.department) {
+      setSupervisorOptions([]);
+      return;
+    }
+
+    let active = true;
+    setSupervisorsLoading(true);
+    getUsers({ departmentId: form.department })
+      .then((response) => {
+        if (!active) return;
+        const records = response?.data?.users?.length ? response.data.users : MOCK_SUPERUSERS;
+        const superUsers = records.filter((record) => record.roleCode === "SUPERUSER");
+        setSupervisorOptions(superUsers.map((record) => ({ label: record.userName, value: record.userId })));
+      })
+      .catch(() => {
+        if (!active) return;
+        setSupervisorOptions(MOCK_SUPERUSERS.map((record) => ({ label: record.userName, value: record.userId })));
       })
       .finally(() => {
         if (active) setSupervisorsLoading(false);
@@ -180,22 +198,7 @@ const AddUserModal = ({
     return () => {
       active = false;
     };
-  }, [open]);
-
-  const departmentOptions = isDepartmentLocked
-    ? [{ label: lockedDepartmentName, value: String(lockedDepartmentId) }]
-    : departmentSupervisors.map((dept) => ({
-        label: dept.departmentName,
-        value: dept.departmentId,
-      }));
-
-  const selectedDepartment = departmentSupervisors.find(
-    (dept) => dept.departmentId === form.department,
-  );
-  const supervisorOptions = (selectedDepartment?.supervisors || []).map((supervisor) => ({
-    label: supervisor.userName,
-    value: supervisor.userId,
-  }));
+  }, [form.department, form.role]);
 
   // Once supervisor options for the pre-filled department are available, resolve
   // the edited user's "reports to" name into the matching option value.
@@ -209,8 +212,10 @@ const AddUserModal = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [supervisorOptions, isEditMode]);
 
+  // Assign Group is never rendered in edit mode, or for role "super_user", so
+  // skip fetching its options in either case.
   useEffect(() => {
-    if (!form.department) {
+    if (isEditMode || form.role !== "user" || !form.department) {
       setGroupOptions([]);
       return;
     }
@@ -233,7 +238,7 @@ const AddUserModal = ({
     return () => {
       active = false;
     };
-  }, [form.department]);
+  }, [form.department, form.role, isEditMode]);
 
   const isFormUnchanged =
     isEditMode && initialForm
@@ -330,7 +335,7 @@ const AddUserModal = ({
       node: (
         <FormSelect
           label="Department"
-          placeholder={supervisorsLoading ? "Loading departments..." : "Select department"}
+          placeholder={departmentsLoading ? "Loading departments..." : "Select department"}
           value={form.department}
           onChange={handleFieldChange("department")}
           options={departmentOptions}
@@ -346,7 +351,13 @@ const AddUserModal = ({
       node: (
         <FormSelect
           label="Reports To"
-          placeholder={form.department ? "Select" : "Select department first"}
+          placeholder={
+            !form.department
+              ? "Select department first"
+              : supervisorsLoading
+                ? "Loading super users..."
+                : "Select"
+          }
           value={form.supervisor}
           onChange={handleFieldChange("supervisor")}
           options={supervisorOptions}
