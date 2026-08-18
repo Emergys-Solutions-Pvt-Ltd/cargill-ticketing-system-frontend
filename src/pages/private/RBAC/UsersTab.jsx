@@ -29,7 +29,7 @@ export const mapUser = (record) => ({
   name: record.userName || nameFromEmail(record.email),
   email: record.email,
   role: record.roleCode === "SUPERUSER" ? "Super User" : record.roleName || "User",
-  reportsTo: record.reportsToName || "-",
+  reportsTo: record.reportsToUserName || "-",
   department: record.departmentName || "Unassigned",
   departmentId: record.departmentId,
   groupsAssigned: record.groupsAssigned ?? 0,

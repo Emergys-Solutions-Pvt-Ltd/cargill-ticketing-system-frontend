@@ -23,7 +23,7 @@ const mapUser = (record, departmentId) => ({
   email: record.email,
   role: record.roleCode === "SUPERUSER" ? "Super User" : record.roleName || "User",
   departmentId,
-  reportsTo: record.reportsToName || "Unassigned",
+  reportsTo: record.reportsToUserName || "Unassigned",
   groupsAssigned: record.groupsAssigned ?? 0,
   status: record.isActive ? "Active" : "Inactive",
   lastLogin: formatRelativeTime(record.lastLogin),
