@@ -68,13 +68,16 @@ const UserDetails = () => {
 
   const user = { ...DEFAULT_USER, ...(location.state?.user || {}) };
   const isSuperUser = (user.role || "").toLowerCase().includes("super");
+  // John Smith (id 1) is the first Super User in the mock user list — kept empty on
+  // purpose to demo the "no inherited groups / no direct reports" empty states.
+  const isEmptySuperUserDemo = Number(user.id) === 1;
 
   // TODO: wire up the real "groups assigned to user" / "inherited groups" API once
   // available. get-queues only supports { groupId } / { departmentId } filters, not
   // { userId }, so this stays on mock data for now rather than firing an invalid request.
-  const [groups, setGroups] = useState(DEFAULT_GROUPS);
+  const [groups, setGroups] = useState(isEmptySuperUserDemo ? [] : DEFAULT_GROUPS);
   const [groupsLoading] = useState(false);
-  const [directReports] = useState(DEFAULT_DIRECT_REPORTS);
+  const [directReports] = useState(isEmptySuperUserDemo ? [] : DEFAULT_DIRECT_REPORTS);
   const [directReportsLoading] = useState(false);
   const [assignGroupOpen, setAssignGroupOpen] = useState(false);
   const [assignGroupLoading, setAssignGroupLoading] = useState(false);

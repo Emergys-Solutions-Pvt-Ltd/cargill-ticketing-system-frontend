@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Box, Typography, Avatar, CircularProgress } from "@mui/material";
+import PersonAddAlt1OutlinedIcon from "@mui/icons-material/PersonAddAlt1Outlined";
 
 const AVATAR_COLORS = [
   { bgcolor: "#E0F2FE", color: "#0369A1" },
@@ -100,9 +101,39 @@ const DirectReportsCard = ({ reports = [], loading = false }) => {
           <CircularProgress size={24} />
         </Box>
       ) : reports.length === 0 ? (
-        <Typography variant="body2" sx={{ color: "text.secondary" }}>
-          No direct reports yet.
-        </Typography>
+        <Box
+          sx={{
+            flexGrow: 1,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            textAlign: "center",
+            gap: 1.5,
+            py: 4,
+          }}
+        >
+          <Box
+            sx={{
+              width: 64,
+              height: 64,
+              borderRadius: "50%",
+              backgroundColor: "#E6F4EA",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <PersonAddAlt1OutlinedIcon sx={{ fontSize: 28, color: "#1B7F37" }} />
+          </Box>
+          <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>
+            No direct reports yet.
+          </Typography>
+          <Typography variant="caption" sx={{ color: "text.secondary", maxWidth: 280 }}>
+            This Super User currently has no users reporting to them. Add users to start building
+            their reporting team.
+          </Typography>
+        </Box>
       ) : (
         <Box
           sx={{

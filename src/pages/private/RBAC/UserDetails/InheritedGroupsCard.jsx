@@ -62,7 +62,7 @@ const InheritedGroupsCard = ({ groups = [], loading = false, onViewGroup }) => {
       }}
     >
       <Typography sx={{ fontWeight: 600, fontSize: "14px", color: "text.primary", mb: 3, flexShrink: 0 }}>
-        Inherited Groups
+        Inherited Groups ({groups.length})
       </Typography>
 
       {loading ? (
@@ -70,9 +70,38 @@ const InheritedGroupsCard = ({ groups = [], loading = false, onViewGroup }) => {
           <CircularProgress size={24} />
         </Box>
       ) : groups.length === 0 ? (
-        <Typography variant="body2" sx={{ color: "text.secondary" }}>
-          No inherited groups yet.
-        </Typography>
+        <Box
+          sx={{
+            flexGrow: 1,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            textAlign: "center",
+            gap: 1.5,
+            py: 4,
+          }}
+        >
+          <Box
+            sx={{
+              width: 64,
+              height: 64,
+              borderRadius: "50%",
+              backgroundColor: "#E6F4EA",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Box component="img" src={GroupsIcon} alt="" sx={{ width: 28, height: 28 }} />
+          </Box>
+          <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>
+            No inherited groups yet.
+          </Typography>
+          <Typography variant="caption" sx={{ color: "text.secondary", maxWidth: 260 }}>
+            Groups will appear here when users are assigned to this Super User.
+          </Typography>
+        </Box>
       ) : (
         <Box
           sx={{
