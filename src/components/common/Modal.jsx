@@ -32,6 +32,7 @@ const Modal = ({
   confirmColor = "primary",
   confirmDisabled = false,
   confirmLoading = false,
+  confirmButtonSx = {},
 }) => {
   const confirmStyle = CONFIRM_COLOR_STYLES[confirmColor] || CONFIRM_COLOR_STYLES.primary;
   const showActions = Boolean(footer || onConfirm || onCancel);
@@ -122,6 +123,7 @@ const Modal = ({
                     backgroundColor: "#99CEB1",
                     color: "#fff",
                   },
+                  ...confirmButtonSx,
                 }}
               >
                 {confirmLabel}

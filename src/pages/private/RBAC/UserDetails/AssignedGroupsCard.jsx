@@ -1,4 +1,4 @@
-import { Box, Typography, IconButton, CircularProgress, Divider } from "@mui/material";
+import { Box, Typography, IconButton, CircularProgress } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import GroupsIcon from "../../../../assets/icons/groups.svg";
 import TrashIcon from "../../../../assets/icons/trash.svg";
@@ -109,19 +109,16 @@ const AssignedGroupsCard = ({ groups = [], loading = false, onAssignGroup, onVie
           </Box>
 
           {rightColumn.length > 0 && (
-            <>
-              <Divider orientation="vertical" flexItem sx={{ borderColor: "divider" }} />
-              <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 1.5, minWidth: 0 }}>
-                {rightColumn.map((group) => (
-                  <GroupItem
-                    key={group.id}
-                    group={group}
-                    onViewGroup={onViewGroup}
-                    onRemoveGroup={onRemoveGroup}
-                  />
-                ))}
-              </Box>
-            </>
+            <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 1.5, minWidth: 0 }}>
+              {rightColumn.map((group) => (
+                <GroupItem
+                  key={group.id}
+                  group={group}
+                  onViewGroup={onViewGroup}
+                  onRemoveGroup={onRemoveGroup}
+                />
+              ))}
+            </Box>
           )}
         </Box>
       )}

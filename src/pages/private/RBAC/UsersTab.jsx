@@ -9,6 +9,7 @@ import AddButton from "../../../components/common/AddButton";
 import AddUserModal, { buildAddUserPayload } from "./AddUserModal";
 import EditUserModal from "./EditUserModal";
 import DeactivateUserIcon from "../../../assets/icons/deactivateUser.svg";
+import ActivateUserIcon from "../../../assets/icons/activateUser.svg";
 import { getUsers, toggleUserStatus, addUser } from "../../../api/apiRequests";
 import { nameFromEmail, formatRelativeTime, isActiveStatus } from "../../../utils/format";
 
@@ -63,7 +64,13 @@ const UserRowActions = ({ onEdit, onToggleStatus, isActive }) => {
       <IconButton size="small" onClick={(e) => setAnchorEl(e.currentTarget)}>
         <MoreVertIcon fontSize="small" />
       </IconButton>
-      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={() => setAnchorEl(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
+      >
         <MenuItem
           onClick={() => {
             setAnchorEl(null);
@@ -93,6 +100,7 @@ const UsersTab = () => {
   const [users, setUsers] = useState(null);
   const [loading, setLoading] = useState(true);
   const [deactivateTarget, setDeactivateTarget] = useState(null);
+  const [activateTarget, setActivateTarget] = useState(null);
   const [statusUpdating, setStatusUpdating] = useState(false);
   const [statusOverrides, setStatusOverrides] = useState({});
   const [addUserOpen, setAddUserOpen] = useState(false);
@@ -137,7 +145,7 @@ const UsersTab = () => {
       return;
     }
 
-    toggleUserStatus({ userId: row.id, isActive: true }).then(() => applyStatusChange(row, true));
+    setActivateTarget(row);
   };
 
   const userColumns = useMemo(
@@ -248,6 +256,30 @@ const UsersTab = () => {
         }
         confirmLabel="Deactivate"
         confirmColor="danger"
+        confirmLoading={statusUpdating}
+      />
+
+      <ConfirmDialog
+        open={Boolean(activateTarget)}
+        onClose={() => setActivateTarget(null)}
+        onConfirm={() => {
+          setStatusUpdating(true);
+          toggleUserStatus({ userId: activateTarget.id, isActive: true })
+            .then(() => applyStatusChange(activateTarget, true))
+            .finally(() => {
+              setStatusUpdating(false);
+              setActivateTarget(null);
+            });
+        }}
+        icon={ActivateUserIcon}
+        title="Are you sure?"
+        message={
+          <>
+            Do you really want to activate this user "<strong>{activateTarget?.name}</strong>"?
+          </>
+        }
+        confirmLabel="Activate"
+        confirmColor="activate"
         confirmLoading={statusUpdating}
       />
 

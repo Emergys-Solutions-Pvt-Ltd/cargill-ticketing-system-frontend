@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Box } from "@mui/material";
 import Modal from "../../../../components/common/Modal";
 import FormMultiSelect from "../../../../components/common/FormMultiSelect";
 import { getGroups } from "../../../../api/apiRequests";
@@ -74,7 +75,6 @@ const AssignGroupModal = ({ open, onClose, onAssign, departmentId, assignedGroup
       open={open}
       onClose={handleClose}
       title="Assign Group"
-      maxWidth="xs"
       onCancel={handleClose}
       onConfirm={handleAssign}
       confirmLabel="Assign"
@@ -82,13 +82,15 @@ const AssignGroupModal = ({ open, onClose, onAssign, departmentId, assignedGroup
       confirmDisabled={selected.length === 0}
       confirmLoading={assigning}
     >
-      <FormMultiSelect
-        label="Select Group to Assign"
-        placeholder={loading ? "Loading groups..." : "Select groups"}
-        value={selected}
-        onChange={setSelected}
-        options={groupOptions}
-      />
+      <Box sx={{ height: "200px" }}>
+        <FormMultiSelect
+          label="Select Group to Assign"
+          placeholder={loading ? "Loading groups..." : "Select groups"}
+          value={selected}
+          onChange={setSelected}
+          options={groupOptions}
+        />
+      </Box>
     </Modal>
   );
 };

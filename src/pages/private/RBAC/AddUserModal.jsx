@@ -222,6 +222,12 @@ const AddUserModal = ({
       ? EDIT_COMPARE_FIELDS.every((key) => form[key] === initialForm[key])
       : false;
 
+  const isRequiredFieldsFilled = Boolean(
+    form.role && form.name.trim() && form.email.trim() && form.department,
+  );
+
+  const isConfirmDisabled = isEditMode ? isFormUnchanged : !isRequiredFieldsFilled;
+
   const handleClose = () => {
     setForm({ ...DEFAULT_FORM, department: isDepartmentLocked ? String(lockedDepartmentId) : "" });
     setInitialForm(null);
@@ -356,10 +362,11 @@ const AddUserModal = ({
       onConfirm={handleSubmit}
       confirmLabel={isEditMode ? "Save Changes" : "Add"}
       confirmColor="success"
-      confirmDisabled={isFormUnchanged}
+      confirmDisabled={isConfirmDisabled}
       confirmLoading={loading}
+      confirmButtonSx={isEditMode ? { width: "150px" } : undefined}
     >
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 3, height: "340px", overflowY: "auto" }}>
         <Box
           sx={{
             display: "grid",

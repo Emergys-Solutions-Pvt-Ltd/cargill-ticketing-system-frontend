@@ -22,7 +22,7 @@ const ViewGroupModal = ({ open, onClose, group }) => {
       title={
         <>
           View Group{" "}
-          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 400, color: "text.secondary" }}>
+          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 600, color: "text.secondary" }}>
             ({group?.name})
           </Box>
         </>
@@ -35,6 +35,7 @@ const ViewGroupModal = ({ open, onClose, group }) => {
           sx={{
             textTransform: "none",
             fontWeight: 600,
+            borderRadius: "4px",
             borderColor: "divider",
             color: "text.primary",
           }}

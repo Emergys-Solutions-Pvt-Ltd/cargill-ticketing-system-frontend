@@ -8,7 +8,7 @@ import {
   TextField,
   InputAdornment,
 } from "@mui/material";
-import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import EditIcon from "../../../../assets/icons/edit.svg";
 import CommonTable from "../../../../components/common/CommonTable";
 import AddButton from "../../../../components/common/AddButton";
 import SearchIcon from "../../../../assets/icons/search.svg";
@@ -205,7 +205,7 @@ const DepartmentGroupsTab = ({ departmentId, departmentName }) => {
             onClick={() => setEditTarget(row)}
             aria-label="Edit group"
           >
-            <EditOutlinedIcon fontSize="small" />
+            <img src={EditIcon} alt="" width={16} height={16} />
           </IconButton>
         )}
         pagination={{

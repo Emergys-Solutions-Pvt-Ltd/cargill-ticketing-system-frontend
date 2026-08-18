@@ -50,27 +50,27 @@ const STATUS_STYLES = {
     },
 
     active: {
-        backgroundColor: "#DEF7EC",
-        color: "#0E9F6E",
-        border: "1px solid #BCF0DA",
+        backgroundColor: "#D1FAE5",
+        color: "#059669",
+        border: "1px solid #6EE7B7",
     },
 
     inactive: {
-        backgroundColor: "#FDE8E8",
-        color: "#F05252",
-        border: "1px solid #F8B4B4",
+        backgroundColor: "#FEE2E2",
+        color: "#EF4444",
+        border: "1px solid #FECACA",
     },
 
     "super user": {
-        backgroundColor: "#EDE9FE",
-        color: "#7C3AED",
-        border: "1px solid #DDD6FE",
+        backgroundColor: "#E9DAFA",
+        color: "#8A3FD0",
+        border: "1px solid #D8B4FE",
     },
 
     user: {
-        backgroundColor: "#E0E7FF",
-        color: "#4338CA",
-        border: "1px solid #C7D2FE",
+        backgroundColor: "#E1EFFE",
+        color: "#3B82F6",
+        border: "1px solid #C3DDFD",
     },
 };
 

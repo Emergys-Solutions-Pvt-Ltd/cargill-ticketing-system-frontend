@@ -14,6 +14,10 @@ const CONFIRM_COLOR_STYLES = {
     backgroundColor: "#E02424",
     "&:hover": { backgroundColor: "#C81E1E" },
   },
+  activate: {
+    backgroundColor: "#057A55",
+    "&:hover": { backgroundColor: "#046C4A" },
+  },
 };
 
 const ConfirmDialog = ({
@@ -81,6 +85,7 @@ const ConfirmDialog = ({
             sx={{
               textTransform: "none",
               fontWeight: 600,
+              borderRadius: "4px",
               borderColor: "divider",
               color: "text.primary",
               minWidth: 100,
@@ -95,6 +100,7 @@ const ConfirmDialog = ({
             sx={{
               textTransform: "none",
               fontWeight: 600,
+              borderRadius: "4px",
               color: "#fff",
               minWidth: 100,
               ...confirmStyle,
