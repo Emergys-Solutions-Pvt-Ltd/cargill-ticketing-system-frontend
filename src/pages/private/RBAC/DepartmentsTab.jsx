@@ -1,10 +1,8 @@
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Typography, CircularProgress } from "@mui/material";
 import DepartmentListItem from "../../../components/common/DepartmentListItem";
-import { getDepartments } from "../../../api/apiRequests";
 
-const mapDepartment = (dept) => ({
+export const mapDepartment = (dept) => ({
   id: dept.departmentId,
   code: dept.departmentCode,
   name: dept.departmentName,
@@ -15,40 +13,17 @@ const mapDepartment = (dept) => ({
 });
 
 // TODO: remove once the departments API is stable; used as a fallback when the API has no response/errors
-const MOCK_DEPARTMENTS = [
+export const MOCK_DEPARTMENTS = [
   { id: 1, code: "HR", name: "Human Resources", description: "Handles all operational service requests and processes across regions.", supervisors: 3, users: 24, queues: 5 },
   { id: 2, code: "IT", name: "IT Support", description: "Handles technical support requests and infrastructure incidents.", supervisors: 4, users: 31, queues: 7 },
   { id: 3, code: "SEC", name: "Security Operations", description: "Handles security incidents and access control requests.", supervisors: 2, users: 12, queues: 3 },
   { id: 4, code: "INFRA", name: "IT Infrastructure", description: "Handles infrastructure provisioning and maintenance requests.", supervisors: 3, users: 18, queues: 4 },
 ];
 
-const DepartmentsTab = () => {
+// Data is fetched once at the page level (Rbac.jsx) so switching tabs doesn't
+// re-trigger the API call — this tab just renders whatever it's handed.
+const DepartmentsTab = ({ departments = [], loading = false }) => {
   const navigate = useNavigate();
-  const [departments, setDepartments] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let active = true;
-    getDepartments()
-      .then((response) => {
-        if (!active) return;
-        if (!response || !response.data) {
-          setDepartments(MOCK_DEPARTMENTS);
-        } else {
-          setDepartments(response.data.map(mapDepartment));
-        }
-      })
-      .catch(() => {
-        if (!active) return;
-        setDepartments(MOCK_DEPARTMENTS);
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
 
   return (
     <Box>

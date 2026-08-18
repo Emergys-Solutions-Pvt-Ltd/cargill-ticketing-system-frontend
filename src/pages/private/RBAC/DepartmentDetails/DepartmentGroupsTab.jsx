@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -14,7 +14,7 @@ import AddButton from "../../../../components/common/AddButton";
 import SearchIcon from "../../../../assets/icons/search.svg";
 import CreateGroupModal, { buildCreateGroupPayload } from "../CreateGroupModal";
 import EditGroupModal, { buildEditGroupPayload } from "../EditGroupModal";
-import { getGroups, addGroup, editGroup } from "../../../../api/apiRequests";
+import { addGroup, editGroup } from "../../../../api/apiRequests";
 
 const AVATAR_COLORS = [
   { bgcolor: "#E0F2FE", color: "#0369A1" },
@@ -53,12 +53,12 @@ const GROUP_TEMPLATES = [
   { name: "Customer Success", description: "Focuses on customer retention and maximizing product value for clients.", queues: 4, assignedUsers: 11 },
 ];
 
-const MOCK_GROUPS = GROUP_TEMPLATES.map((template, index) => ({
+export const MOCK_GROUPS = GROUP_TEMPLATES.map((template, index) => ({
   id: index + 1,
   ...template,
 }));
 
-const mapGroup = (record) => ({
+export const mapGroup = (record) => ({
   id: record.groupId,
   name: record.groupName,
   description: record.groupDescription || "",
@@ -66,7 +66,16 @@ const mapGroup = (record) => ({
   assignedUsers: record.usersAssigned ?? 0,
 });
 
-const DepartmentGroupsTab = ({ departmentId, departmentName }) => {
+// Data is fetched once at the department-page level (DepartmentDetails.jsx) so
+// switching between the Groups/Users sub-tabs doesn't re-trigger the API call.
+// `onGroupsChanged` re-runs that fetch after a mutation (create/edit group) succeeds.
+const DepartmentGroupsTab = ({
+  departmentId,
+  departmentName,
+  groups = null,
+  loading = false,
+  onGroupsChanged,
+}) => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
@@ -75,27 +84,6 @@ const DepartmentGroupsTab = ({ departmentId, departmentName }) => {
   const [createGroupLoading, setCreateGroupLoading] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
   const [editGroupLoading, setEditGroupLoading] = useState(false);
-  const [groups, setGroups] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  const fetchGroups = () => {
-    setLoading(true);
-    return getGroups({ departmentId })
-      .then((response) => {
-        setGroups(response?.data?.groups?.length ? response.data.groups.map(mapGroup) : null);
-      })
-      .catch(() => {
-        setGroups(null);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  };
-
-  useEffect(() => {
-    fetchGroups();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [departmentId]);
 
   const groupRows = groups ?? MOCK_GROUPS;
 
@@ -233,7 +221,7 @@ const DepartmentGroupsTab = ({ departmentId, departmentName }) => {
           addGroup(buildCreateGroupPayload(form))
             .then(() => {
               setCreateGroupOpen(false);
-              return fetchGroups();
+              return onGroupsChanged?.();
             })
             .catch(() => {})
             .finally(() => setCreateGroupLoading(false));
@@ -253,7 +241,7 @@ const DepartmentGroupsTab = ({ departmentId, departmentName }) => {
           editGroup(buildEditGroupPayload(form, editTarget.id))
             .then(() => {
               setEditTarget(null);
-              return fetchGroups();
+              return onGroupsChanged?.();
             })
             .catch(() => {})
             .finally(() => setEditGroupLoading(false));

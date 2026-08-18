@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Typography, Avatar, IconButton, Menu, MenuItem } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -10,10 +10,10 @@ import AddUserModal, { buildAddUserPayload, buildEditUserPayload } from "./AddUs
 import EditUserModal from "./EditUserModal";
 import DeactivateUserIcon from "../../../assets/icons/deactivateUser.svg";
 import ActivateUserIcon from "../../../assets/icons/activateUser.svg";
-import { getUsers, toggleUserStatus, addUser, editUser } from "../../../api/apiRequests";
+import { toggleUserStatus, addUser, editUser } from "../../../api/apiRequests";
 import { nameFromEmail, formatRelativeTime, isActiveStatus } from "../../../utils/format";
 
-const MOCK_USERS = [
+export const MOCK_USERS = [
   { id: 1, name: "John Smith", email: "john.smith@cargill.com", role: "Super User", reportsTo: "-", department: "Human Resources", departmentId: 1, groupsAssigned: 2, status: "Active", lastLogin: "2 hours ago" },
   { id: 2, name: "Alex Johnson", email: "alex.johnson@cargill.com", role: "Super User", reportsTo: "-", department: "Human Resources", departmentId: 1, groupsAssigned: 4, status: "Active", lastLogin: "1 day ago" },
   { id: 3, name: "Rahul Patel", email: "rahul.patel@cargill.com", role: "User", reportsTo: "Alex Johnson", department: "Human Resources", departmentId: 1, groupsAssigned: 5, status: "Active", lastLogin: "3 hours ago" },
@@ -24,7 +24,7 @@ const MOCK_USERS = [
   { id: 8, name: "Lisa Anderson", email: "lisa.anderson@cargill.com", role: "User", reportsTo: "Alex Johnson", department: "Human Resources", departmentId: 1, groupsAssigned: 4, status: "Active", lastLogin: "4 hours ago" },
 ];
 
-const mapUser = (record) => ({
+export const mapUser = (record) => ({
   id: record.userId,
   name: record.userName || nameFromEmail(record.email),
   email: record.email,
@@ -93,12 +93,13 @@ const UserRowActions = ({ onEdit, onToggleStatus, isActive }) => {
   );
 };
 
-const UsersTab = () => {
+// Data is fetched once at the page level (Rbac.jsx) so switching tabs doesn't
+// re-trigger the API call. `onUsersChanged` re-runs that page-level fetch after a
+// mutation (add/edit user) succeeds here.
+const UsersTab = ({ users = null, loading = false, onUsersChanged }) => {
   const navigate = useNavigate();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(8);
-  const [users, setUsers] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [deactivateTarget, setDeactivateTarget] = useState(null);
   const [activateTarget, setActivateTarget] = useState(null);
   const [statusUpdating, setStatusUpdating] = useState(false);
@@ -107,25 +108,6 @@ const UsersTab = () => {
   const [addUserLoading, setAddUserLoading] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
   const [editUserLoading, setEditUserLoading] = useState(false);
-
-  const fetchUsers = () => {
-    setLoading(true);
-    return getUsers()
-      .then((response) => {
-        setUsers(response?.data?.users ? response.data.users.map(mapUser) : null);
-      })
-      .catch(() => {
-        setUsers(null);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  };
-
-  useEffect(() => {
-    fetchUsers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const userRows = (users ?? MOCK_USERS).map((row) =>
     statusOverrides[row.id] ? { ...row, status: statusOverrides[row.id] } : row,
@@ -293,7 +275,7 @@ const UsersTab = () => {
           addUser(buildAddUserPayload(form))
             .then(() => {
               setAddUserOpen(false);
-              return fetchUsers();
+              return onUsersChanged?.();
             })
             .catch(() => {})
             .finally(() => setAddUserLoading(false));
@@ -310,7 +292,7 @@ const UsersTab = () => {
           editUser(buildEditUserPayload(form, editTarget.id))
             .then(() => {
               setEditTarget(null);
-              return fetchUsers();
+              return onUsersChanged?.();
             })
             .catch(() => {})
             .finally(() => setEditUserLoading(false));

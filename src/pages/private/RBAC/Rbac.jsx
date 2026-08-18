@@ -1,18 +1,91 @@
+import { useEffect, useState } from "react";
 import { Box, Typography } from "@mui/material";
 import { useSearchParams } from "react-router-dom";
 import SectionCard from "../../../components/SectionCard";
-import DepartmentsTab from "./DepartmentsTab";
-import UsersTab from "./UsersTab";
-import GroupsTab from "./GroupsTab";
-
-const tabs = [
-  { key: "departments", label: "Departments", content: <DepartmentsTab /> },
-  { key: "users", label: "Users", content: <UsersTab /> },
-  { key: "groups", label: "Groups", content: <GroupsTab /> },
-];
+import DepartmentsTab, { mapDepartment, MOCK_DEPARTMENTS } from "./DepartmentsTab";
+import UsersTab, { mapUser, MOCK_USERS } from "./UsersTab";
+import GroupsTab, { mapGroup, MOCK_GROUPS } from "./GroupsTab";
+import { getDepartments, getUsers, getGroups } from "../../../api/apiRequests";
 
 const Rbac = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+
+  const [departments, setDepartments] = useState([]);
+  const [departmentsLoading, setDepartmentsLoading] = useState(true);
+  const [users, setUsers] = useState(null);
+  const [usersLoading, setUsersLoading] = useState(true);
+  const [groups, setGroups] = useState(null);
+  const [groupsLoading, setGroupsLoading] = useState(true);
+
+  const fetchDepartments = () => {
+    setDepartmentsLoading(true);
+    return getDepartments()
+      .then((response) => {
+        setDepartments(response?.data?.length ? response.data.map(mapDepartment) : MOCK_DEPARTMENTS);
+      })
+      .catch(() => {
+        setDepartments(MOCK_DEPARTMENTS);
+      })
+      .finally(() => {
+        setDepartmentsLoading(false);
+      });
+  };
+
+  const fetchUsers = () => {
+    setUsersLoading(true);
+    return getUsers()
+      .then((response) => {
+        setUsers(response?.data?.users ? response.data.users.map(mapUser) : null);
+      })
+      .catch(() => {
+        setUsers(null);
+      })
+      .finally(() => {
+        setUsersLoading(false);
+      });
+  };
+
+  const fetchGroups = () => {
+    setGroupsLoading(true);
+    return getGroups()
+      .then((response) => {
+        setGroups(response?.data?.groups?.length ? response.data.groups.map(mapGroup) : null);
+      })
+      .catch(() => {
+        setGroups(null);
+      })
+      .finally(() => {
+        setGroupsLoading(false);
+      });
+  };
+
+  // Fetched once at the page level, independent of which tab is active, so
+  // switching between Departments/Users/Groups no longer re-triggers these calls.
+  useEffect(() => {
+    fetchDepartments();
+    fetchUsers();
+    fetchGroups();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const tabs = [
+    {
+      key: "departments",
+      label: "Departments",
+      content: <DepartmentsTab departments={departments} loading={departmentsLoading} />,
+    },
+    {
+      key: "users",
+      label: "Users",
+      content: <UsersTab users={users} loading={usersLoading} onUsersChanged={fetchUsers} />,
+    },
+    {
+      key: "groups",
+      label: "Groups",
+      content: <GroupsTab groups={groups} loading={groupsLoading} onGroupsChanged={fetchGroups} />,
+    },
+  ];
+
   const activeIndex = Math.max(
     tabs.findIndex((tab) => tab.key === searchParams.get("tab")),
     0,

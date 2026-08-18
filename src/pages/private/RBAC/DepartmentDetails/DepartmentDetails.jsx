@@ -4,9 +4,9 @@ import { Box } from "@mui/material";
 import BackNavigation from "../../../../components/common/BackNavigation";
 import EntityHeaderCard from "../../../../components/common/EntityHeaderCard";
 import SectionCard from "../../../../components/SectionCard";
-import DepartmentGroupsTab from "./DepartmentGroupsTab";
+import DepartmentGroupsTab, { mapGroup } from "./DepartmentGroupsTab";
 import DepartmentUsersTab from "./DepartmentUsersTab";
-import { getDepartmentUsers } from "../../../../api/apiRequests";
+import { getUsers, getGroups } from "../../../../api/apiRequests";
 import { nameFromEmail, formatRelativeTime } from "../../../../utils/format";
 
 const DEFAULT_DEPARTMENT = {
@@ -21,9 +21,9 @@ const mapUser = (record, departmentId) => ({
   id: record.userId,
   name: record.userName || nameFromEmail(record.email),
   email: record.email,
-  role: record.roleName || "User",
+  role: record.roleCode === "SUPERUSER" ? "Super User" : record.roleName || "User",
   departmentId,
-  supervisor: record.supervisorName || "Unassigned",
+  supervisor: record.reportsToName || "Unassigned",
   groupsAssigned: record.groupsAssigned ?? 0,
   status: record.isActive ? "Active" : "Inactive",
   lastLogin: formatRelativeTime(record.lastLogin),
@@ -46,15 +46,14 @@ const DepartmentDetails = () => {
 
   const fetchUsers = () => {
     setLoadingUsers(true);
-    return getDepartmentUsers({ departmentId: Number(departmentId) })
+    return getUsers({ departmentId: Number(departmentId) })
       .then((response) => {
-        if (!response || !response.data) {
+        if (!response?.data?.users) {
           setUsers(null);
           return;
         }
 
-        const records = response.data;
-        const userRecords = records.filter((record) => record.roleCode === "USER");
+        const userRecords = response.data.users.filter((record) => record.roleCode === "USER");
 
         const numericDepartmentId = Number(departmentId);
         setUsers(userRecords.map((record) => mapUser(record, numericDepartmentId)));
@@ -68,8 +67,28 @@ const DepartmentDetails = () => {
       });
   };
 
+  const [groups, setGroups] = useState(null);
+  const [loadingGroups, setLoadingGroups] = useState(true);
+
+  const fetchGroups = () => {
+    setLoadingGroups(true);
+    return getGroups({ departmentId: Number(departmentId) })
+      .then((response) => {
+        setGroups(response?.data?.groups?.length ? response.data.groups.map(mapGroup) : null);
+      })
+      .catch(() => {
+        setGroups(null);
+      })
+      .finally(() => {
+        setLoadingGroups(false);
+      });
+  };
+
+  // Both sub-tabs' data is fetched once per department at this page level, so
+  // switching between the Groups/Users sub-tabs doesn't re-trigger either call.
   useEffect(() => {
     fetchUsers();
+    fetchGroups();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [departmentId]);
 
@@ -81,6 +100,9 @@ const DepartmentDetails = () => {
         <DepartmentGroupsTab
           departmentId={Number(departmentId)}
           departmentName={department.name}
+          groups={groups}
+          loading={loadingGroups}
+          onGroupsChanged={fetchGroups}
         />
       ),
     },

@@ -14,9 +14,6 @@ export const addUser = (payload = {}) =>
 export const editUser = (payload = {}) =>
   apiService.post("/v1/rbac/edit-user", payload);
 
-export const getDepartmentUsers = (payload = {}) =>
-  apiService.post("/v1/rbac/get-department-users", payload);
-
 export const toggleUserStatus = (payload = {}) =>
   apiService.post("/v1/rbac/toggle-user-status", payload);
 
