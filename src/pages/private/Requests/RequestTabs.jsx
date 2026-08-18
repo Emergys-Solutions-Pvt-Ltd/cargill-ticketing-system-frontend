@@ -1,7 +1,12 @@
 import { Box, Typography } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
-const RequestTabs = ({ activeTab, onTabChange, openRequestTabs, onCloseTab }) => {
+const RequestTabs = ({
+  activeTab,
+  onTabChange,
+  openRequestTabs,
+  onCloseTab,
+}) => {
   const isAllRequestsActive = activeTab === "all-requests";
 
   if (openRequestTabs.length === 0) {
@@ -16,7 +21,7 @@ const RequestTabs = ({ activeTab, onTabChange, openRequestTabs, onCloseTab }) =>
         flexWrap: "wrap",
         backgroundColor: "background.paper",
         border: "1px solid",
-        borderColor: "divider"
+        borderColor: "divider",
       }}
     >
       <Typography
@@ -28,7 +33,7 @@ const RequestTabs = ({ activeTab, onTabChange, openRequestTabs, onCloseTab }) =>
           fontSize: "13px",
           backgroundColor: "background.paper",
           py: 0.5,
-          px: 1
+          px: 1,
         }}
       >
         All Requests
@@ -51,15 +56,16 @@ const RequestTabs = ({ activeTab, onTabChange, openRequestTabs, onCloseTab }) =>
               backgroundColor: isActive ? "#00843D1A" : "background.paper",
               borderLeft: "1px solid",
               borderRight: "1px solid",
-              borderColor: "divider"
+              borderColor: "divider",
             }}
           >
             <Typography
               variant="body2"
               sx={{
                 whiteSpace: "nowrap",
-                fontSize: "13px",
                 color: "inherit",
+                fontSize: "12px",
+                fontWeight: isActive ? 550 : 400,
               }}
             >
               {tab.request.id}

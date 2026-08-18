@@ -34,7 +34,7 @@ const getDisplayName = (email) => {
   const namePart = email.split("@")[0];
   return namePart
     .split(/[._-]/)
-    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
 };
 
@@ -110,7 +110,7 @@ export default function Navbar() {
   };
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
+    <Box sx={{ width: "100%" }}>
       <AppBar
         position="static"
         sx={{
@@ -154,7 +154,7 @@ export default function Navbar() {
             </Typography>
           </div>
 
-          <div id="navbar-links">
+          {/* <div id="navbar-links">
             <Box>
               <ul
                 style={{
@@ -184,7 +184,7 @@ export default function Navbar() {
                 </li>
               </ul>
             </Box>
-          </div>
+          </div> */}
 
           <div
             id="navbar-actions"
@@ -194,15 +194,6 @@ export default function Navbar() {
               alignItems: "center",
             }}
           >
-            <IconButton
-              size="large"
-              aria-label="toggle dark and light theme"
-              onClick={toggleTheme}
-              color="inherit"
-            >
-              {mode === "dark" ? <LightModeIcon /> : <DarkModeIcon />}
-            </IconButton>
-
             {user ? (
               <Box
                 sx={{
@@ -221,21 +212,23 @@ export default function Navbar() {
                     bgcolor: "#0b8043",
                     color: "white",
                     fontWeight: "bold",
-                    width: 36,
-                    height: 36,
+                    width: 32,
+                    height: 32,
                     fontSize: "1rem",
                   }}
                 >
                   AJ
                 </Avatar>
-                <Box sx={{ display: "flex", flexDirection: "column" }}>
+                <Box
+                  sx={{ display: "flex", flexDirection: "column", gap: "4px" }}
+                >
                   <Typography
                     variant="body2"
                     sx={{
                       fontWeight: 700,
-                      fontSize: "0.95rem",
-                      color: "text.primary",
-                      lineHeight: 1.2,
+                      fontSize: "14px",
+                      color: "#1F2A37",
+                      lineHeight: "14px",
                     }}
                   >
                     Alex Johnson
@@ -243,9 +236,10 @@ export default function Navbar() {
                   <Typography
                     variant="caption"
                     sx={{
-                      fontSize: "0.85rem",
-                      color: "text.secondary",
+                      fontSize: "11px",
+                      color: "#374151",
                       fontWeight: 500,
+                      lineHeight: "12px",
                     }}
                   >
                     {user.role}
@@ -281,23 +275,16 @@ export default function Navbar() {
               onClose={handleClose}
               PaperProps={{
                 sx: {
-                  mt: 1.5,
+                  // mt: 1.5,
                   minWidth: "220px",
                   borderRadius: "12px",
                   boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
-                  padding: "4px 0",
+                  // padding: "4px 0",
                   backgroundImage: "none",
+                  padding: 0,
                 },
               }}
             >
-              <MenuItem
-                onClick={handleClose}
-                component={Link}
-                to="/profile"
-                sx={{ py: 1.25, fontWeight: 500, fontSize: "0.9rem" }}
-              >
-                My Profile
-              </MenuItem>
               <MenuItem
                 onClick={() => {
                   handleClose();
@@ -305,13 +292,22 @@ export default function Navbar() {
                 }}
                 sx={{ display: "flex", alignItems: "center", gap: 1 }}
               >
-                <Box component="img" src={LogoutIcon} alt="Filter" />
-                <Typography sx={{
-                  py: 1.25,
-                  color: "#374151",
-                  fontWeight: "bold",
-                  fontSize: "0.9rem",
-                }}>Logout</Typography>
+                <Box
+                  component="img"
+                  src={LogoutIcon}
+                  alt="Filter"
+                  sx={{ color: "#000000" }}
+                />
+                <Typography
+                  sx={{
+                    // py: 1.25,
+                    color: "#374151",
+                    fontWeight: "500",
+                    fontSize: "14px",
+                  }}
+                >
+                  Logout
+                </Typography>
               </MenuItem>
             </Menu>
           </div>

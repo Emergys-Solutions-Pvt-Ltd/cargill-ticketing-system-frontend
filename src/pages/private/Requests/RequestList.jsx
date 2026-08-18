@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Box, Typography, TextField, InputAdornment } from "@mui/material";
 import {
   getStoredTickets,
@@ -11,6 +11,8 @@ import CommonTable from "../../../components/common/CommonTable";
 import CommonChip from "../../../components/common/CommonChip";
 import LabTabs from "../../../components/LabTabs";
 import RequestTabs from "./RequestTabs";
+import RequestDetails from "./RequestDetails";
+import { getTicketData } from "../../../api/apiRequests";
 
 // Page-specific: truncation style reused by two columns
 const truncateCellSx = {
@@ -21,39 +23,70 @@ const truncateCellSx = {
 };
 
 const RequestList = () => {
-  const [tickets, setTickets] = useState(() => getStoredTickets());
+  const [tickets, setTickets] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(8);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [activeFilterCount, setActiveFilterCount] = useState(0);
   const [activeTab, setActiveTab] = useState("all-requests");
   const [openRequestTabs, setOpenRequestTabs] = useState([]);
 
-  useEffect(() => {
-    if (tickets.length === 0) {
-      getStoredTicketsAsync().then((fetchedTickets) => {
-        setTickets(fetchedTickets);
+  const fetchTickets = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await getTicketData({
+        page: page + 1, // API 1-indexed, MUI 0-indexed
+        pageSize: rowsPerPage,
       });
+      if (res?.success) {
+        const mapped = res.data.tickets.map((t) => ({
+          id: t.ticketid ?? t.ticketshortdesc, // no id field in sample, adjust
+          title: t.ticketshortdesc,
+          description: t.ticketdesc,
+          ticketType: t.tickettype,
+          status: t.ticketstatus,
+          assignee: t.staffname,
+        }));
+        setTickets(mapped);
+        setTotalCount(res.data.pagination.total);
+        console.log(
+          "Fetched tickets:",
+          mapped.length,
+          "Total count:",
+          res.data.pagination.total,
+        );
+      }
+    } finally {
+      setLoading(false);
     }
-  }, [tickets]);
+  }, [page, rowsPerPage]);
+
+  useEffect(() => {
+    fetchTickets();
+  }, [fetchTickets]);
 
   useEffect(() => {
     const count = Number(statusFilter !== "All");
     setActiveFilterCount(count);
   }, [statusFilter]);
 
-  const filteredRequests = tickets.filter((row) => {
-    const matchesSearch =
-      row.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      row.title.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesStatus =
-      statusFilter === "All" ||
-      row.status.toLowerCase() === statusFilter.toLowerCase();
-
-    return matchesSearch && matchesStatus;
-  });
+  const filteredRequests = useMemo(
+    () =>
+      tickets.filter((row) => {
+        const q = searchQuery.toLowerCase();
+        const matchesSearch =
+          row.title.toLowerCase().includes(q) ||
+          String(row.id).toLowerCase().includes(q);
+        const matchesStatus =
+          statusFilter === "All" ||
+          row.status?.toLowerCase() === statusFilter.toLowerCase();
+        return matchesSearch && matchesStatus;
+      }),
+    [tickets, searchQuery, statusFilter],
+  );
 
   const paginatedRequests = filteredRequests.slice(
     page * rowsPerPage,
@@ -80,7 +113,9 @@ const RequestList = () => {
       const remainingTabs = prevTabs.filter((tab) => tab.id !== tabId);
       setActiveTab((currentTab) => {
         if (currentTab === tabId) {
-          return remainingTabs.length > 0 ? remainingTabs[0].id : "all-requests";
+          return remainingTabs.length > 0
+            ? remainingTabs[0].id
+            : "all-requests";
         }
         return currentTab;
       });
@@ -134,7 +169,9 @@ const RequestList = () => {
       {
         key: "status",
         label: "STATUS",
-        render: (_value, row) => <CommonChip status={row.status} label={row.status} />,
+        render: (_value, row) => (
+          <CommonChip status={row.status} label={row.status} />
+        ),
       },
       {
         key: "created",
@@ -153,10 +190,14 @@ const RequestList = () => {
     <Box
       sx={{
         width: "100%",
-        minHeight: "90vh",
+        flex: 1,
+        minHeight: 0,
         display: "flex",
         flexDirection: "column",
         backgroundColor: "background.default",
+        // border: "1px solid black",
+        boxSizing: "border-box",
+        overflow: "hidden",
       }}
     >
       <RequestTabs
@@ -169,159 +210,200 @@ const RequestList = () => {
       <Box
         sx={{
           width: "100%",
-          flexGrow: 1,
+          flex: 1,
+          minHeight: 0,
           display: "flex",
           flexDirection: "column",
-          p: { xs: 2, md: 4 },
+          p: { xs: 2, md: "30px" },
+          boxSizing: "border-box",
+          overflow: "hidden",
         }}
       >
-      {activeTab === "all-requests" && (
-        <Box
-          sx={{
-            display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: 2,
-            mb: 2,
-          }}
-        >
-          <Box>
-            <Typography sx={{ fontWeight: 600, fontSize: "18px", color: "text.primary" }}>
-              Requests
-            </Typography>
-            <Typography
-              variant="caption"
-              sx={{ color: "text.secondary", fontWeight: 400, fontSize: "13px" }}
-            >
-              Search, review, and stay informed about your active and completed requests.
-            </Typography>
-          </Box>
+        {activeTab === "all-requests" && (
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: 2,
+              mb: 2,
+            }}
+          >
+            <Box>
+              <Typography
+                sx={{
+                  fontWeight: 600,
+                  fontSize: "18px",
+                  color: "text.primary",
+                }}
+              >
+                Requests
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "text.secondary",
+                  fontWeight: 400,
+                  fontSize: "13px",
+                }}
+              >
+                Search, review, and stay informed about your active and
+                completed requests.
+              </Typography>
+            </Box>
 
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <TextField
-              placeholder="Search..."
-              variant="outlined"
-              size="small"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              sx={{
-                width: "260px",
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "8px",
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <TextField
+                placeholder="Search..."
+                variant="outlined"
+                size="small"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                sx={{
+                  width: "342px",
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "8px",
+                    height: "2.125rem",
+                  },
+                  borderColor: "#D1D5DB",
+                  backgroundColor: "background.paper",
+                }}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <img
+                          src={SearchIcon}
+                          alt="Search"
+                          width={16}
+                          height={16}
+                        />
+                      </InputAdornment>
+                    ),
+                  },
+                }}
+              />
+
+              <Box
+                onClick={() => {
+                  setStatusFilter((current) =>
+                    current === "All" ? "Open" : "All",
+                  );
+                }}
+                sx={{
                   height: "2.125rem",
-                },
-                backgroundColor: "background.paper",
-              }}
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <img src={SearchIcon} alt="Search" width={16} height={16} />
-                    </InputAdornment>
-                  ),
+                  borderRadius: "8px",
+                  px: 2,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  cursor: "pointer",
+                  ...(activeFilterCount > 0
+                    ? {
+                        backgroundColor: "#F3FAF7",
+                        border: "1px solid #1B7F37",
+                        color: "#1B7F37",
+                      }
+                    : {
+                        backgroundColor: "background.paper",
+                        border: "1px solid #D1D5DB",
+                      }),
+                }}
+              >
+                <Box
+                  component="img"
+                  src={activeFilterCount > 0 ? SelectedFilterIcon : FilterIcon}
+                  alt="Filter"
+                />
+                <Typography
+                  variant="body2"
+                  sx={activeFilterCount > 0 ? { color: "#1B7F37" } : undefined}
+                >
+                  Filter
+                </Typography>
+                {activeFilterCount > 0 && (
+                  <Box
+                    sx={{
+                      minWidth: "18px",
+                      height: "18px",
+                      borderRadius: "50%",
+                      backgroundColor: "#1B7F37",
+                      color: "#fff",
+                      fontSize: "0.7rem",
+                      fontWeight: 600,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      px: "4px",
+                    }}
+                  >
+                    {activeFilterCount}
+                  </Box>
+                )}
+              </Box>
+            </Box>
+          </Box>
+        )}
+
+        {activeTab === "all-requests" ? (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              flexGrow: 1,
+              border: "1px solid red",
+              overflow: "hidden",
+            }}
+          >
+            <CommonTable
+              sx={{ flexGrow: 1, minHeight: 0 }}
+              columns={columns}
+              rows={filteredRequests}
+              onRowClick={handleOpenRequestTab}
+              emptyMessage="No matching records found in this view."
+              tableContainerSx={{ mt: 0 }}
+              ariaLabel="Cargill ticket list"
+              pagination={{
+                count: totalCount,
+                page,
+                onPageChange: setPage,
+                rowsPerPage,
+                onRowsPerPageChange: (value) => {
+                  setRowsPerPage(value);
+                  setPage(0);
                 },
               }}
             />
-
-            <Box
-              onClick={() => {
-                setStatusFilter((current) => (current === "All" ? "Open" : "All"));
-              }}
-              sx={{
-                height: "2.125rem",
-                borderRadius: "8px",
-                px: 2,
-                display: "flex",
-                alignItems: "center",
-                gap: 1,
-                cursor: "pointer",
-                ...(activeFilterCount > 0
-                  ? {
-                    backgroundColor: "#F3FAF7",
-                    border: "1px solid #1B7F37",
-                    color: "#1B7F37",
-                  }
-                  : {
-                    backgroundColor: "background.paper",
-                    border: "1px solid #D1D5DB",
-                  }),
-              }}
-            >
-              <Box
-                component="img"
-                src={activeFilterCount > 0 ? SelectedFilterIcon : FilterIcon}
-                alt="Filter"
-              />
-              <Typography variant="body2" sx={activeFilterCount > 0 ? { color: "#1B7F37" } : undefined}>
-                Filter
-              </Typography>
-              {activeFilterCount > 0 && (
-                <Box
-                  sx={{
-                    minWidth: "18px",
-                    height: "18px",
-                    borderRadius: "50%",
-                    backgroundColor: "#1B7F37",
-                    color: "#fff",
-                    fontSize: "0.7rem",
-                    fontWeight: 600,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    px: "4px",
-                  }}
-                >
-                  {activeFilterCount}
-                </Box>
-              )}
-            </Box>
           </Box>
-        </Box>
-      )}
-
-      {activeTab === "all-requests" ? (
-        <Box sx={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
-          <CommonTable
-            sx={{ flexGrow: 1, minHeight: 0 }}
-            columns={columns}
-            rows={paginatedRequests}
-            onRowClick={handleOpenRequestTab}
-            emptyMessage="No matching records found in this view."
-            tableContainerSx={{ mt: 0 }}
-            ariaLabel="Cargill ticket list"
-            pagination={{
-              count: filteredRequests.length,
-              page,
-              onPageChange: setPage,
-              rowsPerPage,
-              onRowsPerPageChange: (value) => {
-                setRowsPerPage(value);
-                setPage(0);
-              },
-            }}
+        ) : (
+          // <Box
+          //   sx={{
+          //     border: "1px solid",
+          //     borderColor: "divider",
+          //     borderRadius: "8px",
+          //     backgroundColor: "background.paper",
+          //     p: { xs: 1, md: 2 },
+          //     flexGrow: 1,
+          //   }}
+          // >
+          //   {openRequestTabs
+          //     .filter((tab) => tab.id === activeTab)
+          //     .map((tab) => (
+          //       <Box key={tab.id} sx={{ width: "100%" }}>
+          //         <LabTabs
+          //           comments={tab.request.comments || []}
+          //           request={tab.request}
+          //         />
+          //       </Box>
+          //     ))}
+          // </Box>
+          <RequestDetails
+            request={
+              openRequestTabs.find((tab) => tab.id === activeTab)?.request
+            }
           />
-        </Box>
-      ) : (
-        <Box
-          sx={{
-            border: "1px solid",
-            borderColor: "divider",
-            borderRadius: "8px",
-            backgroundColor: "background.paper",
-            p: { xs: 1, md: 2 },
-            flexGrow: 1,
-          }}
-        >
-          {openRequestTabs
-            .filter((tab) => tab.id === activeTab)
-            .map((tab) => (
-              <Box key={tab.id} sx={{ width: "100%" }}>
-                <LabTabs comments={tab.request.comments || []} request={tab.request} />
-              </Box>
-            ))}
-        </Box>
-      )}
+        )}
       </Box>
     </Box>
   );

@@ -8,14 +8,7 @@ const ThemeContext = createContext();
 export const useThemeContext = () => useContext(ThemeContext);
 
 export const ThemeContextProvider = ({ children }) => {
-  const [mode, setMode] = useState(() => {
-    const savedMode = localStorage.getItem("themeMode");
-    if (savedMode) return savedMode;
-    const systemPrefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)",
-    ).matches;
-    return systemPrefersDark ? "dark" : "light";
-  });
+  const [mode, setMode] = useState("light");
 
   useEffect(() => {
     localStorage.setItem("themeMode", mode);
