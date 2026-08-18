@@ -153,6 +153,7 @@ const GroupDetails = () => {
             sx={{
               display: "grid",
               gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)" },
+              alignContent: "start",
               columnGap: 2,
               rowGap: 1.5,
               flexGrow: 1,

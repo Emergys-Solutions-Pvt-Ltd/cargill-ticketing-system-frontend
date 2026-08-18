@@ -68,7 +68,6 @@ const AddQueueModal = ({ open, onClose, onAdd, groupName, departmentId, assigned
       open={open}
       onClose={handleClose}
       title="Add Queue to group"
-      maxWidth="xs"
       onCancel={handleClose}
       onConfirm={handleAdd}
       confirmLabel="Add"
@@ -76,7 +75,7 @@ const AddQueueModal = ({ open, onClose, onAdd, groupName, departmentId, assigned
       confirmDisabled={selected.length === 0}
       confirmLoading={adding}
     >
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 3, height: "200px" }}>
         <FormTextField label="Group Name" value={groupName} disabled />
         <FormMultiSelect
           label="Assign Queues"

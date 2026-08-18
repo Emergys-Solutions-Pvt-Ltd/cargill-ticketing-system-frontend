@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { Box, Alert } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 import Modal from "../../../components/common/Modal";
 import FormTextField from "../../../components/common/FormTextField";
 import FormSelect from "../../../components/common/FormSelect";
 import FormMultiSelect from "../../../components/common/FormMultiSelect";
+import InfoIcon from "../../../assets/icons/info.svg";
 import { getDepartments, getQueues } from "../../../api/apiRequests";
 
 const MOCK_DEPARTMENTS = [
@@ -156,10 +157,29 @@ const CreateGroupModal = ({
       confirmLoading={loading}
     >
       <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-        <Alert severity="warning" sx={{ borderRadius: "8px" }}>
-          <strong>Note:</strong> Once a group is created, it cannot be deleted. Please make sure the
-          group details are correct before creating it.
-        </Alert>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "flex-start",
+            gap: 1.5,
+            p: 1.5,
+            borderRadius: "8px",
+            border: "1px solid",
+            borderColor: "#FF5A1F",
+            backgroundColor: "#FFF8F1",
+          }}
+        >
+          <Box component="img" src={InfoIcon} alt="" sx={{ width: 20, height: 20, flexShrink: 0, mt: 0.25 }} />
+          <Typography variant="body2" sx={{ color: "#CA6500" }}>
+            <Box component="span" sx={{ fontWeight: 700 }}>
+              Note:
+            </Box>{" "}
+            <Box component="span" sx={{ fontWeight: 500 }}>
+              Once a group is created, it cannot be deleted. Please make sure the group details are
+              correct before creating it.
+            </Box>
+          </Typography>
+        </Box>
 
         <FormTextField
           label="Group Name"

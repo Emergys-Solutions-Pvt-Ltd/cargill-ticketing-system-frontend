@@ -11,13 +11,19 @@ const DEFAULT_FORM = {
 
 const EditGroupModal = ({ open, onClose, onSubmit, group, loading = false, existingGroupNames = [] }) => {
   const [form, setForm] = useState(DEFAULT_FORM);
+  const [initialForm, setInitialForm] = useState(DEFAULT_FORM);
   const [nameError, setNameError] = useState("");
 
   useEffect(() => {
     if (!open) return;
-    setForm({ name: group?.name || "", description: group?.description || "" });
+    const nextForm = { name: group?.name || "", description: group?.description || "" };
+    setForm(nextForm);
+    setInitialForm(nextForm);
     setNameError("");
   }, [open, group]);
+
+  const isFormUnchanged =
+    form.name === initialForm.name && form.description === initialForm.description;
 
   const handleClose = () => {
     setNameError("");
@@ -50,9 +56,11 @@ const EditGroupModal = ({ open, onClose, onSubmit, group, loading = false, exist
       onConfirm={handleSubmit}
       confirmLabel="Save Changes"
       confirmColor="success"
+      confirmDisabled={isFormUnchanged}
       confirmLoading={loading}
+      confirmButtonSx={{ width: "140px" }}
     >
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 3, height: "250px" }}>
         <FormTextField
           label="Group Name"
           placeholder="Enter"
