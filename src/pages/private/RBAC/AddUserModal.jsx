@@ -96,6 +96,24 @@ export const buildAddUserPayload = (form) => {
   return payload;
 };
 
+// Builds the /v1/rbac/edit-user request body from the modal's internal form state.
+// Email/department are locked in edit mode so they're intentionally left out here.
+export const buildEditUserPayload = (form, userId) => {
+  const payload = {
+    userId: Number(userId),
+    roleCode: form.role === "super_user" ? "SUPERUSER" : "USER",
+    userName: form.name.trim(),
+    phoneNo: form.mobile.trim(),
+    workLocation: form.workLocation.trim(),
+  };
+
+  if (form.role === "user" && form.supervisor) {
+    payload.reportsToUserId = Number(form.supervisor);
+  }
+
+  return payload;
+};
+
 const formFromUser = (user) => ({
   role: normalizeRole(user.role),
   name: user.name || "",

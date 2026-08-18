@@ -1,7 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import EditInfoIcon from "../../../../assets/icons/editInfo.svg";
 
-const UserInformationCard = ({ title = "User Information", fields = [] }) => {
+const UserInformationCard = ({ title = "User Information", fields = [], onEditInfo }) => {
   return (
     <Box
       sx={{
@@ -17,7 +17,10 @@ const UserInformationCard = ({ title = "User Information", fields = [] }) => {
         <Typography sx={{ fontWeight: 600, fontSize: "14px", color: "text.primary" }}>
           {title}
         </Typography>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, color: "#1C64F2", cursor: "pointer" }}>
+        <Box
+          onClick={onEditInfo}
+          sx={{ display: "flex", alignItems: "center", gap: 1, color: "#1C64F2", cursor: "pointer" }}
+        >
           <img src={EditInfoIcon} alt="" width={16} height={16} style={{ display: "block" }} />
           <Typography variant="body2" sx={{ fontWeight: 600 }}>
             Edit Info

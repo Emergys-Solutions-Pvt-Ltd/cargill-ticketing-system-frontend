@@ -9,6 +9,13 @@ const DEFAULT_FORM = {
   description: "",
 };
 
+// Builds the /v1/rbac/edit-group request body from the modal's internal form state.
+export const buildEditGroupPayload = (form, groupId) => ({
+  groupId: Number(groupId),
+  groupName: form.name.trim(),
+  groupDescription: form.description.trim(),
+});
+
 const EditGroupModal = ({ open, onClose, onSubmit, group, loading = false, existingGroupNames = [] }) => {
   const [form, setForm] = useState(DEFAULT_FORM);
   const [initialForm, setInitialForm] = useState(DEFAULT_FORM);

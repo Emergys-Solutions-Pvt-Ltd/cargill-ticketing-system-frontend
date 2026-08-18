@@ -29,9 +29,7 @@ const DepartmentsTab = () => {
 
   useEffect(() => {
     let active = true;
-    getDepartments({
-      departmentId: 3,
-    })
+    getDepartments()
       .then((response) => {
         if (!active) return;
         if (!response || !response.data) {

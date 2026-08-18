@@ -6,11 +6,11 @@ import CommonTable from "../../../../components/common/CommonTable";
 import CommonChip from "../../../../components/common/CommonChip";
 import ConfirmDialog from "../../../../components/common/ConfirmDialog";
 import AddButton from "../../../../components/common/AddButton";
-import AddUserModal, { buildAddUserPayload } from "../AddUserModal";
+import AddUserModal, { buildAddUserPayload, buildEditUserPayload } from "../AddUserModal";
 import EditUserModal from "../EditUserModal";
 import DeactivateUserIcon from "../../../../assets/icons/deactivateUser.svg";
 import ActivateUserIcon from "../../../../assets/icons/activateUser.svg";
-import { toggleUserStatus, addUser } from "../../../../api/apiRequests";
+import { toggleUserStatus, addUser, editUser } from "../../../../api/apiRequests";
 import { isActiveStatus } from "../../../../utils/format";
 
 const AVATAR_COLORS = [
@@ -100,6 +100,7 @@ const DepartmentUsersTab = ({
   const [addUserOpen, setAddUserOpen] = useState(false);
   const [addUserLoading, setAddUserLoading] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
+  const [editUserLoading, setEditUserLoading] = useState(false);
 
   const [prevUsers, setPrevUsers] = useState(users);
   if (users !== prevUsers) {
@@ -225,7 +226,7 @@ const DepartmentUsersTab = ({
         onClose={() => setDeactivateTarget(null)}
         onConfirm={() => {
           setStatusUpdating(true);
-          toggleUserStatus({ userId: deactivateTarget.id, isActive: false })
+          toggleUserStatus({ userId: Number(deactivateTarget.id), isActive: false })
             .then(() => applyStatusChange(deactivateTarget, false))
             .finally(() => {
               setStatusUpdating(false);
@@ -249,7 +250,7 @@ const DepartmentUsersTab = ({
         onClose={() => setActivateTarget(null)}
         onConfirm={() => {
           setStatusUpdating(true);
-          toggleUserStatus({ userId: activateTarget.id, isActive: true })
+          toggleUserStatus({ userId: Number(activateTarget.id), isActive: true })
             .then(() => applyStatusChange(activateTarget, true))
             .finally(() => {
               setStatusUpdating(false);
@@ -289,10 +290,17 @@ const DepartmentUsersTab = ({
       <EditUserModal
         open={Boolean(editTarget)}
         user={editTarget}
+        loading={editUserLoading}
         onClose={() => setEditTarget(null)}
-        onSubmit={() => {
-          // TODO: call edit user API
-          setEditTarget(null);
+        onSubmit={(form) => {
+          setEditUserLoading(true);
+          editUser(buildEditUserPayload(form, editTarget.id))
+            .then(() => {
+              setEditTarget(null);
+              return onUserAdded?.();
+            })
+            .catch(() => {})
+            .finally(() => setEditUserLoading(false));
         }}
       />
     </Box>

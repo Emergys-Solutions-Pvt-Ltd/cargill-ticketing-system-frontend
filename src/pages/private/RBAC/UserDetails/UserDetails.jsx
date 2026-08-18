@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Box, Typography, Avatar } from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlineOutlined";
@@ -17,7 +17,10 @@ import InheritedGroupsCard from "./InheritedGroupsCard";
 import DirectReportsCard from "./DirectReportsCard";
 import AssignGroupModal from "./AssignGroupModal";
 import ViewGroupModal from "./ViewGroupModal";
-import { assignGroupToUser } from "../../../../api/apiRequests";
+import EditUserModal from "../EditUserModal";
+import { buildEditUserPayload } from "../AddUserModal";
+import { assignGroupToUser, getUserDetails, editUser } from "../../../../api/apiRequests";
+import { formatDate } from "../../../../utils/format";
 
 const getInitials = (name = "") =>
   name
@@ -27,6 +30,7 @@ const getInitials = (name = "") =>
     .slice(0, 2)
     .toUpperCase();
 
+// Mock fallback for get-user-details' inheritedGroups, used if the API errors/returns empty.
 const DEFAULT_GROUPS = [
   { id: 1, name: "Technical Support", queueCount: 8 },
   { id: 2, name: "Escalation Team", queueCount: 15 },
@@ -36,8 +40,7 @@ const DEFAULT_GROUPS = [
   { id: 6, name: "Sales Operations", queueCount: 3 },
 ];
 
-// TODO: wire up the real "direct reports" API once available; for now mirrors the
-// mock users a Super User would supervise within their department.
+// Mock fallback for get-user-details' directReports, used if the API errors/returns empty.
 const DEFAULT_DIRECT_REPORTS = [
   { id: 3, name: "John Smith", email: "john.smith@cargill.com" },
   { id: 4, name: "Alex Johnson", email: "alex.johnson@cargill.com" },
@@ -62,27 +65,83 @@ const DEFAULT_USER = {
   memberSince: "12 Jun 2024",
 };
 
+// Note: get-user-details' userInfo has no reportsToName field, so "Reports To" is
+// intentionally left out here — it stays whatever was already carried over from the
+// row that was clicked (or DEFAULT_USER's mock value).
+const mapUserDetails = (info) => ({
+  id: info.userId,
+  userId: info.userId,
+  name: info.userName,
+  email: info.email,
+  phoneNo: info.phoneNo,
+  workLocation: info.workLocation,
+  department: info.departmentName,
+  departmentId: info.departmentId,
+  status: info.isActive ? "Active" : "Inactive",
+  role: info.roleCode === "SUPERUSER" ? "Super User" : info.roleName || "User",
+  memberSince: formatDate(info.createdAt),
+});
+
+const mapInheritedGroup = (record) => ({
+  id: record.groupId,
+  name: record.groupName,
+  queueCount: record.queuesCount ?? 0,
+});
+
+// Field names inferred from the get-users/get-department-users convention — the
+// sample get-user-details response only showed an empty directReports array.
+const mapDirectReport = (record) => ({
+  id: record.userId,
+  name: record.userName,
+  email: record.email,
+});
+
 const UserDetails = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const user = { ...DEFAULT_USER, ...(location.state?.user || {}) };
+  const routeUser = { ...DEFAULT_USER, ...(location.state?.user || {}) };
+  const [fetchedUser, setFetchedUser] = useState({});
+  const user = { ...routeUser, ...fetchedUser };
   const isSuperUser = (user.role || "").toLowerCase().includes("super");
   // John Smith (id 1) is the first Super User in the mock user list — kept empty on
   // purpose to demo the "no inherited groups / no direct reports" empty states.
-  const isEmptySuperUserDemo = Number(user.id) === 1;
+  const isEmptySuperUserDemo = Number(routeUser.id) === 1;
 
-  // TODO: wire up the real "groups assigned to user" / "inherited groups" API once
-  // available. get-queues only supports { groupId } / { departmentId } filters, not
-  // { userId }, so this stays on mock data for now rather than firing an invalid request.
   const [groups, setGroups] = useState(isEmptySuperUserDemo ? [] : DEFAULT_GROUPS);
-  const [groupsLoading] = useState(false);
-  const [directReports] = useState(isEmptySuperUserDemo ? [] : DEFAULT_DIRECT_REPORTS);
-  const [directReportsLoading] = useState(false);
+  const [groupsLoading, setGroupsLoading] = useState(false);
+  const [directReports, setDirectReports] = useState(isEmptySuperUserDemo ? [] : DEFAULT_DIRECT_REPORTS);
+  const [directReportsLoading, setDirectReportsLoading] = useState(false);
   const [assignGroupOpen, setAssignGroupOpen] = useState(false);
   const [assignGroupLoading, setAssignGroupLoading] = useState(false);
   const [viewGroup, setViewGroup] = useState(null);
   const [removeTarget, setRemoveTarget] = useState(null);
+  const [editUserOpen, setEditUserOpen] = useState(false);
+  const [editUserLoading, setEditUserLoading] = useState(false);
+
+  const fetchUserDetails = () => {
+    setGroupsLoading(true);
+    setDirectReportsLoading(true);
+    return getUserDetails({ userId: Number(routeUser.id) })
+      .then((response) => {
+        const data = response?.data;
+        if (data?.userInfo) setFetchedUser(mapUserDetails(data.userInfo));
+        // Only overwrite the mock fallback when the API actually returned entries —
+        // an empty/missing list keeps whatever mock state was already initialized above.
+        if (data?.inheritedGroups?.length) setGroups(data.inheritedGroups.map(mapInheritedGroup));
+        if (data?.directReports?.length) setDirectReports(data.directReports.map(mapDirectReport));
+      })
+      .catch(() => {})
+      .finally(() => {
+        setGroupsLoading(false);
+        setDirectReportsLoading(false);
+      });
+  };
+
+  useEffect(() => {
+    fetchUserDetails();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [routeUser.id]);
 
   const infoFields = [
     { label: "User ID", value: user.userId, icon: UserIdIcon },
@@ -144,7 +203,7 @@ const UserDetails = () => {
           minHeight: 0,
         }}
       >
-        <UserInformationCard fields={infoFields} />
+        <UserInformationCard fields={infoFields} onEditInfo={() => setEditUserOpen(true)} />
 
         {isSuperUser ? (
           <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, gap: 3 }}>
@@ -193,6 +252,23 @@ const UserDetails = () => {
         open={Boolean(viewGroup)}
         onClose={() => setViewGroup(null)}
         group={viewGroup}
+      />
+
+      <EditUserModal
+        open={editUserOpen}
+        user={user}
+        loading={editUserLoading}
+        onClose={() => setEditUserOpen(false)}
+        onSubmit={(form) => {
+          setEditUserLoading(true);
+          editUser(buildEditUserPayload(form, user.id))
+            .then(() => {
+              setEditUserOpen(false);
+              return fetchUserDetails();
+            })
+            .catch(() => {})
+            .finally(() => setEditUserLoading(false));
+        }}
       />
 
       {!isSuperUser && (

@@ -31,3 +31,9 @@ export const formatMonthYear = (dateString) => {
   if (!dateString || Number.isNaN(date.getTime())) return "—";
   return date.toLocaleDateString("en-US", { month: "short", year: "numeric" });
 };
+
+export const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  if (!dateString || Number.isNaN(date.getTime())) return "—";
+  return date.toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" });
+};

@@ -13,8 +13,8 @@ import CommonTable from "../../../../components/common/CommonTable";
 import AddButton from "../../../../components/common/AddButton";
 import SearchIcon from "../../../../assets/icons/search.svg";
 import CreateGroupModal, { buildCreateGroupPayload } from "../CreateGroupModal";
-import EditGroupModal from "../EditGroupModal";
-import { getGroups, addGroup } from "../../../../api/apiRequests";
+import EditGroupModal, { buildEditGroupPayload } from "../EditGroupModal";
+import { getGroups, addGroup, editGroup } from "../../../../api/apiRequests";
 
 const AVATAR_COLORS = [
   { bgcolor: "#E0F2FE", color: "#0369A1" },
@@ -74,6 +74,7 @@ const DepartmentGroupsTab = ({ departmentId, departmentName }) => {
   const [createGroupOpen, setCreateGroupOpen] = useState(false);
   const [createGroupLoading, setCreateGroupLoading] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
+  const [editGroupLoading, setEditGroupLoading] = useState(false);
   const [groups, setGroups] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -242,13 +243,20 @@ const DepartmentGroupsTab = ({ departmentId, departmentName }) => {
       <EditGroupModal
         open={Boolean(editTarget)}
         group={editTarget}
+        loading={editGroupLoading}
         onClose={() => setEditTarget(null)}
         existingGroupNames={groupRows.filter((group) => group.id !== editTarget?.id).map(
           (group) => group.name,
         )}
-        onSubmit={() => {
-          // TODO: call edit group API
-          setEditTarget(null);
+        onSubmit={(form) => {
+          setEditGroupLoading(true);
+          editGroup(buildEditGroupPayload(form, editTarget.id))
+            .then(() => {
+              setEditTarget(null);
+              return fetchGroups();
+            })
+            .catch(() => {})
+            .finally(() => setEditGroupLoading(false));
         }}
       />
     </Box>
