@@ -1,4 +1,6 @@
 import { Box, Typography, Select, MenuItem, FormControl, Chip } from "@mui/material";
+import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "../../assets/icons/close.svg";
 
 const FormMultiSelect = ({
   label,
@@ -25,7 +27,7 @@ const FormMultiSelect = ({
       {label && (
         <Typography
           variant="caption"
-          sx={{ display: "block", mb: 0.5, fontWeight: 500, color: "text.secondary" }}
+          sx={{ display: "block", mb: 0.5, fontWeight: 500, fontSize: "14px", color: "#111928" }}
         >
           {label}
           {required && (
@@ -43,7 +45,10 @@ const FormMultiSelect = ({
           displayEmpty
           sx={{
             borderRadius: "8px",
-            backgroundColor: "background.paper",
+            backgroundColor: "#F9FAFB",
+            "& .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#D1D5DB",
+            },
             "& .MuiSelect-select": {
               py: value.length > 0 ? 0.75 : undefined,
             },
@@ -52,7 +57,7 @@ const FormMultiSelect = ({
           renderValue={(selected) => {
             if (selected.length === 0) {
               return (
-                <Box component="span" sx={{ color: "text.secondary" }}>
+                <Box component="span" sx={{ color: "#9CA3AF", fontWeight: 400, fontSize: "14px" }}>
                   {placeholder}
                 </Box>
               );
@@ -68,11 +73,13 @@ const FormMultiSelect = ({
                       size="small"
                       onMouseDown={(event) => event.stopPropagation()}
                       onDelete={() => handleRemove(selectedValue)}
+                      deleteIcon={<img src={CloseIcon} alt="" width={12} height={12} />}
                       sx={{
                         borderRadius: "6px",
                         backgroundColor: "#E0F2FE",
-                        color: "#0369A1",
+                        color: "#1E429F",
                         fontWeight: 500,
+                        fontSize: "14px",
                       }}
                     />
                   );
@@ -80,11 +87,40 @@ const FormMultiSelect = ({
               </Box>
             );
           }}
+          MenuProps={{
+            slotProps: {
+              paper: {
+                sx: {
+                  mt: 1,
+                  borderRadius: "12px",
+                  boxShadow: "0 12px 28px rgba(17, 25, 40, 0.12)",
+                  "& .MuiList-root": {
+                    py: 1,
+                  },
+                  "& .MuiMenuItem-root": {
+                    py: 1.5,
+                    px: 2.5,
+                    fontSize: "15px",
+                    color: "#111928",
+                  },
+                  "& .MuiMenuItem-root.Mui-selected": {
+                    backgroundColor: "transparent",
+                  },
+                  "& .MuiMenuItem-root.Mui-selected:hover, & .MuiMenuItem-root:hover": {
+                    backgroundColor: "#F9FAFB",
+                  },
+                },
+              },
+            },
+          }}
           {...props}
         >
           {options.map((option) => (
             <MenuItem key={option.value} value={option.value}>
-              {option.label}
+              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+                {option.label}
+                {value.includes(option.value) && <CheckIcon sx={{ fontSize: 18, color: "#111928" }} />}
+              </Box>
             </MenuItem>
           ))}
         </Select>

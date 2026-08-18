@@ -366,7 +366,7 @@ const AddUserModal = ({
       confirmLoading={loading}
       confirmButtonSx={isEditMode ? { width: "150px" } : undefined}
     >
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 3, height: "340px", overflowY: "auto" }}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 3, height: "350px", overflowY: "auto" }}>
         <Box
           sx={{
             display: "grid",

@@ -20,7 +20,7 @@ const FormTextField = ({
       {label && (
         <Typography
           variant="caption"
-          sx={{ display: "block", mb: 0.5, fontWeight: 500, color: "text.secondary" }}
+          sx={{ display: "block", mb: 0.5, fontWeight: 500, fontSize: "14px", color: "#111928" }}
         >
           {label}
           {required && (
@@ -37,7 +37,16 @@ const FormTextField = ({
         sx={{
           "& .MuiOutlinedInput-root": {
             borderRadius: "8px",
-            backgroundColor: "background.paper",
+            backgroundColor: "#F9FAFB",
+            "& fieldset": {
+              borderColor: "#D1D5DB",
+            },
+          },
+          "& .MuiInputBase-input::placeholder": {
+            color: "#9CA3AF",
+            fontWeight: 400,
+            fontSize: "14px",
+            opacity: 1,
           },
           ...sx,
         }}
