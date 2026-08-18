@@ -34,8 +34,14 @@ const DepartmentDetails = () => {
   const location = useLocation();
   const { departmentId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [department, setDepartment] = useState(location.state?.department || DEFAULT_DEPARTMENT);
 
-  const department = location.state?.department || DEFAULT_DEPARTMENT;
+  useEffect(() => {
+    if (location.state?.department) {
+      setDepartment(location.state.department);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [departmentId, location.state?.department]);
 
   const [users, setUsers] = useState(null);
   const [loadingUsers, setLoadingUsers] = useState(true);
