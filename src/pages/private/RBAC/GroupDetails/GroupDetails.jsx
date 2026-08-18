@@ -9,7 +9,7 @@ import AddButton from "../../../../components/common/AddButton";
 import GroupsIcon from "../../../../assets/icons/groups.svg";
 import TrashIcon from "../../../../assets/icons/trash.svg";
 import AddQueueModal from "./AddQueueModal";
-import { addQueuesToGroup, getQueues } from "../../../../api/apiRequests";
+import { addQueuesToGroup, removeQueuesFromGroup, getQueues } from "../../../../api/apiRequests";
 
 const DEFAULT_GROUP = {
   name: "Technical Support",
@@ -42,6 +42,7 @@ const GroupDetails = () => {
   const [addQueueOpen, setAddQueueOpen] = useState(false);
   const [addQueueLoading, setAddQueueLoading] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     if (!group.id) return;
@@ -192,8 +193,17 @@ const GroupDetails = () => {
         open={Boolean(deleteTarget)}
         onClose={() => setDeleteTarget(null)}
         onConfirm={() => {
-          setQueues((prev) => prev.filter((queue) => queue.id !== deleteTarget.id));
-          setDeleteTarget(null);
+          setDeleteLoading(true);
+          removeQueuesFromGroup({
+            groupId: Number(group.id),
+            queueIds: [Number(deleteTarget.id)],
+          })
+            .then(() => {
+              setQueues((prev) => prev.filter((queue) => queue.id !== deleteTarget.id));
+              setDeleteTarget(null);
+            })
+            .catch(() => {})
+            .finally(() => setDeleteLoading(false));
         }}
         icon={DeleteOutlineIcon}
         title="Are you sure?"
@@ -204,6 +214,7 @@ const GroupDetails = () => {
         }
         confirmLabel="Delete"
         confirmColor="danger"
+        confirmLoading={deleteLoading}
       />
     </Box>
   );
