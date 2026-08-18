@@ -33,12 +33,12 @@ const getInitials = (name) =>
     .toUpperCase();
 
 const USER_TEMPLATES = [
-  { name: "David Miller", email: "david.miller@cargill.com", role: "User", supervisor: "John Smith", groupsAssigned: 5, status: "Active", lastLogin: "2 hours ago" },
-  { name: "Alex Johnson", email: "alex.johnson@cargill.com", role: "User", supervisor: "John Smith", groupsAssigned: 4, status: "Active", lastLogin: "1 day ago" },
-  { name: "Rahul Patel", email: "rahul.patel@cargill.com", role: "User", supervisor: "Sarah Lee", groupsAssigned: 4, status: "Active", lastLogin: "3 hours ago" },
-  { name: "Jennifer Garcia", email: "jennifer.garcia@cargill.com", role: "User", supervisor: "Sarah Lee", groupsAssigned: 3, status: "Active", lastLogin: "5 hours ago" },
-  { name: "Michael Chen", email: "michael.chen@cargill.com", role: "User", supervisor: "Sarah Lee", groupsAssigned: 2, status: "Inactive", lastLogin: "5 days ago" },
-  { name: "Lisa Anderson", email: "lisa.anderson@cargill.com", role: "User", supervisor: "Michael Brown", groupsAssigned: 2, status: "Active", lastLogin: "4 hours ago" },
+  { name: "David Miller", email: "david.miller@cargill.com", role: "User", reportsTo: "John Smith", groupsAssigned: 5, status: "Active", lastLogin: "2 hours ago" },
+  { name: "Alex Johnson", email: "alex.johnson@cargill.com", role: "User", reportsTo: "John Smith", groupsAssigned: 4, status: "Active", lastLogin: "1 day ago" },
+  { name: "Rahul Patel", email: "rahul.patel@cargill.com", role: "User", reportsTo: "Sarah Lee", groupsAssigned: 4, status: "Active", lastLogin: "3 hours ago" },
+  { name: "Jennifer Garcia", email: "jennifer.garcia@cargill.com", role: "User", reportsTo: "Sarah Lee", groupsAssigned: 3, status: "Active", lastLogin: "5 hours ago" },
+  { name: "Michael Chen", email: "michael.chen@cargill.com", role: "User", reportsTo: "Sarah Lee", groupsAssigned: 2, status: "Inactive", lastLogin: "5 days ago" },
+  { name: "Lisa Anderson", email: "lisa.anderson@cargill.com", role: "User", reportsTo: "Michael Brown", groupsAssigned: 2, status: "Active", lastLogin: "4 hours ago" },
 ];
 
 const MOCK_USERS = Array.from({ length: 40 }, (_, index) => ({
@@ -161,7 +161,7 @@ const DepartmentUsersTab = ({
         label: "ROLE",
         render: (value) => <CommonChip status={value} label={value} />,
       },
-      { key: "supervisor", label: "REPORTS TO" },
+      { key: "reportsTo", label: "REPORTS TO" },
       {
         key: "groupsAssigned",
         label: "GROUPS ASSIGNED",

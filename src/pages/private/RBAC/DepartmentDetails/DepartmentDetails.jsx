@@ -12,7 +12,7 @@ import { nameFromEmail, formatRelativeTime } from "../../../../utils/format";
 const DEFAULT_DEPARTMENT = {
   name: "Human Resources",
   description: "Handles all operational service requests and processes across regions.",
-  supervisors: 8,
+  superUsers: 8,
   users: 62,
   queues: 12,
 };
@@ -23,7 +23,7 @@ const mapUser = (record, departmentId) => ({
   email: record.email,
   role: record.roleCode === "SUPERUSER" ? "Super User" : record.roleName || "User",
   departmentId,
-  supervisor: record.reportsToName || "Unassigned",
+  reportsTo: record.reportsToName || "Unassigned",
   groupsAssigned: record.groupsAssigned ?? 0,
   status: record.isActive ? "Active" : "Inactive",
   lastLogin: formatRelativeTime(record.lastLogin),
@@ -148,7 +148,7 @@ const DepartmentDetails = () => {
         title={department.name}
         description={department.description}
         stats={[
-          { label: "Super User", value: department.supervisors },
+          { label: "Super User", value: department.superUsers },
           { label: "Users", value: department.users },
           { label: "Groups", value: department.queues },
         ]}

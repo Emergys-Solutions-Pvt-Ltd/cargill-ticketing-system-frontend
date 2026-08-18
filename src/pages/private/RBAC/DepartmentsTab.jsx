@@ -7,17 +7,17 @@ export const mapDepartment = (dept) => ({
   code: dept.departmentCode,
   name: dept.departmentName,
   description: dept.departmentDescription || "",
-  supervisors: dept.superUserCount,
+  superUsers: dept.superUserCount,
   users: dept.userCount,
   queues: dept.groupCount,
 });
 
 // TODO: remove once the departments API is stable; used as a fallback when the API has no response/errors
 export const MOCK_DEPARTMENTS = [
-  { id: 1, code: "HR", name: "Human Resources", description: "Handles all operational service requests and processes across regions.", supervisors: 3, users: 24, queues: 5 },
-  { id: 2, code: "IT", name: "IT Support", description: "Handles technical support requests and infrastructure incidents.", supervisors: 4, users: 31, queues: 7 },
-  { id: 3, code: "SEC", name: "Security Operations", description: "Handles security incidents and access control requests.", supervisors: 2, users: 12, queues: 3 },
-  { id: 4, code: "INFRA", name: "IT Infrastructure", description: "Handles infrastructure provisioning and maintenance requests.", supervisors: 3, users: 18, queues: 4 },
+  { id: 1, code: "HR", name: "Human Resources", description: "Handles all operational service requests and processes across regions.", superUsers: 3, users: 24, queues: 5 },
+  { id: 2, code: "IT", name: "IT Support", description: "Handles technical support requests and infrastructure incidents.", superUsers: 4, users: 31, queues: 7 },
+  { id: 3, code: "SEC", name: "Security Operations", description: "Handles security incidents and access control requests.", superUsers: 2, users: 12, queues: 3 },
+  { id: 4, code: "INFRA", name: "IT Infrastructure", description: "Handles infrastructure provisioning and maintenance requests.", superUsers: 3, users: 18, queues: 4 },
 ];
 
 // Data is fetched once at the page level (Rbac.jsx) so switching tabs doesn't
@@ -50,7 +50,7 @@ const DepartmentsTab = ({ departments = [], loading = false }) => {
             <DepartmentListItem
               key={dept.id}
               name={dept.name}
-              supervisors={dept.supervisors}
+              superUsers={dept.superUsers}
               users={dept.users}
               queues={dept.queues}
               onClick={() =>

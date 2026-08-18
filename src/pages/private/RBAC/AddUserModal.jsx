@@ -19,8 +19,6 @@ const MOCK_DEPARTMENTS = [
   { departmentId: "5", departmentName: "Customer Support" },
 ];
 
-// "Reports To" now lists Super Users of the selected department — there's no
-// separate supervisor concept anymore.
 const MOCK_SUPERUSERS = [
   { userId: "3", userName: "Mike Wilson", roleCode: "SUPERUSER" },
   { userId: "4", userName: "Kevin Brown", roleCode: "SUPERUSER" },
@@ -42,7 +40,7 @@ const DEFAULT_FORM = {
   email: "",
   mobile: "",
   department: "",
-  supervisor: "",
+  reportsTo: "",
   workLocation: "",
   groups: [],
 };
@@ -50,7 +48,7 @@ const DEFAULT_FORM = {
 const normalizeRole = (role = "") =>
   role.toLowerCase().includes("super") ? "super_user" : "user";
 
-const EDIT_COMPARE_FIELDS = ["role", "name", "email", "mobile", "department", "supervisor", "workLocation"];
+const EDIT_COMPARE_FIELDS = ["role", "name", "email", "mobile", "department", "reportsTo", "workLocation"];
 
 // Builds the /v1/rbac/add-user request body from the modal's internal form state.
 export const buildAddUserPayload = (form) => {
@@ -63,7 +61,7 @@ export const buildAddUserPayload = (form) => {
   };
 
   if (form.role === "user") {
-    if (form.supervisor) payload.reportsToUserId = Number(form.supervisor);
+    if (form.reportsTo) payload.reportsToUserId = Number(form.reportsTo);
     if (form.groups.length) payload.assignedGroupIds = form.groups.map(Number);
   }
 
@@ -81,8 +79,8 @@ export const buildEditUserPayload = (form, userId) => {
     workLocation: form.workLocation.trim(),
   };
 
-  if (form.role === "user" && form.supervisor) {
-    payload.reportsToUserId = Number(form.supervisor);
+  if (form.role === "user" && form.reportsTo) {
+    payload.reportsToUserId = Number(form.reportsTo);
   }
 
   return payload;
@@ -94,15 +92,15 @@ const formFromUser = (user) => ({
   email: user.email || "",
   mobile: user.mobile || user.phoneNo || "",
   department: user.departmentId != null ? String(user.departmentId) : "",
-  supervisor: "",
+  reportsTo: "",
   workLocation: user.workLocation || "",
   groups: [],
+  // "-" and "Unassigned" are the two "no value" placeholders used by the different
+  // tables that can pass a `user` row into this modal.
   reportsToName:
-    user.reportsTo && user.reportsTo !== "-"
+    user.reportsTo && user.reportsTo !== "-" && user.reportsTo !== "Unassigned"
       ? user.reportsTo
-      : user.supervisor && user.supervisor !== "Unassigned"
-        ? user.supervisor
-        : "",
+      : "",
 });
 
 const AddUserModal = ({
@@ -123,8 +121,8 @@ const AddUserModal = ({
   const [groupsLoading, setGroupsLoading] = useState(false);
   const [departments, setDepartments] = useState([]);
   const [departmentsLoading, setDepartmentsLoading] = useState(false);
-  const [supervisorOptions, setSupervisorOptions] = useState([]);
-  const [supervisorsLoading, setSupervisorsLoading] = useState(false);
+  const [reportsToOptions, setReportsToOptions] = useState([]);
+  const [reportsToLoading, setReportsToLoading] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -175,42 +173,42 @@ const AddUserModal = ({
   // whenever the selected department changes.
   useEffect(() => {
     if (form.role !== "user" || !form.department) {
-      setSupervisorOptions([]);
+      setReportsToOptions([]);
       return;
     }
 
     let active = true;
-    setSupervisorsLoading(true);
+    setReportsToLoading(true);
     getUsers({ departmentId: form.department })
       .then((response) => {
         if (!active) return;
         const records = response?.data?.users?.length ? response.data.users : MOCK_SUPERUSERS;
         const superUsers = records.filter((record) => record.roleCode === "SUPERUSER");
-        setSupervisorOptions(superUsers.map((record) => ({ label: record.userName, value: record.userId })));
+        setReportsToOptions(superUsers.map((record) => ({ label: record.userName, value: record.userId })));
       })
       .catch(() => {
         if (!active) return;
-        setSupervisorOptions(MOCK_SUPERUSERS.map((record) => ({ label: record.userName, value: record.userId })));
+        setReportsToOptions(MOCK_SUPERUSERS.map((record) => ({ label: record.userName, value: record.userId })));
       })
       .finally(() => {
-        if (active) setSupervisorsLoading(false);
+        if (active) setReportsToLoading(false);
       });
     return () => {
       active = false;
     };
   }, [form.department, form.role]);
 
-  // Once supervisor options for the pre-filled department are available, resolve
+  // Once Reports To options for the pre-filled department are available, resolve
   // the edited user's "reports to" name into the matching option value.
   useEffect(() => {
-    if (!isEditMode || !form.reportsToName || form.supervisor) return;
-    const match = supervisorOptions.find((option) => option.label === form.reportsToName);
+    if (!isEditMode || !form.reportsToName || form.reportsTo) return;
+    const match = reportsToOptions.find((option) => option.label === form.reportsToName);
     if (match) {
-      setForm((prev) => ({ ...prev, supervisor: match.value }));
-      setInitialForm((prev) => (prev ? { ...prev, supervisor: match.value } : prev));
+      setForm((prev) => ({ ...prev, reportsTo: match.value }));
+      setInitialForm((prev) => (prev ? { ...prev, reportsTo: match.value } : prev));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [supervisorOptions, isEditMode]);
+  }, [reportsToOptions, isEditMode]);
 
   // Assign Group is never rendered in edit mode, or for role "super_user", so
   // skip fetching its options in either case.
@@ -262,7 +260,7 @@ const AddUserModal = ({
     setForm((prev) => ({
       ...prev,
       [field]: value,
-      ...(field === "department" ? { groups: [], supervisor: "" } : {}),
+      ...(field === "department" ? { groups: [], reportsTo: "" } : {}),
     }));
   };
 
@@ -354,13 +352,13 @@ const AddUserModal = ({
           placeholder={
             !form.department
               ? "Select department first"
-              : supervisorsLoading
+              : reportsToLoading
                 ? "Loading super users..."
                 : "Select"
           }
-          value={form.supervisor}
-          onChange={handleFieldChange("supervisor")}
-          options={supervisorOptions}
+          value={form.reportsTo}
+          onChange={handleFieldChange("reportsTo")}
+          options={reportsToOptions}
         />
       ),
     });

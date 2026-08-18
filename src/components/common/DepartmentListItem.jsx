@@ -8,14 +8,14 @@ import DeptUsersIcon from "../../assets/icons/deptUsers.svg";
  */
 const DepartmentListItem = ({
   name,
-  supervisors,
+  superUsers,
   users,
   queues,
   icon = DeptUsersIcon,
   onClick,
 }) => {
   const stats = [
-    { label: "Super Users", value: supervisors },
+    { label: "Super Users", value: superUsers },
     { label: "Users", value: users },
     { label: "Groups", value: queues },
   ];
