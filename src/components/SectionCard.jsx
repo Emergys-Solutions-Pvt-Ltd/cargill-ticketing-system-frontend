@@ -3,11 +3,14 @@ import { Box, Tab, Tabs, Card, CardContent } from "@mui/material";
 
 const SELECTED_TAB_COLOR = "#1B7F37";
 
-const SectionCard = ({ tabs, initialTab = 0, sx = {} }) => {
-  const [value, setValue] = useState(initialTab);
+const SectionCard = ({ tabs, initialTab = 0, value: controlledValue, onChange, sx = {} }) => {
+  const [internalValue, setInternalValue] = useState(initialTab);
+  const isControlled = controlledValue !== undefined;
+  const value = isControlled ? controlledValue : internalValue;
 
   const handleChange = (event, newValue) => {
-    setValue(newValue);
+    if (!isControlled) setInternalValue(newValue);
+    onChange?.(newValue, event);
   };
 
   const selectedTab = tabs[value];

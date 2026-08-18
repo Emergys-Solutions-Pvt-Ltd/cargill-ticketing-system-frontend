@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Box } from "@mui/material";
 import BackNavigation from "../../../../components/common/BackNavigation";
 import EntityHeaderCard from "../../../../components/common/EntityHeaderCard";
@@ -33,6 +33,7 @@ const DepartmentDetails = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { departmentId } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const department = location.state?.department || DEFAULT_DEPARTMENT;
 
@@ -74,6 +75,7 @@ const DepartmentDetails = () => {
 
   const tabs = [
     {
+      key: "groups",
       label: "Groups",
       content: (
         <DepartmentGroupsTab
@@ -83,6 +85,7 @@ const DepartmentDetails = () => {
       ),
     },
     {
+      key: "users",
       label: "Users",
       content: (
         <DepartmentUsersTab
@@ -96,6 +99,15 @@ const DepartmentDetails = () => {
     },
   ];
 
+  const activeTabIndex = Math.max(
+    tabs.findIndex((tab) => tab.key === searchParams.get("tab")),
+    0,
+  );
+
+  const handleTabChange = (index) => {
+    setSearchParams({ tab: tabs[index].key }, { replace: true });
+  };
+
   return (
     <Box
       sx={{
@@ -108,7 +120,7 @@ const DepartmentDetails = () => {
         p: { xs: 2, md: 4 },
       }}
     >
-      <BackNavigation label="Back to List of Departments" onClick={() => navigate("/rbac")} />
+      <BackNavigation label="Back to List of Departments" onClick={() => navigate(-1)} />
 
       <EntityHeaderCard
         title={department.name}
@@ -120,7 +132,12 @@ const DepartmentDetails = () => {
         ]}
       />
 
-      <SectionCard tabs={tabs} sx={{ flexGrow: 1, minHeight: 0 }} />
+      <SectionCard
+        tabs={tabs}
+        value={activeTabIndex}
+        onChange={handleTabChange}
+        sx={{ flexGrow: 1, minHeight: 0 }}
+      />
     </Box>
   );
 };

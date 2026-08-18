@@ -1,16 +1,27 @@
 import { Box, Typography } from "@mui/material";
+import { useSearchParams } from "react-router-dom";
 import SectionCard from "../../../components/SectionCard";
 import DepartmentsTab from "./DepartmentsTab";
 import UsersTab from "./UsersTab";
 import GroupsTab from "./GroupsTab";
 
 const tabs = [
-  { label: "Departments", content: <DepartmentsTab /> },
-  { label: "Users", content: <UsersTab /> },
-  { label: "Groups", content: <GroupsTab /> },
+  { key: "departments", label: "Departments", content: <DepartmentsTab /> },
+  { key: "users", label: "Users", content: <UsersTab /> },
+  { key: "groups", label: "Groups", content: <GroupsTab /> },
 ];
 
 const Rbac = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeIndex = Math.max(
+    tabs.findIndex((tab) => tab.key === searchParams.get("tab")),
+    0,
+  );
+
+  const handleTabChange = (index) => {
+    setSearchParams({ tab: tabs[index].key }, { replace: true });
+  };
+
   return (
     <Box
       sx={{
@@ -34,7 +45,12 @@ const Rbac = () => {
         </Typography>
       </Box>
 
-      <SectionCard tabs={tabs} sx={{ flexGrow: 1, minHeight: 0 }} />
+      <SectionCard
+        tabs={tabs}
+        value={activeIndex}
+        onChange={handleTabChange}
+        sx={{ flexGrow: 1, minHeight: 0 }}
+      />
     </Box>
   );
 };
