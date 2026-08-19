@@ -267,6 +267,7 @@
       "category": "Security Assessment",
       "urgency": "Medium",
       "impact": "Medium",
+      "ticketType": "Service",
       "comments": [
         {
           "id": 1,
@@ -331,6 +332,7 @@
       "category": "Access Management",
       "urgency": "High",
       "impact": "High",
+      "ticketType": "Incident",
       "comments": []
     },
     {
@@ -345,6 +347,7 @@
       "category": "Software Request",
       "urgency": "Medium",
       "impact": "Low",
+      "ticketType": "Task",
       "comments": []
     },
     {
@@ -359,6 +362,22 @@
       "category": "Hardware",
       "urgency": "Low",
       "impact": "Low",
+      "ticketType": "Incident",
+      "comments": []
+    },
+    {
+      "id": "REQ0001236",
+      "title": "Request for new email account setup",
+      "status": "Closed",
+      "created": "1 week ago",
+      "updated": "3 days ago",
+      "priority": "Medium",
+      "assignee": "David Lee",
+      "department": "IT Support",
+      "category": "Account Management",
+      "urgency": "Medium",
+      "impact": "Medium",
+      "ticketType": "Service",
       "comments": []
     }
   ],
