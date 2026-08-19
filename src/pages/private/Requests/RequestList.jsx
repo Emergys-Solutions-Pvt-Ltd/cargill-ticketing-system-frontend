@@ -352,7 +352,7 @@ const RequestList = () => {
               display: "flex",
               flexDirection: "column",
               flexGrow: 1,
-              border: "1px solid red",
+              // border: "1px solid red",
               overflow: "hidden",
             }}
           >
