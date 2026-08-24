@@ -13,6 +13,7 @@ import LabTabs from "../../../components/LabTabs";
 import RequestTabs from "./RequestTabs";
 import RequestDetails from "./RequestDetails";
 import { getTicketData } from "../../../api/apiRequests";
+import FilterPanel from "../../../components/FilterPanel";
 
 // Page-specific: truncation style reused by two columns
 const truncateCellSx = {
@@ -33,6 +34,26 @@ const RequestList = () => {
   const [activeFilterCount, setActiveFilterCount] = useState(0);
   const [activeTab, setActiveTab] = useState("all-requests");
   const [openRequestTabs, setOpenRequestTabs] = useState([]);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [filters, setFilters] = useState({});
+
+  const handleFilterChange = (key, value) =>
+    setFilters((prev) => ({ ...prev, [key]: value }));
+
+  const handleApplyFilter = () => {
+    setFilterOpen(false);
+    setPage(0);
+    // fetchTickets(); // or fold `filters` into getTicketData() params
+  };
+
+  const handleResetFilter = () => {
+    setFilters({});
+    setActiveFilterCount(0);
+  };
+
+  useEffect(() => {
+    setActiveFilterCount(Object.values(filters).filter(Boolean).length);
+  }, [filters]);
 
   const fetchTickets = useCallback(async () => {
     setLoading(true);
@@ -68,10 +89,10 @@ const RequestList = () => {
     fetchTickets();
   }, [fetchTickets]);
 
-  useEffect(() => {
-    const count = Number(statusFilter !== "All");
-    setActiveFilterCount(count);
-  }, [statusFilter]);
+  // useEffect(() => {
+  //   const count = Number(statusFilter !== "All");
+  //   setActiveFilterCount(count);
+  // }, [statusFilter]);
 
   const filteredRequests = useMemo(
     () =>
@@ -286,11 +307,7 @@ const RequestList = () => {
               />
 
               <Box
-                onClick={() => {
-                  setStatusFilter((current) =>
-                    current === "All" ? "Open" : "All",
-                  );
-                }}
+                onClick={() => setFilterOpen(true)}
                 sx={{
                   height: "2.125rem",
                   borderRadius: "8px",
@@ -348,56 +365,49 @@ const RequestList = () => {
 
         {activeTab === "all-requests" ? (
           <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              flexGrow: 1,
-              // border: "1px solid red",
-              overflow: "hidden",
-            }}
+            sx={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden" }}
           >
-            <CommonTable
-              sx={{ flexGrow: 1, minHeight: 0 }}
-              columns={columns}
-              rows={filteredRequests}
-              onRowClick={handleOpenRequestTab}
-              emptyMessage="No matching records found in this view."
-              tableContainerSx={{ mt: 0 }}
-              ariaLabel="Cargill ticket list"
-              pagination={{
-                count: totalCount,
-                page,
-                onPageChange: setPage,
-                rowsPerPage,
-                onRowsPerPageChange: (value) => {
-                  setRowsPerPage(value);
-                  setPage(0);
-                },
+            <Box
+              sx={{
+                flex: 1,
+                minHeight: 0,
+                display: "flex",
+                flexDirection: "column",
+                overflow: "hidden",
               }}
+            >
+              <CommonTable
+                sx={{ flexGrow: 1, minHeight: 0 }}
+                columns={columns}
+                rows={filteredRequests}
+                onRowClick={handleOpenRequestTab}
+                emptyMessage="No matching records found in this view."
+                tableContainerSx={{ mt: 0 }}
+                ariaLabel="Cargill ticket list"
+                pagination={{
+                  count: totalCount,
+                  page,
+                  onPageChange: setPage,
+                  rowsPerPage,
+                  onRowsPerPageChange: (value) => {
+                    setRowsPerPage(value);
+                    setPage(0);
+                  },
+                }}
+              />
+            </Box>
+
+            <FilterPanel
+              open={filterOpen}
+              onClose={() => setFilterOpen(false)}
+              filters={filters}
+              onFilterChange={handleFilterChange}
+              onApply={handleApplyFilter}
+              onReset={handleResetFilter}
+              activeFilterCount={activeFilterCount}
             />
           </Box>
         ) : (
-          // <Box
-          //   sx={{
-          //     border: "1px solid",
-          //     borderColor: "divider",
-          //     borderRadius: "8px",
-          //     backgroundColor: "background.paper",
-          //     p: { xs: 1, md: 2 },
-          //     flexGrow: 1,
-          //   }}
-          // >
-          //   {openRequestTabs
-          //     .filter((tab) => tab.id === activeTab)
-          //     .map((tab) => (
-          //       <Box key={tab.id} sx={{ width: "100%" }}>
-          //         <LabTabs
-          //           comments={tab.request.comments || []}
-          //           request={tab.request}
-          //         />
-          //       </Box>
-          //     ))}
-          // </Box>
           <RequestDetails
             request={
               openRequestTabs.find((tab) => tab.id === activeTab)?.request

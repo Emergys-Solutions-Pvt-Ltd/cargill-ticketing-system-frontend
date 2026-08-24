@@ -6,13 +6,13 @@ import {
   Box,
   Card,
   Chip,
+  CircularProgress,
   Grid,
   Tab,
   Tabs,
   Typography,
 } from "@mui/material";
 
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import EventOutlinedIcon from "@mui/icons-material/EventOutlined";
 import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
@@ -35,48 +35,124 @@ import SubmittedFormView from "../../../components/common/SubmittedFormView";
 import DetailTable from "../../../components/common/DetailTable";
 import FormSection from "../../../components/common/FormSection";
 import FormSectionGrid from "../../../components/common/FormSectionGrid";
-import {
-  detailsTabSections,
-  requestFormSections,
-  submittedFormData,
-} from "../../../api/mockData";
+import { submittedFormData } from "../../../api/mockData";
 import RequestTabsNav from "../../../components/common/RequestTabsNav";
 import FilePreviewModal from "../../../components/filePreviews/FilePreviewModal";
-
-const getStatusColor = (status) => {
-  const s = status?.toLowerCase();
-  switch (s) {
-    case "new":
-    case "open":
-      return { bg: "#e6f4ea", text: "#137333", border: "#ceead6" };
-    case "in progress":
-      return { bg: "#e8f0fe", text: "#1a73e8", border: "#d2e3fc" };
-    case "pending":
-    case "on hold":
-      return { bg: "#fef7e0", text: "#b06000", border: "#feebd0" };
-    case "resolved":
-      return { bg: "#e2f1e8", text: "#0f9d58", border: "#c6ecdb" };
-    case "closed":
-      return { bg: "#f1f3f4", text: "#5f6368", border: "#dadce0" };
-    default:
-      return { bg: "#f1f3f4", text: "#5f6368", border: "#dadce0" };
-  }
-};
+import {
+  getServiceRequestForm,
+  getServiceRequestDetails,
+} from "../../../api/apiRequests";
+import { objectToFields, getStatusColor } from "./utils/formatters.js";
+import {
+  DETAILS_SECTIONS,
+  SECTION_ICON_MAP,
+  SERVICE_REQUEST_SECTIONS,
+} from "../../../utils/constants";
 
 function RequestDetails({ request }) {
   const { requestId } = useParams();
   const { user: authUser } = useAuth();
-
   const [tickets, setTickets] = useState(() => getStoredTickets());
   const [activeTab, setActiveTab] = useState(0);
   const [previewFile, setPreviewFile] = useState(null);
+  const [formSections, setFormSections] = useState([]);
+  const [detailsSections, setDetailsSections] = useState([]);
+  const [submittedForm, setSubmittedForm] = useState(null);
+  const [sectionsLoading, setSectionsLoading] = useState(true);
+  const [detailsLoading, setDetailsLoading] = useState(true);
 
-  console.log("RequestDetails requestId in requestDetails:", request);
   useEffect(() => {
     if (request?.id && authUser) {
       recordTicketView(request.id, authUser);
     }
   }, [request?.id, authUser]);
+
+  useEffect(() => {
+    if (!request?.id) return;
+
+    const ticketType = request.ticketType || "Service";
+    if (ticketType !== "Service" && ticketType !== "Incident") {
+      setSectionsLoading(false);
+      return;
+    }
+
+    const fetchServiceRequestForm = async () => {
+      setSectionsLoading(true);
+
+      try {
+        const res = await getServiceRequestForm({
+          ticketId: request.id,
+        });
+
+        if (res?.success) {
+          const apiData = res?.data || {};
+
+          const sections = SERVICE_REQUEST_SECTIONS.map((section) => ({
+            ...section,
+            defaultExpanded: true,
+            type: "grid",
+            gridSize: 3,
+            fields: objectToFields(apiData[section.key]),
+          }));
+
+          setFormSections(sections);
+        }
+      } catch (error) {
+        console.error("Failed to fetch service request form:", error);
+        setFormSections([]);
+      } finally {
+        setSectionsLoading(false);
+      }
+    };
+
+    fetchServiceRequestForm();
+  }, [request?.id, request?.ticketType]);
+
+  useEffect(() => {
+    if (!request?.id) return;
+
+    const ticketType = request.ticketType || "Service";
+    if (ticketType !== "Service" && ticketType !== "Incident") {
+      setDetailsLoading(false);
+      return;
+    }
+
+    const fetchServiceRequestDetails = async () => {
+      setDetailsLoading(true);
+
+      try {
+        const res = await getServiceRequestDetails({
+          ticketId: request.id,
+        });
+
+        if (res?.success) {
+          const apiData = res?.data || {};
+
+          const sections = DETAILS_SECTIONS.map((section) => {
+            const rows = apiData[section.key] || [];
+
+            return {
+              ...section,
+              defaultExpanded: true,
+              type: "table",
+              rows,
+              columns: rows.length > 0 ? Object.keys(rows[0]) : [],
+            };
+          });
+
+          setDetailsSections(sections);
+        }
+      } catch (error) {
+        console.error("Failed to fetch service request details:", error);
+
+        setDetailsSections([]);
+      } finally {
+        setDetailsLoading(false);
+      }
+    };
+
+    fetchServiceRequestDetails();
+  }, [request?.id, request?.ticketType]);
 
   if (!request) return null;
 
@@ -93,35 +169,6 @@ function RequestDetails({ request }) {
       recordTicketView(requestId, authUser);
     }
   }, [requestId, authUser]);
-
-  // const request = useMemo(() => {
-  //   return (
-  //     tickets.find((r) => r.id === requestId) || {
-  //       id: requestId || "SR0000000",
-  //       title: "Request to initiate dynamic scan on SXR QA Environment",
-  //       status: "Pending",
-  //       priority: "Medium",
-  //       created: "",
-  //       updated: "",
-  //       comments: [],
-  //       assignee: "Loading...",
-  //       category: "General Support",
-  //       department: "Enterprise Services",
-  //       contact: "John Doe",
-  //       employee: "Samuel Tarley",
-  //       requester: "John Doe",
-  //       selfServiceRequester: "John Doe",
-  //       incident: "",
-  //       statusAndPriority: "",
-  //       startDate: "",
-  //       startTime: "",
-  //       endDate: "",
-  //       endTime: "",
-  //       assignmentGroup: "",
-  //       assignedTo: "",
-  //     }
-  //   );
-  // }, [tickets, requestId]);
 
   const statusColors = getStatusColor(request.status);
 
@@ -233,19 +280,37 @@ function RequestDetails({ request }) {
               minHeight: 0,
             }}
           >
-            {requestFormSections.map((section) => (
-              <FormSection
-                key={section.title}
-                title={section.title}
-                icon={section.icon}
-                defaultExpanded={section.defaultExpanded}
-              >
-                <FormSectionGrid
-                  fields={section.fields(request)}
-                  gridSize={section.gridSize}
-                />
-              </FormSection>
-            ))}
+            {sectionsLoading ? (
+              <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+                <CircularProgress size={24} />
+              </Box>
+            ) : (
+              formSections.map((section) => {
+                const SectionIcon =
+                  SECTION_ICON_MAP[section.icon] || DescriptionOutlinedIcon;
+
+                return (
+                  <FormSection
+                    key={section.key}
+                    title={section.title}
+                    icon={SectionIcon}
+                    defaultExpanded={section.defaultExpanded}
+                  >
+                    {section.type === "table" ? (
+                      <DetailTable
+                        columns={section.columns}
+                        rows={section.rows}
+                      />
+                    ) : (
+                      <FormSectionGrid
+                        fields={section.fields}
+                        gridSize={section.gridSize}
+                      />
+                    )}
+                  </FormSection>
+                );
+              })
+            )}
           </Box>
         )}
 
@@ -261,45 +326,47 @@ function RequestDetails({ request }) {
               flex: 1,
             }}
           >
-            {detailsTabSections.map((section) => (
-              <FormSection
-                key={section.title}
-                title={section.title}
-                icon={section.icon}
-                defaultExpanded={section.defaultExpanded}
+            {detailsLoading ? (
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  py: 4,
+                }}
               >
-                <DetailTable
-                  columns={section.columns}
-                  rows={section.rows(request)}
-                  onView={(row) =>
-                    setPreviewFile({
-                      name: row.Title,
-                      uploadedBy: "Alex Morgan",
-                      date: "Jan 17, 2026 · 09:21 AM",
-                      downloadCount: 1,
-                      previewTitle:
-                        "Cargill Ticketing System - Security Scan Requirements Checklist",
-                      previewLines: [
-                        "Verify CORS policies on all SXR QA endpoints.",
-                        "Run dynamic application scan against HTTP API.",
-                        "Validate session timeout parameters.",
-                        "Verify SSL/TLS cipher suites.",
-                        "Check RBAC roles for privilege escalation holes.",
-                        "Verify encryption settings for sensitive parameters.",
-                      ],
-                    })
-                  }
-                  onDelete={(row) => console.log("delete", row)}
-                />
-                <FilePreviewModal
-                  open={!!previewFile}
-                  file={previewFile}
-                  onClose={() => setPreviewFile(null)}
-                  onDownload={() => console.log("download", previewFile)}
-                  onViewHistory={() => console.log("history", previewFile)}
-                />
-              </FormSection>
-            ))}
+                <CircularProgress size={24} />
+              </Box>
+            ) : (
+              detailsSections.map((section) => {
+                const SectionIcon =
+                  SECTION_ICON_MAP[section.icon] || DescriptionOutlinedIcon;
+
+                return (
+                  <FormSection
+                    key={section.key}
+                    title={section.title}
+                    icon={SectionIcon}
+                    defaultExpanded={section.defaultExpanded}
+                  >
+                    <DetailTable
+                      columns={section.columns}
+                      rows={section.rows}
+                      onView={(row) => {
+                        setPreviewFile({
+                          name: row.Title,
+                          uploadedBy: row.AddedBy,
+                          date: row.Date,
+                          downloadCount: 1,
+                          previewTitle: row.Title,
+                          previewLines: [],
+                        });
+                      }}
+                      onDelete={(row) => console.log("delete", row)}
+                    />
+                  </FormSection>
+                );
+              })
+            )}
           </Box>
         )}
 
@@ -315,7 +382,7 @@ function RequestDetails({ request }) {
               flex: 1,
             }}
           >
-            <SubmittedFormView data={submittedFormData} />
+            {submittedForm && <SubmittedFormView data={submittedForm} />}
           </Box>
         )}
       </Box>

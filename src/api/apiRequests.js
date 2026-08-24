@@ -1,5 +1,15 @@
 import { apiService } from "./apiService";
 import mockTickets from "../mocks/ticketData";
+import {
+  hrRequestDetailSections,
+  nonHrRequestDetailSections,
+  hrDetailsTabSections,
+  nonHrDetailsTabSections,
+  hrSubmittedForm,
+  nonHrSubmittedForm,
+} from "../mocks/requestDetailsData";
+import { mockServiceRequestForm } from "../mocks/ticketServiceRequestData";
+import { mockServiceRequestDetails } from "../mocks/serviceRequestDetailsData";
 
 export const getDepartments = (payload = {}) =>
   apiService.post("/v1/rbac/get-departments", payload);
@@ -44,6 +54,7 @@ export const getTicketData = (payload = {}) => {
   const { page = 1, pageSize = 10 } = payload;
 
   // Simulate network + real API's response shape
+  console.log("Fetching tickets with payload:", payload);
   return new Promise((resolve) => {
     setTimeout(() => {
       const start = (page - 1) * pageSize;
@@ -69,8 +80,52 @@ export const getTicketData = (payload = {}) => {
     }, 300); // fake latency
   });
 
-  console.log("Fetching tickets with payload:", payload);
-
   // Real version, uncomment when backend ready:
   // return apiService.post("/v1/tickets/get-data", payload);
+};
+
+export const getServiceRequestForm = (payload = {}) => {
+  const { ticketId } = payload;
+
+  console.log("Fetching service request form with payload:", payload);
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        success: true,
+        message: "Service request form fetched successfully.",
+        data: {
+          ticketId,
+          ...mockServiceRequestForm,
+        },
+      });
+    }, 300);
+  });
+
+  // Real API version:
+  // return apiService.post("/v1/tickets/get-service-request-form", payload);
+};
+
+export const getServiceRequestDetails = (payload = {}) => {
+  const { ticketId } = payload;
+
+  console.log("Fetching service request details with payload:", payload);
+
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        success: true,
+        message: "Service request details fetched successfully.",
+        data: {
+          ticketId,
+          ...mockServiceRequestDetails,
+        },
+      });
+    }, 300);
+  });
+
+  // Real API:
+  // return apiService.post(
+  //   "/v1/tickets/get-service-request-details",
+  //   payload
+  // );
 };

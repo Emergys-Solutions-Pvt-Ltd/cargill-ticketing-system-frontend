@@ -1,7 +1,7 @@
 // Mock ticket data — swap back to apiService when backend ready
 const statuses = ["OPEN", "CLOSED", "PENDING", "IN PROGRESS"];
 const staff = ["Eddy", "Maria", "Sam", "Priya", "Unassigned"];
-const types = ["Service Request", "Incident", "Change Request"];
+const types = ["Service", "Incident", "Task"];
 
 const allTickets = Array.from({ length: 100 }, (_, i) => ({
   ticketid: `TCK-${1000 + i}`,
