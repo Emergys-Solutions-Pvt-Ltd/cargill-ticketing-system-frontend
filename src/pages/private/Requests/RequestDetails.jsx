@@ -73,64 +73,51 @@ function RequestDetails({ request }) {
     const ticketType = request.ticketType || "Service";
     if (ticketType !== "Service" && ticketType !== "Incident") {
       setSectionsLoading(false);
+      setDetailsLoading(false);
       return;
     }
 
-    const fetchServiceRequestForm = async () => {
+    let cancelled = false;
+
+    const fetchAll = async () => {
       setSectionsLoading(true);
+      setDetailsLoading(true);
 
-      try {
-        const res = await getServiceRequestForm({
-          ticketId: request.id,
-        });
+      const [formRes, detailsRes] = await Promise.allSettled([
+        getServiceRequestForm({ ticketId: request.id }),
+        getServiceRequestDetails({ ticketId: request.id }),
+      ]);
 
-        if (res?.success) {
-          const apiData = res?.data || {};
+      if (cancelled) return;
 
-          const sections = SERVICE_REQUEST_SECTIONS.map((section) => ({
+      // form sections
+      if (formRes.status === "fulfilled" && formRes.value?.success) {
+        const apiData = formRes.value?.data || {};
+        setFormSections(
+          SERVICE_REQUEST_SECTIONS.map((section) => ({
             ...section,
             defaultExpanded: true,
             type: "grid",
             gridSize: 3,
             fields: objectToFields(apiData[section.key]),
-          }));
-
-          setFormSections(sections);
-        }
-      } catch (error) {
-        console.error("Failed to fetch service request form:", error);
+          })),
+        );
+      } else {
+        if (formRes.status === "rejected")
+          console.error(
+            "Failed to fetch service request form:",
+            formRes.reason,
+          );
         setFormSections([]);
-      } finally {
-        setSectionsLoading(false);
       }
-    };
+      setSectionsLoading(false);
 
-    fetchServiceRequestForm();
-  }, [request?.id, request?.ticketType]);
-
-  useEffect(() => {
-    if (!request?.id) return;
-
-    const ticketType = request.ticketType || "Service";
-    if (ticketType !== "Service" && ticketType !== "Incident") {
-      setDetailsLoading(false);
-      return;
-    }
-
-    const fetchServiceRequestDetails = async () => {
-      setDetailsLoading(true);
-
-      try {
-        const res = await getServiceRequestDetails({
-          ticketId: request.id,
-        });
-
-        if (res?.success) {
-          const apiData = res?.data || {};
-
-          const sections = DETAILS_SECTIONS.map((section) => {
+      // details sections
+      if (detailsRes.status === "fulfilled" && detailsRes.value?.success) {
+        const apiData = detailsRes.value?.data || {};
+        setDetailsSections(
+          DETAILS_SECTIONS.map((section) => {
             const rows = apiData[section.key] || [];
-
             return {
               ...section,
               defaultExpanded: true,
@@ -138,20 +125,24 @@ function RequestDetails({ request }) {
               rows,
               columns: rows.length > 0 ? Object.keys(rows[0]) : [],
             };
-          });
-
-          setDetailsSections(sections);
-        }
-      } catch (error) {
-        console.error("Failed to fetch service request details:", error);
-
+          }),
+        );
+      } else {
+        if (detailsRes.status === "rejected")
+          console.error(
+            "Failed to fetch service request details:",
+            detailsRes.reason,
+          );
         setDetailsSections([]);
-      } finally {
-        setDetailsLoading(false);
       }
+      setDetailsLoading(false);
     };
 
-    fetchServiceRequestDetails();
+    fetchAll();
+
+    return () => {
+      cancelled = true;
+    };
   }, [request?.id, request?.ticketType]);
 
   if (!request) return null;
