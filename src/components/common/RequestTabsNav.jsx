@@ -3,7 +3,7 @@ import { Tab, Tabs } from "@mui/material";
 const tabConfig = {
   Service: ["Service Request Form", "Details", "Submitted Form"],
   Incident: ["Incident Form", "Details"],
-  Tsk: ["Task Form", "Details"],
+  Task: ["Task Form", "Details"],
 };
 
 const RequestTabsNav = ({ ticketType = "Service", value, onChange }) => {

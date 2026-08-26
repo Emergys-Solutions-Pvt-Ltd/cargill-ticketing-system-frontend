@@ -56,3 +56,28 @@ export const DETAILS_SECTIONS = [
     icon: "link",
   },
 ];
+
+export const TASK_DETAILS_SECTIONS = [
+  { key: "actionHistory", title: "Action History", icon: "list" },
+  {
+    key: "notesAndAttachments",
+    title: "Notes & Attachments",
+    icon: "description",
+  },
+  // { key: "approvalHistory", title: "Approval History", icon: "shield" }, // backend not returning yet
+  { key: "linkedTasks", title: "Linked Tasks", icon: "link" },
+  // { key: "incidentHistory", title: "Incident History", icon: "event" }, // backend not returning yet
+  { key: "linkedIncidents", title: "Linked Incidents", icon: "assignment" },
+];
+
+export const TASK_REQUEST_SECTIONS = [
+  { key: "clientDetails", title: "Console Client Details HR", icon: "person" },
+  { key: "taskDetails", title: "Console-Task Details HR", icon: "description" },
+  {
+    key: "statusAndPriority",
+    title: "Status and Priority Details",
+    icon: "shield",
+  },
+  { key: "dateAndTimeDetails", title: "Date and Time Details", icon: "event" },
+  { key: "assignmentDetails", title: "Assignment Details", icon: "assignment" },
+];

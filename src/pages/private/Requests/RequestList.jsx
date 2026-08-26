@@ -109,10 +109,10 @@ const RequestList = () => {
     [tickets, searchQuery, statusFilter],
   );
 
-  const paginatedRequests = filteredRequests.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage,
-  );
+  // const paginatedRequests = filteredRequests.slice(
+  //   page * rowsPerPage,
+  //   page * rowsPerPage + rowsPerPage,
+  // );
 
   const handleOpenRequestTab = (row) => {
     setOpenRequestTabs((prevTabs) => {

@@ -1,6 +1,6 @@
 import { Box, Typography } from "@mui/material";
 
-const DetailField = ({ label, value }) => (
+const DetailField = ({ label, value, sx }) => (
   <Box sx={{ minWidth: 0 }}>
     <Typography
       sx={{ fontSize: "11px", color: "#6b7280", mb: 0.5, fontWeight: 400 }}
@@ -15,6 +15,7 @@ const DetailField = ({ label, value }) => (
         overflow: "hidden",
         textOverflow: "ellipsis",
         whiteSpace: "nowrap",
+        ...sx,
       }}
     >
       {value || "-"}

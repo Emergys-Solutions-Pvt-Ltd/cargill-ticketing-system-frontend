@@ -38,15 +38,20 @@ import FormSectionGrid from "../../../components/common/FormSectionGrid";
 import { submittedFormData } from "../../../api/mockData";
 import RequestTabsNav from "../../../components/common/RequestTabsNav";
 import FilePreviewModal from "../../../components/filePreviews/FilePreviewModal";
+import { objectToFields, getStatusColor } from "./utils/formatters.js";
 import {
   getServiceRequestForm,
   getServiceRequestDetails,
+  getTaskFormDetails,
+  getTaskDetails,
+  getSubmittedForm,
 } from "../../../api/apiRequests";
-import { objectToFields, getStatusColor } from "./utils/formatters.js";
 import {
   DETAILS_SECTIONS,
   SECTION_ICON_MAP,
   SERVICE_REQUEST_SECTIONS,
+  TASK_REQUEST_SECTIONS,
+  TASK_DETAILS_SECTIONS,
 } from "../../../utils/constants";
 
 function RequestDetails({ request }) {
@@ -60,6 +65,29 @@ function RequestDetails({ request }) {
   const [submittedForm, setSubmittedForm] = useState(null);
   const [sectionsLoading, setSectionsLoading] = useState(true);
   const [detailsLoading, setDetailsLoading] = useState(true);
+  const [submittedFormLoading, setSubmittedFormLoading] = useState(true);
+
+  useEffect(() => {
+    if (!request?.id) return;
+    let cancelled = false;
+
+    const fetchSubmittedForm = async () => {
+      setSubmittedFormLoading(true);
+      try {
+        const res = await getSubmittedForm({ ticketId: request.id });
+        if (!cancelled && res?.success) setSubmittedForm(res.data);
+      } catch (error) {
+        console.error("Failed to fetch submitted form:", error);
+      } finally {
+        if (!cancelled) setSubmittedFormLoading(false);
+      }
+    };
+
+    fetchSubmittedForm();
+    return () => {
+      cancelled = true;
+    };
+  }, [request?.id]);
 
   useEffect(() => {
     if (request?.id && authUser) {
@@ -71,7 +99,10 @@ function RequestDetails({ request }) {
     if (!request?.id) return;
 
     const ticketType = request.ticketType || "Service";
-    if (ticketType !== "Service" && ticketType !== "Incident") {
+    const isServiceLike = ticketType === "Service" || ticketType === "Incident";
+    const isTask = ticketType === "Task";
+
+    if (!isServiceLike && !isTask) {
       setSectionsLoading(false);
       setDetailsLoading(false);
       return;
@@ -83,9 +114,17 @@ function RequestDetails({ request }) {
       setSectionsLoading(true);
       setDetailsLoading(true);
 
+      const formPromise = isTask
+        ? getTaskFormDetails({ ticketId: request.id })
+        : getServiceRequestForm({ ticketId: request.id });
+
+      const detailsPromise = isTask
+        ? getTaskDetails({ ticketId: request.id })
+        : getServiceRequestDetails({ ticketId: request.id });
+
       const [formRes, detailsRes] = await Promise.allSettled([
-        getServiceRequestForm({ ticketId: request.id }),
-        getServiceRequestDetails({ ticketId: request.id }),
+        formPromise,
+        detailsPromise,
       ]);
 
       if (cancelled) return;
@@ -93,8 +132,11 @@ function RequestDetails({ request }) {
       // form sections
       if (formRes.status === "fulfilled" && formRes.value?.success) {
         const apiData = formRes.value?.data || {};
+        const sectionConfig = isTask
+          ? TASK_REQUEST_SECTIONS
+          : SERVICE_REQUEST_SECTIONS;
         setFormSections(
-          SERVICE_REQUEST_SECTIONS.map((section) => ({
+          sectionConfig.map((section) => ({
             ...section,
             defaultExpanded: true,
             type: "grid",
@@ -104,10 +146,7 @@ function RequestDetails({ request }) {
         );
       } else {
         if (formRes.status === "rejected")
-          console.error(
-            "Failed to fetch service request form:",
-            formRes.reason,
-          );
+          console.error("Failed to fetch form:", formRes.reason);
         setFormSections([]);
       }
       setSectionsLoading(false);
@@ -115,8 +154,9 @@ function RequestDetails({ request }) {
       // details sections
       if (detailsRes.status === "fulfilled" && detailsRes.value?.success) {
         const apiData = detailsRes.value?.data || {};
+        const sectionConfig = isTask ? TASK_DETAILS_SECTIONS : DETAILS_SECTIONS;
         setDetailsSections(
-          DETAILS_SECTIONS.map((section) => {
+          sectionConfig.map((section) => {
             const rows = apiData[section.key] || [];
             return {
               ...section,
@@ -129,10 +169,7 @@ function RequestDetails({ request }) {
         );
       } else {
         if (detailsRes.status === "rejected")
-          console.error(
-            "Failed to fetch service request details:",
-            detailsRes.reason,
-          );
+          console.error("Failed to fetch details:", detailsRes.reason);
         setDetailsSections([]);
       }
       setDetailsLoading(false);
@@ -232,11 +269,32 @@ function RequestDetails({ request }) {
             }}
           />
         </Box>
-        <Typography
-          sx={{ mt: 1, color: "#374151", fontSize: "14px", fontWeight: 300 }}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 2,
+          }}
         >
-          {request.title}
-        </Typography>
+          <Typography
+            sx={{ mt: 1, color: "#374151", fontSize: "14px", fontWeight: 300 }}
+          >
+            {request.title}
+          </Typography>
+          <Box sx={{ display: "flex", mt: 1.5 }}>
+            <Typography
+              sx={{ color: "#374151", fontWeight: 400, fontSize: "14px" }}
+            >
+              Ticket type:{" "}
+            </Typography>
+            <Typography
+              sx={{ color: "#1F2A37", fontWeight: 400, fontSize: "14px" }}
+            >
+              {request.ticketType}
+            </Typography>
+          </Box>
+        </Box>
       </Card>
 
       {/* Main Service Request Form */}
@@ -373,7 +431,13 @@ function RequestDetails({ request }) {
               flex: 1,
             }}
           >
-            {submittedForm && <SubmittedFormView data={submittedForm} />}
+            {submittedFormLoading ? (
+              <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+                <CircularProgress size={24} />
+              </Box>
+            ) : (
+              submittedForm && <SubmittedFormView data={submittedForm} />
+            )}
           </Box>
         )}
       </Box>
