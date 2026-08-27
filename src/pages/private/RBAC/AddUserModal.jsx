@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Box } from "@mui/material";
+import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 import Modal from "../../../components/common/Modal";
 import FormTextField from "../../../components/common/FormTextField";
 import FormSelect from "../../../components/common/FormSelect";
@@ -47,6 +48,11 @@ const DEFAULT_FORM = {
 
 const normalizeRole = (role = "") =>
   role.toLowerCase().includes("super") ? "super_user" : "user";
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MOBILE_REGEX = /^\d{10}$/;
+
+const DEFAULT_ERRORS = { email: "", mobile: "" };
 
 const EDIT_COMPARE_FIELDS = ["role", "name", "email", "mobile", "department", "reportsTo", "workLocation"];
 
@@ -123,6 +129,7 @@ const AddUserModal = ({
   const [departmentsLoading, setDepartmentsLoading] = useState(false);
   const [reportsToOptions, setReportsToOptions] = useState([]);
   const [reportsToLoading, setReportsToLoading] = useState(false);
+  const [errors, setErrors] = useState(DEFAULT_ERRORS);
 
   useEffect(() => {
     if (!open) return;
@@ -131,6 +138,7 @@ const AddUserModal = ({
       : { ...DEFAULT_FORM, department: isDepartmentLocked ? String(lockedDepartmentId) : "" };
     setForm(nextForm);
     setInitialForm(isEditMode ? nextForm : null);
+    setErrors(DEFAULT_ERRORS);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, user, isDepartmentLocked, lockedDepartmentId]);
 
@@ -243,8 +251,14 @@ const AddUserModal = ({
       ? EDIT_COMPARE_FIELDS.every((key) => form[key] === initialForm[key])
       : false;
 
+  // Every field is required except Mobile Number — for role "user" that also means
+  // Reports To and Assign Group (the two fields only shown for that role).
   const isRequiredFieldsFilled = Boolean(
-    form.role && form.name.trim() && form.email.trim() && form.department,
+    form.role &&
+      form.name.trim() &&
+      form.email.trim() &&
+      form.department &&
+      (form.role !== "user" || (form.reportsTo && form.groups.length > 0)),
   );
 
   const isConfirmDisabled = isEditMode ? isFormUnchanged : !isRequiredFieldsFilled;
@@ -252,23 +266,47 @@ const AddUserModal = ({
   const handleClose = () => {
     setForm({ ...DEFAULT_FORM, department: isDepartmentLocked ? String(lockedDepartmentId) : "" });
     setInitialForm(null);
+    setErrors(DEFAULT_ERRORS);
     onClose?.();
   };
 
   const handleFieldChange = (field) => (event) => {
-    const { value } = event.target;
+    // Mobile only ever accepts digits, so strip anything else as it's typed rather
+    // than waiting for submit-time validation to catch it.
+    const value = field === "mobile" ? event.target.value.replace(/\D/g, "") : event.target.value;
     setForm((prev) => ({
       ...prev,
       [field]: value,
       ...(field === "department" ? { groups: [], reportsTo: "" } : {}),
     }));
+    if (field === "email" || field === "mobile") {
+      setErrors((prev) => ({ ...prev, [field]: "" }));
+    }
   };
 
   const handleGroupsChange = (value) => {
     setForm((prev) => ({ ...prev, groups: value }));
   };
 
+  // Runs before the API call — if either check fails, the errors are shown inline
+  // and onSubmit (which triggers the add/edit API call) is never invoked.
+  const validate = () => {
+    const nextErrors = { ...DEFAULT_ERRORS };
+
+    if (!isEditMode && !EMAIL_REGEX.test(form.email.trim())) {
+      nextErrors.email = "Enter a valid email address.";
+    }
+
+    if (form.mobile.trim() && !MOBILE_REGEX.test(form.mobile.trim())) {
+      nextErrors.mobile = "Enter a valid 10-digit mobile number.";
+    }
+
+    setErrors(nextErrors);
+    return !nextErrors.email && !nextErrors.mobile;
+  };
+
   const handleSubmit = () => {
+    if (!validate()) return;
     onSubmit?.(form);
   };
 
@@ -304,6 +342,15 @@ const AddUserModal = ({
           value={form.email}
           onChange={handleFieldChange("email")}
           disabled={isEditMode}
+          error={Boolean(errors.email)}
+          helperText={
+            errors.email && (
+              <Box component="span" sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                <WarningAmberRoundedIcon sx={{ fontSize: 14 }} />
+                {errors.email}
+              </Box>
+            )
+          }
         />
       ),
     },
@@ -322,6 +369,16 @@ const AddUserModal = ({
           placeholder="Enter"
           value={form.mobile}
           onChange={handleFieldChange("mobile")}
+          inputProps={{ inputMode: "numeric", maxLength: 10 }}
+          error={Boolean(errors.mobile)}
+          helperText={
+            errors.mobile && (
+              <Box component="span" sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                <WarningAmberRoundedIcon sx={{ fontSize: 14 }} />
+                {errors.mobile}
+              </Box>
+            )
+          }
         />
       ),
     },

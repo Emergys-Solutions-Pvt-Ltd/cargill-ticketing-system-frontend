@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import { Box, Typography, CircularProgress } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import DepartmentListItem from "../../../components/common/DepartmentListItem";
+import Loader from "../../../components/common/Loader";
 
 export const mapDepartment = (dept) => ({
   id: dept.departmentId,
@@ -32,7 +33,7 @@ const DepartmentsTab = ({ departments = [], loading = false }) => {
       </Typography>
       {loading ? (
         <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-          <CircularProgress size={28} />
+          <Loader size={28} />
         </Box>
       ) : departments.length === 0 ? (
         <Typography variant="body2" sx={{ color: "text.secondary" }}>

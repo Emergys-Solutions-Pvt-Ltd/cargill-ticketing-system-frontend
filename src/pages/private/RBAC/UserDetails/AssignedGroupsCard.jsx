@@ -1,7 +1,8 @@
-import { Box, Typography, IconButton, CircularProgress } from "@mui/material";
+import { Box, Typography, IconButton } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import GroupsIcon from "../../../../assets/icons/groups.svg";
 import TrashIcon from "../../../../assets/icons/trash.svg";
+import Loader from "../../../../components/common/Loader";
 
 const GroupItem = ({ group, onViewGroup, onRemoveGroup }) => (
   <Box
@@ -89,14 +90,14 @@ const AssignedGroupsCard = ({ groups = [], loading = false, onAssignGroup, onVie
 
       {loading ? (
         <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-          <CircularProgress size={24} />
+          <Loader size={24} />
         </Box>
       ) : groups.length === 0 ? (
         <Typography variant="body2" sx={{ color: "text.secondary" }}>
           No groups assigned yet.
         </Typography>
       ) : (
-        <Box sx={{ display: "flex", alignItems: "stretch", gap: 2 }}>
+        <Box sx={{ display: "flex", alignItems: "stretch", gap: 2, maxHeight: 320, overflowY: "auto", pr: 0.5 }}>
           <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 1.5, minWidth: 0 }}>
             {leftColumn.map((group) => (
               <GroupItem
