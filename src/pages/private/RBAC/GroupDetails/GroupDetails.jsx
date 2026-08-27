@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Box, Typography, IconButton, CircularProgress } from "@mui/material";
+import { Box, Typography, IconButton } from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import BackNavigation from "../../../../components/common/BackNavigation";
 import EntityHeaderCard from "../../../../components/common/EntityHeaderCard";
 import ConfirmDialog from "../../../../components/common/ConfirmDialog";
 import AddButton from "../../../../components/common/AddButton";
+import Loader from "../../../../components/common/Loader";
 import GroupsIcon from "../../../../assets/icons/groups.svg";
 import TrashIcon from "../../../../assets/icons/trash.svg";
 import AddQueueModal from "./AddQueueModal";
@@ -147,7 +148,7 @@ const GroupDetails = () => {
 
         {queuesLoading ? (
           <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-            <CircularProgress size={24} />
+            <Loader size={24} />
           </Box>
         ) : (
           <Box

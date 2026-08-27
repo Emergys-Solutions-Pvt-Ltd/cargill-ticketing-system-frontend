@@ -2,7 +2,6 @@ import { useState } from "react";
 import {
   Box,
   Checkbox,
-  CircularProgress,
   Paper,
   Table,
   TableBody,
@@ -14,6 +13,7 @@ import {
   Typography,
 } from "@mui/material";
 import Pagination from "../Pagination";
+import Loader from "./Loader";
 
 const CommonTable = ({
   columns = [],
@@ -118,6 +118,7 @@ const CommonTable = ({
           stickyHeader={stickyHeader}
           sx={{
             minWidth,
+            ...(loading ? { height: "100%" } : {}),
             "& .MuiTableCell-root": {
               borderBottom: "1px solid #E5E7EB",
               whiteSpace: "nowrap",
@@ -222,9 +223,22 @@ const CommonTable = ({
           <TableBody>
             {/* Loading state */}
             {loading ? (
-              <TableRow>
-                <TableCell colSpan={totalColumns} align="center" sx={{ py: 6 }}>
-                  <CircularProgress size={32} />
+              <TableRow sx={{ height: "100%" }}>
+                <TableCell
+                  colSpan={totalColumns}
+                  align="center"
+                  sx={{ height: "100%", border: "none", py: 0 }}
+                >
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      height: "100%",
+                    }}
+                  >
+                    <Loader size={32} />
+                  </Box>
                 </TableCell>
               </TableRow>
             ) : displayRows.length === 0 ? (

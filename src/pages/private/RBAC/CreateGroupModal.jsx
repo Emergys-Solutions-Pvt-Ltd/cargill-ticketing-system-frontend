@@ -134,6 +134,10 @@ const CreateGroupModal = ({
     setForm((prev) => ({ ...prev, queues: value }));
   };
 
+  const isRequiredFieldsFilled = Boolean(
+    form.name.trim() && form.description.trim() && form.department && form.queues.length > 0,
+  );
+
   const handleSubmit = () => {
     const isDuplicate = existingGroupNames.some(
       (name) => name.trim().toLowerCase() === form.name.trim().toLowerCase(),
@@ -154,6 +158,7 @@ const CreateGroupModal = ({
       onConfirm={handleSubmit}
       confirmLabel="Create"
       confirmColor="success"
+      confirmDisabled={!isRequiredFieldsFilled}
       confirmLoading={loading}
     >
       <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>

@@ -1,5 +1,6 @@
-import { Box, Typography, CircularProgress } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import GroupsIcon from "../../../../assets/icons/groups.svg";
+import Loader from "../../../../components/common/Loader";
 
 const InheritedGroupItem = ({ group, onViewGroup }) => (
   <Box
@@ -67,7 +68,7 @@ const InheritedGroupsCard = ({ groups = [], loading = false, onViewGroup }) => {
 
       {loading ? (
         <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-          <CircularProgress size={24} />
+          <Loader size={24} />
         </Box>
       ) : groups.length === 0 ? (
         <Box

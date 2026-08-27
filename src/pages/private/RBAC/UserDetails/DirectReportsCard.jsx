@@ -1,5 +1,6 @@
-import { Box, Typography, Avatar, CircularProgress } from "@mui/material";
+import { Box, Typography, Avatar } from "@mui/material";
 import PersonAddAlt1OutlinedIcon from "@mui/icons-material/PersonAddAlt1Outlined";
+import Loader from "../../../../components/common/Loader";
 
 const AVATAR_COLORS = [
   { bgcolor: "#E0F2FE", color: "#0369A1" },
@@ -88,7 +89,7 @@ const DirectReportsCard = ({ reports = [], loading = false }) => {
 
       {loading ? (
         <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-          <CircularProgress size={24} />
+          <Loader size={24} />
         </Box>
       ) : reports.length === 0 ? (
         <Box
