@@ -299,3 +299,49 @@ export const getSubmittedForm = async (payload) => {
   await new Promise((r) => setTimeout(r, 400));
   return { success: true, data: MOCK_SUBMITTED_FORM };
 };
+
+const MOCK_SLA_DATA = [
+  {
+    "Target Title": "CBS Global Re...",
+    "Target Type": "Resolution...",
+    "Time Remaining": "- 190 day(s) 09...",
+    "Target End Date": "10/27/2023 8...",
+    Agreement: "CBS Global Ta...",
+    "Start Date": "8/2/2025 12:5...",
+    "Elapsed Time": "250 day(s) 09:30 HH:...",
+    Clock: "Running",
+    State: "In-progress",
+    Status: "Missed",
+  },
+  {
+    "Target Title": "CBS Global Re...",
+    "Target Type": "Resolution...",
+    "Time Remaining": "- 190 day(s) 09...",
+    "Target End Date": "10/27/2023 8...",
+    Agreement: "CBS Global Ta...",
+    "Start Date": "8/2/2025 12:5...",
+    "Elapsed Time": "250 day(s) 09:30 HH:...",
+    Clock: "Running",
+    State: "In-progress",
+    Status: "Missed",
+  },
+  {
+    "Target Title": "CBS Global Re...",
+    "Target Type": "Resolution...",
+    "Time Remaining": "- 190 day(s) 09...",
+    "Target End Date": "10/27/2023 8...",
+    Agreement: "CBS Global Ta...",
+    "Start Date": "8/2/2025 12:5...",
+    "Elapsed Time": "250 day(s) 09:30 HH:...",
+    Clock: "Running",
+    State: "In-progress",
+    Status: "Cancelled",
+  },
+];
+
+export const getSlaData = async (payload) => {
+  // TODO: swap to real call
+  // return api.post("/get-sla", payload);
+  await new Promise((r) => setTimeout(r, 400));
+  return { success: true, data: MOCK_SLA_DATA };
+};

@@ -36,7 +36,15 @@ const RequestList = () => {
   const [openRequestTabs, setOpenRequestTabs] = useState([]);
   const [filterOpen, setFilterOpen] = useState(false);
   const [filters, setFilters] = useState({});
+  const [ticketDataCache, setTicketDataCache] = useState({});
 
+  const handleCacheUpdate = useCallback((ticketId, partialData) => {
+    setTicketDataCache((prev) => ({
+      ...prev,
+      [ticketId]: { ...prev[ticketId], ...partialData },
+    }));
+  }, []);
+  
   const handleFilterChange = (key, value) =>
     setFilters((prev) => ({ ...prev, [key]: value }));
 
@@ -141,6 +149,11 @@ const RequestList = () => {
         return currentTab;
       });
       return remainingTabs;
+    });
+    setTicketDataCache((prev) => {
+      const next = { ...prev };
+      delete next[tabId];
+      return next;
     });
   };
 
@@ -412,6 +425,8 @@ const RequestList = () => {
             request={
               openRequestTabs.find((tab) => tab.id === activeTab)?.request
             }
+            cachedData={ticketDataCache[activeTab]}
+            onCacheUpdate={handleCacheUpdate}
           />
         )}
       </Box>

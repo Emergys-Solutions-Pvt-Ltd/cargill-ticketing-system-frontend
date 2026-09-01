@@ -45,16 +45,19 @@ import {
   getTaskFormDetails,
   getTaskDetails,
   getSubmittedForm,
+  getSlaData,
 } from "../../../api/apiRequests";
 import {
   DETAILS_SECTIONS,
   SECTION_ICON_MAP,
   SERVICE_REQUEST_SECTIONS,
+  INCIDENT_REQUEST_SECTIONS,
   TASK_REQUEST_SECTIONS,
   TASK_DETAILS_SECTIONS,
+  IS_HR,
 } from "../../../utils/constants";
 
-function RequestDetails({ request }) {
+function RequestDetails({ request, cachedData, onCacheUpdate }) {
   const { requestId } = useParams();
   const { user: authUser } = useAuth();
   const [tickets, setTickets] = useState(() => getStoredTickets());
@@ -66,16 +69,92 @@ function RequestDetails({ request }) {
   const [sectionsLoading, setSectionsLoading] = useState(true);
   const [detailsLoading, setDetailsLoading] = useState(true);
   const [submittedFormLoading, setSubmittedFormLoading] = useState(true);
+  const [slaRows, setSlaRows] = useState([]);
+  const [slaLoading, setSlaLoading] = useState(true);
+
+  const ticketTypeNormalized =
+    request?.ticketType === "Task" || request?.ticketType === "task"
+      ? "Task"
+      : request?.ticketType === "Incident" || request?.ticketType === "incident"
+        ? "Incident"
+        : "Service";
+  const HR_TAB_CONFIG = {
+    Service: ["Service Request Form", "Details", "Submitted Form"],
+    Incident: ["Incident Form", "Details"],
+    Task: ["Task Form", "Details"],
+  };
+  const NONHR_TAB_CONFIG = {
+    Service: ["Service Request Form", "Details", "Submitted Form", "SLA"],
+    Incident: ["Incident Form", "Details", "SLA"],
+    Task: ["Task Form", "Details"],
+  };
+  const tabLabels = (IS_HR ? HR_TAB_CONFIG : NONHR_TAB_CONFIG)[
+    ticketTypeNormalized
+  ];
+
+  const formTabIndex = 0;
+  const detailsTabIndex = tabLabels.indexOf("Details");
+  const submittedFormTabIndex = tabLabels.indexOf("Submitted Form");
+  const slaTabIndex = tabLabels.indexOf("SLA");
+
+  useEffect(() => {
+    if (!request?.id || IS_HR) {
+      setSlaLoading(false);
+      return;
+    }
+
+    if (cachedData?.slaRows !== undefined) {
+      setSlaRows(cachedData.slaRows);
+      setSlaLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    const fetchSla = async () => {
+      setSlaLoading(true);
+      try {
+        const res = await getSlaData({ ticketId: request.id });
+        if (!cancelled && res?.success) {
+          setSlaRows(res.data);
+          onCacheUpdate?.(request.id, { slaRows: res.data });
+        }
+      } catch (error) {
+        console.error("Failed to fetch SLA data:", error);
+      } finally {
+        if (!cancelled) setSlaLoading(false);
+      }
+    };
+
+    fetchSla();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [request?.id]);
 
   useEffect(() => {
     if (!request?.id) return;
-    let cancelled = false;
 
+    if (submittedFormTabIndex === -1) {
+      setSubmittedFormLoading(false);
+      return;
+    }
+
+    if (cachedData?.submittedForm !== undefined) {
+      setSubmittedForm(cachedData.submittedForm);
+      setSubmittedFormLoading(false);
+      return;
+    }
+
+    let cancelled = false;
     const fetchSubmittedForm = async () => {
       setSubmittedFormLoading(true);
       try {
         const res = await getSubmittedForm({ ticketId: request.id });
-        if (!cancelled && res?.success) setSubmittedForm(res.data);
+        if (!cancelled && res?.success) {
+          setSubmittedForm(res.data);
+          onCacheUpdate?.(request.id, { submittedForm: res.data });
+        }
       } catch (error) {
         console.error("Failed to fetch submitted form:", error);
       } finally {
@@ -99,10 +178,24 @@ function RequestDetails({ request }) {
     if (!request?.id) return;
 
     const ticketType = request.ticketType || "Service";
-    const isServiceLike = ticketType === "Service" || ticketType === "Incident";
-    const isTask = ticketType === "Task";
+    const isService =
+      ticketType === "Service" || ticketType === "serviceRequest";
+    const isIncident = ticketType === "Incident" || ticketType === "incident";
+    const isServiceLike = isService || isIncident;
+    const isTask = ticketType === "Task" || ticketType === "task";
 
     if (!isServiceLike && !isTask) {
+      setSectionsLoading(false);
+      setDetailsLoading(false);
+      return;
+    }
+
+    if (
+      cachedData?.formSections !== undefined &&
+      cachedData?.detailsSections !== undefined
+    ) {
+      setFormSections(cachedData.formSections);
+      setDetailsSections(cachedData.detailsSections);
       setSectionsLoading(false);
       setDetailsLoading(false);
       return;
@@ -129,50 +222,52 @@ function RequestDetails({ request }) {
 
       if (cancelled) return;
 
-      // form sections
+      let newFormSections = [];
+      let newDetailsSections = [];
+
       if (formRes.status === "fulfilled" && formRes.value?.success) {
         const apiData = formRes.value?.data || {};
         const sectionConfig = isTask
           ? TASK_REQUEST_SECTIONS
-          : SERVICE_REQUEST_SECTIONS;
-        setFormSections(
-          sectionConfig.map((section) => ({
-            ...section,
-            defaultExpanded: true,
-            type: "grid",
-            gridSize: 3,
-            fields: objectToFields(apiData[section.key]),
-          })),
-        );
-      } else {
-        if (formRes.status === "rejected")
-          console.error("Failed to fetch form:", formRes.reason);
-        setFormSections([]);
+          : isIncident
+            ? INCIDENT_REQUEST_SECTIONS
+            : SERVICE_REQUEST_SECTIONS;
+        newFormSections = sectionConfig.map((section) => ({
+          ...section,
+          defaultExpanded: true,
+          type: "grid",
+          gridSize: 3,
+          fields: objectToFields(apiData[section.key]),
+        }));
+      } else if (formRes.status === "rejected") {
+        console.error("Failed to fetch form:", formRes.reason);
       }
+      setFormSections(newFormSections);
       setSectionsLoading(false);
 
-      // details sections
       if (detailsRes.status === "fulfilled" && detailsRes.value?.success) {
         const apiData = detailsRes.value?.data || {};
         const sectionConfig = isTask ? TASK_DETAILS_SECTIONS : DETAILS_SECTIONS;
-        setDetailsSections(
-          sectionConfig.map((section) => {
-            const rows = apiData[section.key] || [];
-            return {
-              ...section,
-              defaultExpanded: true,
-              type: "table",
-              rows,
-              columns: rows.length > 0 ? Object.keys(rows[0]) : [],
-            };
-          }),
-        );
-      } else {
-        if (detailsRes.status === "rejected")
-          console.error("Failed to fetch details:", detailsRes.reason);
-        setDetailsSections([]);
+        newDetailsSections = sectionConfig.map((section) => {
+          const rows = apiData[section.key] || [];
+          return {
+            ...section,
+            defaultExpanded: true,
+            type: "table",
+            rows,
+            columns: rows.length > 0 ? Object.keys(rows[0]) : [],
+          };
+        });
+      } else if (detailsRes.status === "rejected") {
+        console.error("Failed to fetch details:", detailsRes.reason);
       }
+      setDetailsSections(newDetailsSections);
       setDetailsLoading(false);
+
+      onCacheUpdate?.(request.id, {
+        formSections: newFormSections,
+        detailsSections: newDetailsSections,
+      });
     };
 
     fetchAll();
@@ -180,6 +275,7 @@ function RequestDetails({ request }) {
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [request?.id, request?.ticketType]);
 
   if (!request) return null;
@@ -316,7 +412,7 @@ function RequestDetails({ request }) {
           onChange={handleTabChange}
         />
 
-        {activeTab === 0 && (
+        {activeTab === formTabIndex && (
           <Box
             sx={{
               py: 3,
@@ -363,7 +459,7 @@ function RequestDetails({ request }) {
           </Box>
         )}
 
-        {activeTab === 1 && (
+        {activeTab === detailsTabIndex && (
           <Box
             sx={{
               py: 3,
@@ -419,7 +515,30 @@ function RequestDetails({ request }) {
           </Box>
         )}
 
-        {activeTab === 2 && (
+        {submittedFormTabIndex !== -1 &&
+          activeTab === submittedFormTabIndex && (
+            <Box
+              sx={{
+                py: 3,
+                px: 2.5,
+                backgroundColor: "#ffffff",
+                display: "flex",
+                flexDirection: "column",
+                overflowY: "auto",
+                flex: 1,
+              }}
+            >
+              {submittedFormLoading ? (
+                <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+                  <CircularProgress size={24} />
+                </Box>
+              ) : (
+                submittedForm && <SubmittedFormView data={submittedForm} />
+              )}
+            </Box>
+          )}
+
+        {slaTabIndex !== -1 && activeTab === slaTabIndex && (
           <Box
             sx={{
               py: 3,
@@ -431,12 +550,15 @@ function RequestDetails({ request }) {
               flex: 1,
             }}
           >
-            {submittedFormLoading ? (
+            {slaLoading ? (
               <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
                 <CircularProgress size={24} />
               </Box>
             ) : (
-              submittedForm && <SubmittedFormView data={submittedForm} />
+              <DetailTable
+                columns={slaRows.length > 0 ? Object.keys(slaRows[0]) : []}
+                rows={slaRows}
+              />
             )}
           </Box>
         )}
