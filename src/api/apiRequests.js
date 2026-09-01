@@ -345,3 +345,26 @@ export const getSlaData = async (payload) => {
   await new Promise((r) => setTimeout(r, 400));
   return { success: true, data: MOCK_SLA_DATA };
 };
+
+/**
+ * Fetches a pre-signed download URL for a given attachment.
+ *
+ * Real API: GET /v1/tickets/download
+ * Body: { relativePath: string }
+ * Response: { success: true, message: string, data: { url: string } }
+ */
+export const downloadFile = async (payload = {}) => {
+  const { relativePath } = payload;
+
+  console.log("[mock] relativePath from row:", relativePath);
+  await new Promise((r) => setTimeout(r, 400));
+  console.log(`${window.location.origin}/mock/sample.pdf`, "---------------");
+  return {
+    success: true,
+    message: "File url generated successfully.",
+    data: {
+      url: `${window.location.origin}/mock/sample.pdf`,
+      fileName: "sample.pdf",
+    },
+  };
+};

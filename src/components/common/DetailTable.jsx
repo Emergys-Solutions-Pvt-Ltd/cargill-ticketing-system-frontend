@@ -1,8 +1,8 @@
 import { Box, IconButton } from "@mui/material";
-import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 // import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
-const DetailTable = ({ columns, rows, onView, onDelete }) => (
+const DetailTable = ({ columns, rows, onView, onDownload }) => (
   <Box
     sx={{ overflowX: "auto", border: "1px solid #e5e7eb", borderRadius: "6px" }}
   >
@@ -47,14 +47,9 @@ const DetailTable = ({ columns, rows, onView, onDelete }) => (
                     whiteSpace: "nowrap",
                   }}
                 >
-                  <IconButton size="small" onClick={() => onView?.(row)}>
-                    <VisibilityOutlinedIcon
+                  <IconButton size="small" onClick={() => onDownload?.(row)}>
+                    <FileDownloadOutlinedIcon
                       sx={{ fontSize: 18, color: "#6b7280" }}
-                    />
-                  </IconButton>
-                  <IconButton size="small" onClick={() => onDelete?.(row)}>
-                    <VisibilityOutlinedIcon
-                      sx={{ fontSize: 18, color: "#d92d20" }}
                     />
                   </IconButton>
                 </Box>

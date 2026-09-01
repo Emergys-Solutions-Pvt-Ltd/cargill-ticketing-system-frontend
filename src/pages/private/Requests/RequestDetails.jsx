@@ -46,6 +46,7 @@ import {
   getTaskDetails,
   getSubmittedForm,
   getSlaData,
+  downloadFile,
 } from "../../../api/apiRequests";
 import {
   DETAILS_SECTIONS,
@@ -313,6 +314,24 @@ function RequestDetails({ request, cachedData, onCacheUpdate }) {
     setStoredTickets(updatedTickets);
   };
 
+  const handleDownloadFile = async (row) => {
+    try {
+      const file = await downloadFile({ relativePath: row.relativePath });
+      if (file?.success && file.data?.url) {
+        const link = document.createElement("a");
+        link.href = file.data.url;
+        link.download = file.data.fileName || "download";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        console.error("Download failed:", file);
+      }
+    } catch (error) {
+      console.error("Download error:", error);
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -506,7 +525,7 @@ function RequestDetails({ request, cachedData, onCacheUpdate }) {
                           previewLines: [],
                         });
                       }}
-                      onDelete={(row) => console.log("delete", row)}
+                      onDownload={handleDownloadFile}
                     />
                   </FormSection>
                 );
