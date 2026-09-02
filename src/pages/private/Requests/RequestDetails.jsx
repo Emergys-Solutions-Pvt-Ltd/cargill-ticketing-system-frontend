@@ -72,6 +72,7 @@ function RequestDetails({ request, cachedData, onCacheUpdate }) {
   const [submittedFormLoading, setSubmittedFormLoading] = useState(true);
   const [slaRows, setSlaRows] = useState([]);
   const [slaLoading, setSlaLoading] = useState(true);
+  const [previewModalOpen, setPreviewModalOpen] = useState(false);
 
   const ticketTypeNormalized =
     request?.ticketType === "Task" || request?.ticketType === "task"
@@ -316,6 +317,7 @@ function RequestDetails({ request, cachedData, onCacheUpdate }) {
 
   const handleDownloadFile = async (row) => {
     try {
+      console.log("--------------download");
       const file = await downloadFile({ relativePath: row.relativePath });
       if (file?.success && file.data?.url) {
         const link = document.createElement("a");
@@ -329,6 +331,29 @@ function RequestDetails({ request, cachedData, onCacheUpdate }) {
       }
     } catch (error) {
       console.error("Download error:", error);
+    }
+  };
+
+  const handleViewFile = async (row) => {
+    try {
+      const file = await downloadFile({ relativePath: row.relativePath });
+      if (file?.success && file.data?.url) {
+        setPreviewFile({
+          name: row.Title,
+          uploadedBy: row.AddedBy || row["Created By"],
+          date: row.Date || row["Last Modified"],
+          downloadCount: 1,
+          previewTitle: row.Title,
+          previewUrl: file.data.url,
+          contentType: file.data.contentType,
+          relativePath: row.relativePath,
+        });
+        setPreviewModalOpen(true);
+      } else {
+        console.error("View failed:", file);
+      }
+    } catch (error) {
+      console.error("View error:", error);
     }
   };
 
@@ -515,16 +540,7 @@ function RequestDetails({ request, cachedData, onCacheUpdate }) {
                     <DetailTable
                       columns={section.columns}
                       rows={section.rows}
-                      onView={(row) => {
-                        setPreviewFile({
-                          name: row.Title,
-                          uploadedBy: row.AddedBy,
-                          date: row.Date,
-                          downloadCount: 1,
-                          previewTitle: row.Title,
-                          previewLines: [],
-                        });
-                      }}
+                      onView={handleViewFile}
                       onDownload={handleDownloadFile}
                     />
                   </FormSection>
@@ -581,6 +597,15 @@ function RequestDetails({ request, cachedData, onCacheUpdate }) {
             )}
           </Box>
         )}
+        <FilePreviewModal
+          open={previewModalOpen}
+          onClose={() => setPreviewModalOpen(false)}
+          file={previewFile}
+          onDownload={() => {
+            handleDownloadFile(previewFile);
+          }}
+          onViewHistory={() => console.log("view history", previewFile)}
+        />
       </Box>
     </Box>
   );

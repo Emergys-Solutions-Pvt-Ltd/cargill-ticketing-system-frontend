@@ -1,5 +1,6 @@
 import { Box, IconButton } from "@mui/material";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 // import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
 const DetailTable = ({ columns, rows, onView, onDownload }) => (
@@ -49,6 +50,11 @@ const DetailTable = ({ columns, rows, onView, onDownload }) => (
                 >
                   <IconButton size="small" onClick={() => onDownload?.(row)}>
                     <FileDownloadOutlinedIcon
+                      sx={{ fontSize: 18, color: "#6b7280" }}
+                    />
+                  </IconButton>
+                  <IconButton size="small" onClick={() => onView?.(row)}>
+                    <VisibilityOutlinedIcon
                       sx={{ fontSize: 18, color: "#6b7280" }}
                     />
                   </IconButton>

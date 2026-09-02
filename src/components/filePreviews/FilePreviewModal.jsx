@@ -109,14 +109,23 @@ const FilePreviewModal = ({
           {file.previewTitle}
         </Typography>
 
-        {file.previewLines?.map((line, i) => (
-          <Typography
-            key={i}
-            sx={{ fontSize: "13px", color: "#374151", mb: 0.75 }}
-          >
-            {i + 1}. {line}
+        {file.previewUrl ? (
+          <Box
+            component="iframe"
+            src={file.previewUrl}
+            title={file.previewTitle || file.name}
+            sx={{
+              width: "100%",
+              height: "60vh",
+              border: "none",
+              borderRadius: "6px",
+            }}
+          />
+        ) : (
+          <Typography sx={{ fontSize: "13px", color: "#6b7280" }}>
+            No preview available.
           </Typography>
-        ))}
+        )}
       </DialogContent>
 
       <Box
