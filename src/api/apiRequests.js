@@ -201,18 +201,21 @@ const MOCK_TASK_DETAILS = {
       Type: "File",
       "Created By": "Nicole Salgado Mediz",
       "Last Modified": "02/07/2025 10:04 am",
+      relativePath: "docs/scan_requirements.txt",
     },
     {
-      Title: "design_specifications.docx",
+      Title: "demo_document.docx",
       Type: "File",
       "Created By": "Nicole Salgado Mediz",
       "Last Modified": "11/07/2025 10:04 am",
+      relativePath: "docs/demo_document.docx",
     },
     {
-      Title: "final_report.pptx.jpg",
-      Type: "Image",
+      Title: "demo_spreadsheet.xlsx",
+      Type: "File",
       "Created By": "Nicole Salgado Mediz",
       "Last Modified": "23/07/2025 10:04 am",
+      relativePath: "docs/demo_spreadsheet.xlsx",
     },
   ],
   linkedTasks: [
@@ -355,16 +358,26 @@ export const getSlaData = async (payload) => {
  */
 export const downloadFile = async (payload = {}) => {
   const { relativePath } = payload;
+  const ext = (relativePath || "").split(".").pop().toLowerCase();
 
-  console.log("[mock] relativePath from row:", relativePath);
-  await new Promise((r) => setTimeout(r, 400));
-  console.log(`${window.location.origin}/mock/sample.pdf`, "---------------");
+  const FILE_MAP = {
+    pdf: { file: "docs/demo_document.docx", name: "demo_document.docx" },
+    docx: { file: "docs/demo_document.docx", name: "demo_document.docx" },
+    doc: { file: "docs/demo_document.docx", name: "demo_document.docx" },
+    xlsx: { file: "docs/demo_spreadsheet.xlsx", name: "demo_spreadsheet.xlsx" },
+    xls: { file: "docs/demo_spreadsheet.xlsx", name: "demo_spreadsheet.xlsx" },
+  };
+
+  const match = FILE_MAP[ext] || FILE_MAP["pdf"];
+
+  await new Promise((r) => setTimeout(r, 300));
+  console.log("path", `${window.location.origin}/${match.file}`, "-------------path");
   return {
     success: true,
     message: "File url generated successfully.",
     data: {
-      url: `${window.location.origin}/mock/sample.pdf`,
-      fileName: "sample.pdf",
+      url: `${window.location.origin}/${match.file}`,
+      fileName: match.name,
     },
   };
 };

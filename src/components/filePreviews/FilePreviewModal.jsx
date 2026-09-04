@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,8 +10,8 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import RestoreOutlinedIcon from "@mui/icons-material/RestoreOutlined";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
-import { renderAsync } from "docx-preview";
 import mammoth from "mammoth";
+import * as XLSX from "xlsx";
 
 const getExtension = (filename = "") =>
   filename.split(".").pop().toLowerCase();
@@ -23,224 +23,85 @@ const FilePreviewModal = ({
   onDownload,
   onViewHistory,
 }) => {
-  const docxContainerRef = useRef(null);
-
-  const [fileBuffer, setFileBuffer] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [activeSheet, setActiveSheet] = useState(0);
-  const [docHtml, setDocHtml] = useState("");          // mammoth output for .doc
+  const [docHtml, setDocHtml] = useState("");       // mammoth output for docx
+  const [sheetHtml, setSheetHtml] = useState("");    // SheetJS output for xlsx
 
   const ext = getExtension(file?.name);
-
   const isDocx = ext === "docx";
-  const isDoc = ext === "doc";
-  const needsBuffer = isDocx || isDoc;
+  const isXlsx = ext === "xlsx" || ext === "xls";
+  const needsBuffer = isDocx || isXlsx;
+  // Everything else (pdf, images, etc.) keeps using the plain iframe below, untouched.
 
-  // Fetch file buffer for docx, doc, and xlsx from the signed S3 URL
   useEffect(() => {
     if (!open || !file?.previewUrl || !needsBuffer) {
-      setFileBuffer(null);
-      setError("");
-      setActiveSheet(0);
       setDocHtml("");
+      setSheetHtml("");
+      setError("");
       return;
     }
 
     let cancelled = false;
 
-    const fetchFile = async () => {
+    const fetchAndRender = async () => {
+      setLoading(true);
+      setError("");
+      setDocHtml("");
+      setSheetHtml("");
+
       try {
-        setLoading(true);
-        setError("");
-        setFileBuffer(null);
-
         const response = await fetch(file.previewUrl);
-
-        if (!response.ok) {
-          throw new Error(
-            `Failed to fetch file: ${response.status}`
-          );
-        }
-
+        if (!response.ok) throw new Error(`Failed to fetch file: ${response.status}`);
         const buffer = await response.arrayBuffer();
+        if (cancelled) return;
 
-
-        if (!cancelled) {
-          setFileBuffer(buffer);
+        if (isDocx) {
+          const result = await mammoth.convertToHtml({ arrayBuffer: buffer });
+          if (!cancelled) setDocHtml(result.value);
+        } else if (isXlsx) {
+          const workbook = XLSX.read(buffer, { type: "array" });
+          const firstSheetName = workbook.SheetNames[0];
+          const sheet = workbook.Sheets[firstSheetName];
+          const html = XLSX.utils.sheet_to_html(sheet);
+          if (!cancelled) setSheetHtml(html);
         }
       } catch (err) {
-        console.error("File fetch failed:", err);
-
-        if (!cancelled) {
-          setError("Unable to load file preview.");
-        }
+        console.error("File preview render failed:", err);
+        if (!cancelled) setError("Unable to render this document.");
       } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
+        if (!cancelled) setLoading(false);
       }
     };
 
-    fetchFile();
-
+    fetchAndRender();
     return () => {
       cancelled = true;
     };
-  }, [open, file?.previewUrl, needsBuffer]);
-
-  // --- Render .docx buffer ---
-  useEffect(() => {
-    if (
-      !open ||
-      !isDocx ||
-      !fileBuffer ||
-      !docxContainerRef.current
-    ) {
-      return;
-    }
-
-    const renderDocx = async () => {
-      try {
-        docxContainerRef.current.innerHTML = "";
-
-        const blob = new Blob([fileBuffer], {
-          type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        });
-
-        await renderAsync(
-          blob,
-          docxContainerRef.current,
-          null,
-          {
-            className: "docx-preview",
-            inWrapper: true,
-            ignoreWidth: false,
-            ignoreHeight: false,
-            breakPages: true,
-            ignoreLastRenderedPageBreak: false,
-            experimental: false,
-            trimXmlDeclaration: true,
-            useBase64URL: false,
-            renderHeaders: true,
-            renderFooters: true,
-            renderFootnotes: true,
-            renderEndnotes: true,
-          }
-        );
-      } catch (err) {
-        console.error("DOCX render failed:", err);
-
-        if (docxContainerRef.current) {
-          docxContainerRef.current.innerHTML = "";
-        }
-
-        setError("Unable to render this document.");
-      }
-    };
-
-    renderDocx();
-
-    return () => {
-      if (docxContainerRef.current) {
-        docxContainerRef.current.innerHTML = "";
-      }
-    };
-  }, [open, isDocx, fileBuffer]);
-
-  // --- Render .xlsx / .xls buffer with SheetJS ---
-
-
-  // --- Render .doc buffer with mammoth (converts to HTML) ---
-  useEffect(() => {
-    if (!open || !isDoc || !fileBuffer) {
-      setDocHtml("");
-      return;
-    }
-
-    mammoth
-      .convertToHtml({ arrayBuffer: fileBuffer })
-      .then((result) => {
-        setDocHtml(result.value);
-      })
-      .catch((err) => {
-        console.error("DOC render failed:", err);
-        setError("Unable to render this document.");
-      });
-  }, [open, isDoc, fileBuffer]);
+  }, [open, file?.previewUrl, needsBuffer, isDocx, isXlsx]);
 
   if (!file) return null;
 
   const renderPreview = () => {
-    if (loading) {
+    if (needsBuffer && loading) {
       return (
-        <Box
-          sx={{
-            height: "60vh",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Typography
-            sx={{
-              fontSize: "13px",
-              color: "#6b7280",
-            }}
-          >
-            Loading preview...
-          </Typography>
+        <Box sx={{ height: "60vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Typography sx={{ fontSize: "13px", color: "#6b7280" }}>Loading preview...</Typography>
         </Box>
       );
     }
 
-    if (error) {
+    if (needsBuffer && error) {
       return (
-        <Box
-          sx={{
-            height: "60vh",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Typography
-            sx={{
-              fontSize: "13px",
-              color: "#6b7280",
-            }}
-          >
-            {error}
-          </Typography>
+        <Box sx={{ height: "60vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Typography sx={{ fontSize: "13px", color: "#6b7280" }}>{error}</Typography>
         </Box>
       );
     }
 
-    if (isDocx && fileBuffer) {
+    if (isDocx && docHtml) {
       return (
-        <Box
-          ref={docxContainerRef}
-          sx={{
-            width: "100%",
-            maxHeight: "60vh",
-            overflowY: "auto",
-            "& .docx-wrapper": { backgroundColor: "#f5f5f5", padding: "20px 0" },
-            "& .docx-wrapper > section": { backgroundColor: "#fff", margin: "0 auto", boxShadow: "0 1px 4px rgba(0,0,0,0.15)" },
-          }}
-        />
-      );
-    }
-
-    if (isDoc && docHtml) {
-      return (
-        <Box
-          sx={{
-            maxHeight: "60vh",
-            overflowY: "auto",
-            backgroundColor: "#f5f5f5",
-            p: 2,
-          }}
-        >
+        <Box sx={{ maxHeight: "60vh", overflowY: "auto", backgroundColor: "#f5f5f5", p: 2 }}>
           <Box
             sx={{
               backgroundColor: "#fff",
@@ -250,7 +111,6 @@ const FilePreviewModal = ({
               boxShadow: "0 1px 4px rgba(0,0,0,0.15)",
               fontSize: "14px",
               lineHeight: 1.7,
-              fontFamily: '"Times New Roman", Times, serif',
               color: "#111",
               "& h1, & h2, & h3": { marginTop: "1em", marginBottom: "0.4em" },
               "& p": { marginBottom: "0.6em" },
@@ -263,9 +123,24 @@ const FilePreviewModal = ({
       );
     }
 
+    if (isXlsx && sheetHtml) {
+      return (
+        <Box
+          sx={{
+            maxHeight: "60vh",
+            overflowY: "auto",
+            backgroundColor: "#fff",
+            p: 2,
+            fontSize: "13px",
+            "& table": { borderCollapse: "collapse", width: "100%" },
+            "& td, & th": { border: "1px solid #e5e7eb", padding: "4px 8px" },
+          }}
+          dangerouslySetInnerHTML={{ __html: sheetHtml }}
+        />
+      );
+    }
 
-
-    // Keep iframe fallback for other file types.
+    // Untouched — pdf, images, everything else keep using the iframe.
     if (file.previewUrl) {
       return (
         <Box
@@ -284,12 +159,7 @@ const FilePreviewModal = ({
     }
 
     return (
-      <Typography
-        sx={{
-          fontSize: "13px",
-          color: "#6b7280",
-        }}
-      >
+      <Typography sx={{ fontSize: "13px", color: "#6b7280" }}>
         No preview available.
       </Typography>
     );
@@ -302,29 +172,12 @@ const FilePreviewModal = ({
       maxWidth="md"
       fullWidth
       slotProps={{
-        backdrop: {
-          sx: {
-            backgroundColor: "rgba(0, 0, 0, 0.15)",
-          },
-        },
-        paper: {
-          sx: {
-            borderRadius: "10px",
-            boxShadow: "none",
-          },
-        },
+        backdrop: { sx: { backgroundColor: "rgba(0, 0, 0, 0.15)" } },
+        paper: { sx: { borderRadius: "10px", boxShadow: "none" } },
       }}
     >
       {/* Header */}
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
-          p: 2.5,
-          pb: 2,
-        }}
-      >
+      <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", p: 2.5, pb: 2 }}>
         <Box sx={{ minWidth: 0 }}>
           <Typography
             sx={{
@@ -338,33 +191,15 @@ const FilePreviewModal = ({
           >
             {file.name}
           </Typography>
-
-          <Typography
-            sx={{
-              fontSize: "12px",
-              fontWeight: 400,
-              color: "#6A7282",
-              mt: 0.25,
-            }}
-          >
+          <Typography sx={{ fontSize: "12px", fontWeight: 400, color: "#6A7282", mt: 0.25 }}>
             By {file.uploadedBy} · {file.date}
           </Typography>
         </Box>
 
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-            ml: 2,
-            flexShrink: 0,
-          }}
-        >
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, ml: 2, flexShrink: 0 }}>
           <Button
             size="small"
-            startIcon={
-              <RestoreOutlinedIcon sx={{ fontSize: 16 }} />
-            }
+            startIcon={<RestoreOutlinedIcon sx={{ fontSize: 16 }} />}
             onClick={onViewHistory}
             sx={{
               textTransform: "none",
@@ -380,9 +215,7 @@ const FilePreviewModal = ({
 
           <Button
             size="small"
-            startIcon={
-              <FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />
-            }
+            startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />}
             onClick={onDownload}
             sx={{
               textTransform: "none",
@@ -413,14 +246,7 @@ const FilePreviewModal = ({
           overflowY: "auto",
         }}
       >
-        <Typography
-          sx={{
-            fontSize: "14px",
-            fontWeight: 700,
-            color: "#111827",
-            mb: 1.5,
-          }}
-        >
+        <Typography sx={{ fontSize: "14px", fontWeight: 700, color: "#111827", mb: 1.5 }}>
           {file.previewTitle || file.name}
         </Typography>
 
@@ -428,16 +254,7 @@ const FilePreviewModal = ({
       </DialogContent>
 
       {/* Footer */}
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "flex-end",
-          gap: 1.5,
-          px: 2.5,
-          pb: 2.5,
-          mt: 3,
-        }}
-      >
+      <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1.5, px: 2.5, pb: 2.5, mt: 3 }}>
         <Button
           onClick={onClose}
           sx={{
@@ -448,9 +265,7 @@ const FilePreviewModal = ({
             backgroundColor: "#f3f4f6",
             borderRadius: "6px",
             px: 2,
-            "&:hover": {
-              backgroundColor: "#e5e7eb",
-            },
+            "&:hover": { backgroundColor: "#e5e7eb" },
           }}
         >
           Cancel
@@ -458,10 +273,7 @@ const FilePreviewModal = ({
 
         <Button
           onClick={onDownload}
-          startIcon={
-            <FileDownloadOutlinedIcon sx={{ fontSize: 16 }}
-            />
-          }
+          startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />}
           sx={{
             textTransform: "none",
             fontSize: "13px",
@@ -470,9 +282,7 @@ const FilePreviewModal = ({
             backgroundColor: "#16834b",
             borderRadius: "6px",
             px: 2,
-            "&:hover": {
-              backgroundColor: "#0f6b3c",
-            },
+            "&:hover": { backgroundColor: "#0f6b3c" },
           }}
         >
           Download
@@ -483,4 +293,3 @@ const FilePreviewModal = ({
 };
 
 export default FilePreviewModal;
-
