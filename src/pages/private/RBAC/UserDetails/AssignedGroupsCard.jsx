@@ -4,7 +4,7 @@ import GroupsIcon from "../../../../assets/icons/groups.svg";
 import TrashIcon from "../../../../assets/icons/trash.svg";
 import Loader from "../../../../components/common/Loader";
 
-const GroupItem = ({ group, onViewGroup, onRemoveGroup }) => (
+const GroupItem = ({ group, onViewGroup, onRemoveGroup, onAddQueueToGroup }) => (
   <Box
     onClick={() => onViewGroup?.(group)}
     sx={{
@@ -40,10 +40,21 @@ const GroupItem = ({ group, onViewGroup, onRemoveGroup }) => (
         {group.name}
       </Typography>
     </Box>
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexShrink: 0 }}>
+    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flexShrink: 0 }}>
       <Typography variant="caption" sx={{ color: "text.secondary", fontStyle: "italic", whiteSpace: "nowrap" }}>
         {group.queueCount} queues
       </Typography>
+      {onAddQueueToGroup && (
+        <IconButton
+          size="small"
+          onClick={(e) => { e.stopPropagation(); onAddQueueToGroup?.(group); }}
+          aria-label={`Add queue to ${group.name}`}
+          title="Add queue to group"
+          sx={{ color: "#1C64F2" }}
+        >
+          <AddIcon sx={{ fontSize: 16 }} />
+        </IconButton>
+      )}
       <IconButton
         size="small"
         onClick={(event) => {
@@ -58,7 +69,7 @@ const GroupItem = ({ group, onViewGroup, onRemoveGroup }) => (
   </Box>
 );
 
-const AssignedGroupsCard = ({ groups = [], loading = false, onAssignGroup, onViewGroup, onRemoveGroup }) => {
+const AssignedGroupsCard = ({ groups = [], loading = false, onViewGroup, onRemoveGroup, onAddQueueToGroup }) => {
   const leftColumn = groups.filter((_, index) => index % 2 === 0);
   const rightColumn = groups.filter((_, index) => index % 2 === 1);
 
@@ -77,15 +88,6 @@ const AssignedGroupsCard = ({ groups = [], loading = false, onAssignGroup, onVie
         <Typography sx={{ fontWeight: 600, fontSize: "14px", color: "text.primary" }}>
           Assigned Groups
         </Typography>
-        <Box
-          onClick={onAssignGroup}
-          sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "#1C64F2", cursor: "pointer" }}
-        >
-          <AddIcon sx={{ fontSize: 16 }} />
-          <Typography variant="body2" sx={{ fontWeight: 600 }}>
-            Assign Group
-          </Typography>
-        </Box>
       </Box>
 
       {loading ? (
@@ -105,6 +107,7 @@ const AssignedGroupsCard = ({ groups = [], loading = false, onAssignGroup, onVie
                 group={group}
                 onViewGroup={onViewGroup}
                 onRemoveGroup={onRemoveGroup}
+                onAddQueueToGroup={onAddQueueToGroup}
               />
             ))}
           </Box>
@@ -117,6 +120,7 @@ const AssignedGroupsCard = ({ groups = [], loading = false, onAssignGroup, onVie
                   group={group}
                   onViewGroup={onViewGroup}
                   onRemoveGroup={onRemoveGroup}
+                  onAddQueueToGroup={onAddQueueToGroup}
                 />
               ))}
             </Box>

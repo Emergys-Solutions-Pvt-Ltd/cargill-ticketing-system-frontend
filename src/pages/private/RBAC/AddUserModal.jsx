@@ -5,34 +5,17 @@ import Modal from "../../../components/common/Modal";
 import FormTextField from "../../../components/common/FormTextField";
 import FormSelect from "../../../components/common/FormSelect";
 import FormMultiSelect from "../../../components/common/FormMultiSelect";
-import { getGroups, getDepartments, getUsers } from "../../../api/apiRequests";
+import {
+  getGroups,
+  getDepartments,
+  getUsers,
+  getQueues,
+} from "../../../api/apiRequests";
+import { IS_HR } from "../../../utils/constants";
 
 const USER_ROLE_OPTIONS = [
   { label: "User", value: "user" },
   { label: "Super User", value: "super_user" },
-];
-
-const MOCK_DEPARTMENTS = [
-  { departmentId: "1", departmentName: "Human Resources" },
-  { departmentId: "2", departmentName: "Finance" },
-  { departmentId: "3", departmentName: "Information Technology" },
-  { departmentId: "4", departmentName: "Operations" },
-  { departmentId: "5", departmentName: "Customer Support" },
-];
-
-const MOCK_SUPERUSERS = [
-  { userId: "3", userName: "Mike Wilson", roleCode: "SUPERUSER" },
-  { userId: "4", userName: "Kevin Brown", roleCode: "SUPERUSER" },
-  { userId: "11", userName: "Emma Clark", roleCode: "SUPERUSER" },
-  { userId: "12", userName: "Brian Lewis", roleCode: "SUPERUSER" },
-];
-
-const MOCK_GROUPS_FOR_ASSIGNMENT = [
-  { groupId: "1", groupName: "HR Support" },
-  { groupId: "2", groupName: "HR NA Feedback" },
-  { groupId: "3", groupName: "HR LA PRY Benefits" },
-  { groupId: "4", groupName: "HR APAC Support" },
-  { groupId: "5", groupName: "HR Payroll Queries" },
 ];
 
 const DEFAULT_FORM = {
@@ -44,6 +27,7 @@ const DEFAULT_FORM = {
   reportsTo: "",
   workLocation: "",
   groups: [],
+  queues: [],
 };
 
 const normalizeRole = (role = "") =>
@@ -54,7 +38,14 @@ const MOBILE_REGEX = /^\d{10}$/;
 
 const DEFAULT_ERRORS = { email: "", mobile: "" };
 
-const EDIT_COMPARE_FIELDS = ["role", "name", "email", "mobile", "department", "reportsTo", "workLocation"];
+const EDIT_COMPARE_FIELDS = [
+  "name",
+  "email",
+  "mobile",
+  "department",
+  "reportsTo",
+  "workLocation",
+];
 
 // Builds the /v1/rbac/add-user request body from the modal's internal form state.
 export const buildAddUserPayload = (form) => {
@@ -63,12 +54,14 @@ export const buildAddUserPayload = (form) => {
     userName: form.name.trim(),
     email: form.email.trim(),
     phoneNo: form.mobile.trim(),
-    departmentId: Number(form.department),
+    departmentId: IS_HR ? 1 : Number(form.department),
   };
+
+  if (form.groups.length) payload.assignedGroupIds = form.groups.map(Number);
 
   if (form.role === "user") {
     if (form.reportsTo) payload.reportsToUserId = Number(form.reportsTo);
-    if (form.groups.length) payload.assignedGroupIds = form.groups.map(Number);
+    if (form.queues.length) payload.assignedQueueIds = form.queues.map(Number);
   }
 
   return payload;
@@ -79,13 +72,12 @@ export const buildAddUserPayload = (form) => {
 export const buildEditUserPayload = (form, userId) => {
   const payload = {
     userId: Number(userId),
-    roleCode: form.role === "super_user" ? "SUPERUSER" : "USER",
     userName: form.name.trim(),
     phoneNo: form.mobile.trim(),
     workLocation: form.workLocation.trim(),
   };
 
-  if (form.role === "user" && form.reportsTo) {
+  if (form.reportsTo) {
     payload.reportsToUserId = Number(form.reportsTo);
   }
 
@@ -101,8 +93,7 @@ const formFromUser = (user) => ({
   reportsTo: "",
   workLocation: user.workLocation || "",
   groups: [],
-  // "-" and "Unassigned" are the two "no value" placeholders used by the different
-  // tables that can pass a `user` row into this modal.
+  queues: [],
   reportsToName:
     user.reportsTo && user.reportsTo !== "-" && user.reportsTo !== "Unassigned"
       ? user.reportsTo
@@ -119,12 +110,17 @@ const AddUserModal = ({
   lockedDepartmentName,
 }) => {
   const isEditMode = Boolean(user);
-  const isDepartmentLocked = !isEditMode && lockedDepartmentId !== undefined && lockedDepartmentId !== null;
+  const isDepartmentLocked =
+    !isEditMode &&
+    lockedDepartmentId !== undefined &&
+    lockedDepartmentId !== null;
 
   const [form, setForm] = useState(DEFAULT_FORM);
   const [initialForm, setInitialForm] = useState(null);
   const [groupOptions, setGroupOptions] = useState([]);
   const [groupsLoading, setGroupsLoading] = useState(false);
+  const [queueOptions, setQueueOptions] = useState([]);
+  const [queuesLoading, setQueuesLoading] = useState(false);
   const [departments, setDepartments] = useState([]);
   const [departmentsLoading, setDepartmentsLoading] = useState(false);
   const [reportsToOptions, setReportsToOptions] = useState([]);
@@ -135,33 +131,40 @@ const AddUserModal = ({
     if (!open) return;
     const nextForm = isEditMode
       ? formFromUser(user)
-      : { ...DEFAULT_FORM, department: isDepartmentLocked ? String(lockedDepartmentId) : "" };
+      : {
+          ...DEFAULT_FORM,
+          department: IS_HR
+            ? "1"
+            : isDepartmentLocked
+              ? String(lockedDepartmentId)
+              : "",
+        };
     setForm(nextForm);
     setInitialForm(isEditMode ? nextForm : null);
     setErrors(DEFAULT_ERRORS);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, user, isDepartmentLocked, lockedDepartmentId]);
 
-  // Department is disabled/locked whenever it can't be changed (edit mode or a
-  // locked-department context), so there's no need to hit the API for its options
-  // there — the current department's own name/id is already known.
   useEffect(() => {
-    if (!open || isEditMode || isDepartmentLocked) return;
+    if (!open || isEditMode || isDepartmentLocked || IS_HR) return;
 
     let active = true;
-    setDepartmentsLoading(true);
-    getDepartments()
-      .then((response) => {
+
+    const fetchDepartments = async () => {
+      setDepartmentsLoading(true);
+      try {
+        const response = await getDepartments();
         if (!active) return;
-        setDepartments(response?.data?.length ? response.data : MOCK_DEPARTMENTS);
-      })
-      .catch(() => {
-        if (!active) return;
-        setDepartments(MOCK_DEPARTMENTS);
-      })
-      .finally(() => {
+        setDepartments(response?.data || []);
+      } catch (error) {
+        console.error("Failed to fetch departments:", error);
+        if (active) setDepartments([]);
+      } finally {
         if (active) setDepartmentsLoading(false);
-      });
+      }
+    };
+
+    fetchDepartments();
     return () => {
       active = false;
     };
@@ -176,108 +179,186 @@ const AddUserModal = ({
           value: dept.departmentId,
         }));
 
-  // "Reports To" only renders for role "user" (Super Users don't report to anyone),
-  // so skip fetching it otherwise. Lists this department's Super Users, fetched
-  // whenever the selected department changes.
   useEffect(() => {
-    if (form.role !== "user" || !form.department) {
+    if (form.role !== "user" || (!IS_HR && !form.department)) {
       setReportsToOptions([]);
       return;
     }
 
     let active = true;
-    setReportsToLoading(true);
-    getUsers({ departmentId: form.department })
-      .then((response) => {
+
+    const fetchReportsTo = async () => {
+      setReportsToLoading(true);
+      try {
+        const response = await getUsers(
+          IS_HR ? {} : { departmentId: form.department },
+        );
         if (!active) return;
-        const records = response?.data?.users?.length ? response.data.users : MOCK_SUPERUSERS;
-        const superUsers = records.filter((record) => record.roleCode === "SUPERUSER");
-        setReportsToOptions(superUsers.map((record) => ({ label: record.userName, value: record.userId })));
-      })
-      .catch(() => {
-        if (!active) return;
-        setReportsToOptions(MOCK_SUPERUSERS.map((record) => ({ label: record.userName, value: record.userId })));
-      })
-      .finally(() => {
+        const records = response?.data?.users || [];
+        const superUsers = records.filter(
+          (record) => record.roleCode === "SUPERUSER",
+        );
+        setReportsToOptions(
+          superUsers.map((record) => ({
+            label: record.userName,
+            value: record.userId,
+          })),
+        );
+      } catch (error) {
+        console.error("Failed to fetch reports-to options:", error);
+        if (active) setReportsToOptions([]);
+      } finally {
         if (active) setReportsToLoading(false);
-      });
+      }
+    };
+
+    fetchReportsTo();
     return () => {
       active = false;
     };
   }, [form.department, form.role]);
 
-  // Once Reports To options for the pre-filled department are available, resolve
-  // the edited user's "reports to" name into the matching option value.
   useEffect(() => {
     if (!isEditMode || !form.reportsToName || form.reportsTo) return;
-    const match = reportsToOptions.find((option) => option.label === form.reportsToName);
+    const match = reportsToOptions.find(
+      (option) => option.label === form.reportsToName,
+    );
     if (match) {
       setForm((prev) => ({ ...prev, reportsTo: match.value }));
-      setInitialForm((prev) => (prev ? { ...prev, reportsTo: match.value } : prev));
+      setInitialForm((prev) =>
+        prev ? { ...prev, reportsTo: match.value } : prev,
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reportsToOptions, isEditMode]);
 
-  // Assign Group is never rendered in edit mode, or for role "super_user", so
-  // skip fetching its options in either case.
+  // Assign Group renders for both "user" and "super_user" roles, never in edit mode.
+  // Fetches all groups, unscoped — no longer filtered by Reports To.
   useEffect(() => {
-    if (isEditMode || form.role !== "user" || !form.department) {
+    if (isEditMode) {
+      setGroupOptions([]);
+      return;
+    }
+    if (form.role !== "user" && form.role !== "super_user") {
       setGroupOptions([]);
       return;
     }
 
     let active = true;
-    setGroupsLoading(true);
-    getGroups({ departmentId: form.department })
-      .then((response) => {
+
+    const fetchGroups = async () => {
+      setGroupsLoading(true);
+      try {
+        const response = await getGroups({});
         if (!active) return;
-        const records = response?.data?.groups?.length ? response.data.groups : MOCK_GROUPS_FOR_ASSIGNMENT;
-        setGroupOptions(records.map((record) => ({ label: record.groupName, value: record.groupId })));
-      })
-      .catch(() => {
-        if (!active) return;
-        setGroupOptions(MOCK_GROUPS_FOR_ASSIGNMENT.map((record) => ({ label: record.groupName, value: record.groupId })));
-      })
-      .finally(() => {
+        const records = response?.data?.groups || [];
+        setGroupOptions(
+          records.map((record) => ({
+            label: record.groupName,
+            value: String(record.groupId),
+          })),
+        );
+      } catch (error) {
+        console.error("Failed to fetch groups:", error);
+        if (active) setGroupOptions([]);
+      } finally {
         if (active) setGroupsLoading(false);
-      });
+      }
+    };
+
+    fetchGroups();
     return () => {
       active = false;
     };
-  }, [form.department, form.role, isEditMode]);
+  }, [form.role, isEditMode]);
+
+  // Assign Queue only renders for role "user", never in edit mode.
+  useEffect(() => {
+    if (isEditMode || form.role !== "user" || form.groups.length === 0) {
+      setQueueOptions([]);
+      return;
+    }
+
+    let active = true;
+
+    const fetchQueues = async () => {
+      setQueuesLoading(true);
+      try {
+        const response = await getQueues({ groupIds: form.groups.map(Number) });
+        if (!active) return;
+        const records = response?.data?.queues || [];
+        setQueueOptions(
+          records.map((record) => ({
+            label: record.queueName,
+            value: record.queueId,
+          })),
+        );
+      } catch (error) {
+        console.error("Failed to fetch queues:", error);
+        if (active) setQueueOptions([]);
+      } finally {
+        if (active) setQueuesLoading(false);
+      }
+    };
+
+    fetchQueues();
+    return () => {
+      active = false;
+    };
+  }, [form.role, form.groups, isEditMode]);
 
   const isFormUnchanged =
     isEditMode && initialForm
       ? EDIT_COMPARE_FIELDS.every((key) => form[key] === initialForm[key])
       : false;
 
-  // Every field is required except Mobile Number — for role "user" that also means
-  // Reports To and Assign Group (the two fields only shown for that role).
   const isRequiredFieldsFilled = Boolean(
     form.role &&
-      form.name.trim() &&
-      form.email.trim() &&
-      form.department &&
-      (form.role !== "user" || (form.reportsTo && form.groups.length > 0)),
+    form.name.trim() &&
+    form.email.trim() &&
+    (IS_HR || form.department) &&
+    (form.role !== "user" ||
+      (form.groups.length > 0 && form.queues.length > 0)) &&
+    (form.role !== "super_user" || form.groups.length > 0),
   );
 
-  const isConfirmDisabled = isEditMode ? isFormUnchanged : !isRequiredFieldsFilled;
+  const isConfirmDisabled = isEditMode
+    ? isFormUnchanged
+    : !isRequiredFieldsFilled;
 
   const handleClose = () => {
-    setForm({ ...DEFAULT_FORM, department: isDepartmentLocked ? String(lockedDepartmentId) : "" });
+    setForm({
+      ...DEFAULT_FORM,
+      department: IS_HR
+        ? "1"
+        : isDepartmentLocked
+          ? String(lockedDepartmentId)
+          : "",
+    });
     setInitialForm(null);
     setErrors(DEFAULT_ERRORS);
     onClose?.();
   };
 
   const handleFieldChange = (field) => (event) => {
-    // Mobile only ever accepts digits, so strip anything else as it's typed rather
-    // than waiting for submit-time validation to catch it.
-    const value = field === "mobile" ? event.target.value.replace(/\D/g, "") : event.target.value;
+    const value =
+      field === "mobile"
+        ? event.target.value.replace(/\D/g, "")
+        : event.target.value;
+
+    if (field === "role") {
+      setForm((prev) => ({
+        ...DEFAULT_FORM,
+        department: prev.department,
+        role: value,
+      }));
+      return;
+    }
+
     setForm((prev) => ({
       ...prev,
       [field]: value,
-      ...(field === "department" ? { groups: [], reportsTo: "" } : {}),
+      ...(field === "reportsTo" ? { groups: [], queues: [] } : {}),
     }));
     if (field === "email" || field === "mobile") {
       setErrors((prev) => ({ ...prev, [field]: "" }));
@@ -285,11 +366,19 @@ const AddUserModal = ({
   };
 
   const handleGroupsChange = (value) => {
-    setForm((prev) => ({ ...prev, groups: value }));
+    console.log(value, "groups selected");
+
+    setForm((prev) => ({
+      ...prev,
+      groups: Array.isArray(value) ? value : [value],
+      queues: [],
+    }));
   };
 
-  // Runs before the API call — if either check fails, the errors are shown inline
-  // and onSubmit (which triggers the add/edit API call) is never invoked.
+  const handleQueuesChange = (value) => {
+    setForm((prev) => ({ ...prev, queues: value }));
+  };
+
   const validate = () => {
     const nextErrors = { ...DEFAULT_ERRORS };
 
@@ -311,17 +400,21 @@ const AddUserModal = ({
   };
 
   const gridFields = [
-    {
-      key: "role",
-      node: (
-        <FormSelect
-          label="User Role"
-          value={form.role}
-          onChange={handleFieldChange("role")}
-          options={USER_ROLE_OPTIONS}
-        />
-      ),
-    },
+    ...(isEditMode
+      ? []
+      : [
+          {
+            key: "role",
+            node: (
+              <FormSelect
+                label="User Role"
+                value={form.role}
+                onChange={handleFieldChange("role")}
+                options={USER_ROLE_OPTIONS}
+              />
+            ),
+          },
+        ]),
     {
       key: "name",
       node: (
@@ -345,7 +438,10 @@ const AddUserModal = ({
           error={Boolean(errors.email)}
           helperText={
             errors.email && (
-              <Box component="span" sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+              <Box
+                component="span"
+                sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+              >
                 <WarningAmberRoundedIcon sx={{ fontSize: 14 }} />
                 {errors.email}
               </Box>
@@ -361,7 +457,14 @@ const AddUserModal = ({
           label={
             <>
               Mobile Number{" "}
-              <Box component="span" sx={{ fontStyle: "italic", fontWeight: 400, color: "text.secondary" }}>
+              <Box
+                component="span"
+                sx={{
+                  fontStyle: "italic",
+                  fontWeight: 400,
+                  color: "text.secondary",
+                }}
+              >
                 (optional)
               </Box>
             </>
@@ -373,7 +476,10 @@ const AddUserModal = ({
           error={Boolean(errors.mobile)}
           helperText={
             errors.mobile && (
-              <Box component="span" sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+              <Box
+                component="span"
+                sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+              >
                 <WarningAmberRoundedIcon sx={{ fontSize: 14 }} />
                 {errors.mobile}
               </Box>
@@ -384,13 +490,15 @@ const AddUserModal = ({
     },
   ];
 
-  if (form.role) {
+  if (form.role && !IS_HR) {
     gridFields.push({
       key: "department",
       node: (
         <FormSelect
           label="Department"
-          placeholder={departmentsLoading ? "Loading departments..." : "Select department"}
+          placeholder={
+            departmentsLoading ? "Loading departments..." : "Select department"
+          }
           value={form.department}
           onChange={handleFieldChange("department")}
           options={departmentOptions}
@@ -407,7 +515,7 @@ const AddUserModal = ({
         <FormSelect
           label="Reports To"
           placeholder={
-            !form.department
+            !IS_HR && !form.department
               ? "Select department first"
               : reportsToLoading
                 ? "Loading super users..."
@@ -450,7 +558,15 @@ const AddUserModal = ({
       confirmLoading={loading}
       confirmButtonSx={isEditMode ? { width: "150px" } : undefined}
     >
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 3, height: "350px", overflowY: "auto" }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 3,
+          height: "350px",
+          overflowY: "auto",
+        }}
+      >
         <Box
           sx={{
             display: "grid",
@@ -463,7 +579,10 @@ const AddUserModal = ({
             <Box
               key={field.key}
               sx={{
-                gridColumn: isLastFieldFullWidth && index === gridFields.length - 1 ? "1 / -1" : "auto",
+                gridColumn:
+                  isLastFieldFullWidth && index === gridFields.length - 1
+                    ? "1 / -1"
+                    : "auto",
               }}
             >
               {field.node}
@@ -472,12 +591,32 @@ const AddUserModal = ({
         </Box>
 
         {!isEditMode && form.role === "user" && (
+          <FormSelect
+            label="Assign Group"
+            placeholder={groupsLoading ? "Loading groups..." : "Select group"}
+            value={form.groups[0] || ""}
+            onChange={(event) => handleGroupsChange(event.target.value)}
+            options={groupOptions}
+          />
+        )}
+
+        {!isEditMode && form.role === "super_user" && (
           <FormMultiSelect
             label="Assign Group"
             placeholder={groupsLoading ? "Loading groups..." : "Select groups"}
             value={form.groups}
             onChange={handleGroupsChange}
             options={groupOptions}
+          />
+        )}
+
+        {!isEditMode && form.role === "user" && (
+          <FormMultiSelect
+            label="Assign Queue"
+            placeholder={queuesLoading ? "Loading queues..." : "Select queues"}
+            value={form.queues}
+            onChange={handleQueuesChange}
+            options={queueOptions}
           />
         )}
       </Box>

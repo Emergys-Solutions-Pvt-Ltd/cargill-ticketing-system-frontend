@@ -44,10 +44,7 @@ const InheritedGroupItem = ({ group, onViewGroup }) => (
   </Box>
 );
 
-// Read-only counterpart to AssignedGroupsCard for Super Users: groups here come from
-// department/queue inheritance rather than a direct assignment, so there's no
-// Assign/Remove action, just a list that opens ViewGroupModal on click.
-const InheritedGroupsCard = ({ groups = [], loading = false, onViewGroup }) => {
+const InheritedGroupsCard = ({ groups = [], loading = false, onViewGroup, onAssignGroup }) => {
   return (
     <Box
       sx={{
@@ -62,9 +59,34 @@ const InheritedGroupsCard = ({ groups = [], loading = false, onViewGroup }) => {
         backgroundColor: "background.paper",
       }}
     >
-      <Typography sx={{ fontWeight: 600, fontSize: "14px", color: "text.primary", mb: 3, flexShrink: 0 }}>
-        Inherited Groups ({groups.length})
-      </Typography>
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 3, flexShrink: 0 }}>
+        <Typography sx={{ fontWeight: 600, fontSize: "14px", color: "text.primary" }}>
+          Assigned Groups ({groups.length})
+        </Typography>
+        {onAssignGroup && (
+          <Box
+            component="button"
+            onClick={onAssignGroup}
+            sx={{
+              border: "1px solid",
+              borderColor: "divider",
+              borderRadius: "6px",
+              color: "#1B7F37",
+              backgroundColor: "transparent",
+              cursor: "pointer",
+              width: 28,
+              height: 28,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "18px",
+              lineHeight: 1,
+            }}
+          >
+            +
+          </Box>
+        )}
+      </Box>
 
       {loading ? (
         <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
@@ -97,10 +119,10 @@ const InheritedGroupsCard = ({ groups = [], loading = false, onViewGroup }) => {
             <Box component="img" src={GroupsIcon} alt="" sx={{ width: 28, height: 28 }} />
           </Box>
           <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>
-            No inherited groups yet.
+            No groups assigned yet.
           </Typography>
           <Typography variant="caption" sx={{ color: "text.secondary", maxWidth: 260 }}>
-            Groups will appear here when users are assigned to this Super User.
+            Assign groups to this Super User to get started.
           </Typography>
         </Box>
       ) : (

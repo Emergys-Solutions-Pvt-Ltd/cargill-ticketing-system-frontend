@@ -368,3 +368,9 @@ export const downloadFile = async (payload = {}) => {
     },
   };
 };
+
+export const assignQueuesToUser = (payload = {}) =>
+  apiService.post("/v1/rbac/assign-queue-to-user", payload);
+
+export const removeQueuesFromUser = (payload = {}) =>
+  apiService.post("/v1/rbac/remove-queues-from-user", payload);

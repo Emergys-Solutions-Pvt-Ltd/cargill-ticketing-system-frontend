@@ -1,47 +1,63 @@
 import { useEffect, useState } from "react";
-import { Box, Typography, Button } from "@mui/material";
+import { Box, Typography, Button, IconButton, CircularProgress } from "@mui/material";
 import Modal from "../../../../components/common/Modal";
 import GroupsIcon from "../../../../assets/icons/groups.svg";
+import TrashIcon from "../../../../assets/icons/trash.svg";
 import Loader from "../../../../components/common/Loader";
-import { getQueues } from "../../../../api/apiRequests";
+import { getQueues, removeQueuesFromUser } from "../../../../api/apiRequests";
 
-const MOCK_GROUP_QUEUES = [
-  { id: 1, name: "HR Support" },
-  { id: 2, name: "HR NA Feedback" },
-  { id: 3, name: "HR LA PRY Benefits" },
-  { id: 4, name: "HR LA PDT Hypercare" },
-  { id: 5, name: "HR EMEA Comp & Mobility" },
-  { id: 6, name: "HR Finance APAC Reporting" },
-  { id: 7, name: "HR Marketing EMEA Brand" },
-];
-
-const ViewGroupModal = ({ open, onClose, group }) => {
+const ViewGroupModal = ({ open, onClose, group, userId, onRemoveQueue }) => {
   const [queues, setQueues] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [removingId, setRemovingId] = useState(null);
 
   useEffect(() => {
     if (!open || !group?.id) return;
 
     let active = true;
-    setLoading(true);
-    getQueues({ groupId: Number(group.id) })
-      .then((response) => {
-        if (!active) return;
-        const records = response?.data?.length ? response.data : MOCK_GROUP_QUEUES;
-        setQueues(records.map((record) => ({ id: record.queueId ?? record.id, name: record.queueName ?? record.name })));
-      })
-      .catch(() => {
-        if (!active) return;
-        setQueues(MOCK_GROUP_QUEUES);
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
 
+    const fetchQueues = async () => {
+      setLoading(true);
+      try {
+        const response = await getQueues({ groupId: Number(group.id) });
+        if (!active) return;
+        const records = response?.data || [];
+        setQueues(
+          records.map((record) => ({
+            id: record.queueId ?? record.id,
+            name: record.queueName ?? record.name,
+          })),
+        );
+      } catch (error) {
+        console.error("Failed to fetch group queues:", error);
+        if (active) setQueues([]);
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+
+    fetchQueues();
     return () => {
       active = false;
     };
   }, [open, group?.id]);
+
+  const handleRemoveQueue = async (queue) => {
+    setRemovingId(queue.id);
+    try {
+      await removeQueuesFromUser({
+        userId: Number(userId),
+        queueIds: [Number(queue.id)],
+      });
+      setQueues((prev) => prev.filter((q) => q.id !== queue.id));
+      // Notify parent so it can sync its own state if needed
+      onRemoveQueue?.(queue);
+    } catch (error) {
+      console.error("Failed to remove queue:", error);
+    } finally {
+      setRemovingId(null);
+    }
+  };
 
   return (
     <Modal
@@ -79,12 +95,12 @@ const ViewGroupModal = ({ open, onClose, group }) => {
       ) : (
         <Box
           sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)" },
+            display: "flex",
+            flexDirection: "column",
             gap: 1.5,
             maxHeight: 360,
             overflowY: "auto",
-            pr: 1,
+            pr: 0.5,
           }}
         >
           {queues.map((queue) => (
@@ -93,6 +109,7 @@ const ViewGroupModal = ({ open, onClose, group }) => {
               sx={{
                 display: "flex",
                 alignItems: "center",
+                justifyContent: "space-between",
                 gap: 1.5,
                 px: 2,
                 py: 1.25,
@@ -101,10 +118,31 @@ const ViewGroupModal = ({ open, onClose, group }) => {
                 borderColor: "divider",
               }}
             >
-              <Box component="img" src={GroupsIcon} alt="" sx={{ width: 28, height: 28, flexShrink: 0 }} />
-              <Typography variant="body2" sx={{ fontWeight: 500, color: "text.primary" }}>
-                {queue.name}
-              </Typography>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, minWidth: 0 }}>
+                <Box component="img" src={GroupsIcon} alt="" sx={{ width: 28, height: 28, flexShrink: 0 }} />
+                <Typography
+                  variant="body2"
+                  sx={{ fontWeight: 500, color: "text.primary", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+                >
+                  {queue.name}
+                </Typography>
+              </Box>
+
+              {onRemoveQueue && (
+                <IconButton
+                  size="small"
+                  disabled={removingId === queue.id}
+                  onClick={() => handleRemoveQueue(queue)}
+                  aria-label={`Remove ${queue.name}`}
+                  sx={{ flexShrink: 0 }}
+                >
+                  {removingId === queue.id ? (
+                    <CircularProgress size={16} />
+                  ) : (
+                    <img src={TrashIcon} alt="" width={16} height={16} />
+                  )}
+                </IconButton>
+              )}
             </Box>
           ))}
         </Box>

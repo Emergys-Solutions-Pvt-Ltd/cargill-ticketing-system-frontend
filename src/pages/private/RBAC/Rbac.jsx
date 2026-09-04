@@ -6,6 +6,7 @@ import DepartmentsTab, { mapDepartment, MOCK_DEPARTMENTS } from "./DepartmentsTa
 import UsersTab, { mapUser, MOCK_USERS } from "./UsersTab";
 import GroupsTab, { mapGroup, MOCK_GROUPS } from "./GroupsTab";
 import { getDepartments, getUsers, getGroups } from "../../../api/apiRequests";
+import { IS_HR } from "../../../utils/constants";
 
 const Rbac = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -59,21 +60,23 @@ const Rbac = () => {
       });
   };
 
-  // Fetched once at the page level, independent of which tab is active, so
-  // switching between Departments/Users/Groups no longer re-triggers these calls.
   useEffect(() => {
-    fetchDepartments();
+    if (!IS_HR) fetchDepartments();
     fetchUsers();
     fetchGroups();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const tabs = [
-    {
-      key: "departments",
-      label: "Departments",
-      content: <DepartmentsTab departments={departments} loading={departmentsLoading} />,
-    },
+    ...(!IS_HR
+      ? [
+          {
+            key: "departments",
+            label: "Departments",
+            content: <DepartmentsTab departments={departments} loading={departmentsLoading} />,
+          },
+        ]
+      : []),
     {
       key: "users",
       label: "Users",

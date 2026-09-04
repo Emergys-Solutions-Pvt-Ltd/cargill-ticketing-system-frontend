@@ -9,6 +9,7 @@ const FormMultiSelect = ({
   onChange,
   options = [],
   placeholder = "Select",
+  disabledValues = [],
   sx = {},
   fullWidth = true,
   ...props
@@ -115,14 +116,33 @@ const FormMultiSelect = ({
           }}
           {...props}
         >
-          {options.map((option) => (
-            <MenuItem key={option.value} value={option.value}>
-              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
-                {option.label}
-                {value.includes(option.value) && <CheckIcon sx={{ fontSize: 18, color: "#111928" }} />}
-              </Box>
-            </MenuItem>
-          ))}
+          {options.map((option) => {
+            const isDisabled = disabledValues.includes(option.value);
+            const isSelected = value.includes(option.value);
+            return (
+              <MenuItem
+                key={option.value}
+                value={option.value}
+                disabled={isDisabled}
+                sx={isDisabled ? { opacity: "1 !important" } : {}}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+                  <Box
+                    component="span"
+                    sx={{ color: isDisabled ? "text.disabled" : "inherit" }}
+                  >
+                    {option.label}
+                  </Box>
+                  {isDisabled && (
+                    <CheckIcon sx={{ fontSize: 18, color: "#1B7F37" }} />
+                  )}
+                  {!isDisabled && isSelected && (
+                    <CheckIcon sx={{ fontSize: 18, color: "#111928" }} />
+                  )}
+                </Box>
+              </MenuItem>
+            );
+          })}
         </Select>
       </FormControl>
     </Box>

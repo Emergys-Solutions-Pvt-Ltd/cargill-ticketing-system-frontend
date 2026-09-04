@@ -1,34 +1,137 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Typography, Avatar, IconButton, Menu, MenuItem } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Avatar,
+  IconButton,
+  Menu,
+  MenuItem,
+} from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import CommonTable from "../../../components/common/CommonTable";
 import CommonChip from "../../../components/common/CommonChip";
 import ConfirmDialog from "../../../components/common/ConfirmDialog";
 import AddButton from "../../../components/common/AddButton";
-import AddUserModal, { buildAddUserPayload, buildEditUserPayload } from "./AddUserModal";
+import AddUserModal, {
+  buildAddUserPayload,
+  buildEditUserPayload,
+} from "./AddUserModal";
 import EditUserModal from "./EditUserModal";
 import DeactivateUserIcon from "../../../assets/icons/deactivateUser.svg";
 import ActivateUserIcon from "../../../assets/icons/activateUser.svg";
 import { toggleUserStatus, addUser, editUser } from "../../../api/apiRequests";
-import { nameFromEmail, formatRelativeTime, isActiveStatus } from "../../../utils/format";
+import {
+  nameFromEmail,
+  formatRelativeTime,
+  isActiveStatus,
+} from "../../../utils/format";
 
 export const MOCK_USERS = [
-  { id: 1, name: "John Smith", email: "john.smith@cargill.com", role: "Super User", reportsTo: "-", department: "Human Resources", departmentId: 1, groupsAssigned: 2, status: "Active", lastLogin: "2 hours ago" },
-  { id: 2, name: "Alex Johnson", email: "alex.johnson@cargill.com", role: "Super User", reportsTo: "-", department: "Human Resources", departmentId: 1, groupsAssigned: 4, status: "Active", lastLogin: "1 day ago" },
-  { id: 3, name: "Rahul Patel", email: "rahul.patel@cargill.com", role: "User", reportsTo: "Alex Johnson", department: "Human Resources", departmentId: 1, groupsAssigned: 5, status: "Active", lastLogin: "3 hours ago" },
-  { id: 4, name: "Jennifer Garcia", email: "jennifer.garcia@cargill.com", role: "User", reportsTo: "Alex Johnson", department: "Human Resources", departmentId: 1, groupsAssigned: 3, status: "Active", lastLogin: "5 hours ago" },
-  { id: 5, name: "Michael Chen", email: "michael.chen@cargill.com", role: "User", reportsTo: "Alex Johnson", department: "Human Resources", departmentId: 1, groupsAssigned: 3, status: "Inactive", lastLogin: "5 days ago" },
-  { id: 6, name: "Priya Sharma", email: "priya.sharma@cargill.com", role: "User", reportsTo: "Alex Johnson", department: "Human Resources", departmentId: 1, groupsAssigned: 4, status: "Active", lastLogin: "1 day ago" },
-  { id: 7, name: "James Wilson", email: "james.wilson@cargill.com", role: "User", reportsTo: "Alex Johnson", department: "Human Resources", departmentId: 1, groupsAssigned: 2, status: "Active", lastLogin: "2 days ago" },
-  { id: 8, name: "Lisa Anderson", email: "lisa.anderson@cargill.com", role: "User", reportsTo: "Alex Johnson", department: "Human Resources", departmentId: 1, groupsAssigned: 4, status: "Active", lastLogin: "4 hours ago" },
+  {
+    id: 1,
+    name: "John Smith",
+    email: "john.smith@cargill.com",
+    role: "Super User",
+    reportsTo: "-",
+    department: "Human Resources",
+    departmentId: 1,
+    groupsAssigned: 2,
+    status: "Active",
+    lastLogin: "2 hours ago",
+  },
+  {
+    id: 2,
+    name: "Alex Johnson",
+    email: "alex.johnson@cargill.com",
+    role: "Super User",
+    reportsTo: "-",
+    department: "Human Resources",
+    departmentId: 1,
+    groupsAssigned: 4,
+    status: "Active",
+    lastLogin: "1 day ago",
+  },
+  {
+    id: 3,
+    name: "Rahul Patel",
+    email: "rahul.patel@cargill.com",
+    role: "User",
+    reportsTo: "Alex Johnson",
+    department: "Human Resources",
+    departmentId: 1,
+    groupsAssigned: 5,
+    status: "Active",
+    lastLogin: "3 hours ago",
+  },
+  {
+    id: 4,
+    name: "Jennifer Garcia",
+    email: "jennifer.garcia@cargill.com",
+    role: "User",
+    reportsTo: "Alex Johnson",
+    department: "Human Resources",
+    departmentId: 1,
+    groupsAssigned: 3,
+    status: "Active",
+    lastLogin: "5 hours ago",
+  },
+  {
+    id: 5,
+    name: "Michael Chen",
+    email: "michael.chen@cargill.com",
+    role: "User",
+    reportsTo: "Alex Johnson",
+    department: "Human Resources",
+    departmentId: 1,
+    groupsAssigned: 3,
+    status: "Inactive",
+    lastLogin: "5 days ago",
+  },
+  {
+    id: 6,
+    name: "Priya Sharma",
+    email: "priya.sharma@cargill.com",
+    role: "User",
+    reportsTo: "Alex Johnson",
+    department: "Human Resources",
+    departmentId: 1,
+    groupsAssigned: 4,
+    status: "Active",
+    lastLogin: "1 day ago",
+  },
+  {
+    id: 7,
+    name: "James Wilson",
+    email: "james.wilson@cargill.com",
+    role: "User",
+    reportsTo: "Alex Johnson",
+    department: "Human Resources",
+    departmentId: 1,
+    groupsAssigned: 2,
+    status: "Active",
+    lastLogin: "2 days ago",
+  },
+  {
+    id: 8,
+    name: "Lisa Anderson",
+    email: "lisa.anderson@cargill.com",
+    role: "User",
+    reportsTo: "Alex Johnson",
+    department: "Human Resources",
+    departmentId: 1,
+    groupsAssigned: 4,
+    status: "Active",
+    lastLogin: "4 hours ago",
+  },
 ];
 
 export const mapUser = (record) => ({
   id: record.userId,
   name: record.userName || nameFromEmail(record.email),
   email: record.email,
-  role: record.roleCode === "SUPERUSER" ? "Super User" : record.roleName || "User",
+  role:
+    record.roleCode === "SUPERUSER" ? "Super User" : record.roleName || "User",
   reportsTo: record.reportsToUserName || "-",
   department: record.departmentName || "Unassigned",
   departmentId: record.departmentId,
@@ -119,7 +222,10 @@ const UsersTab = ({ users = null, loading = false, onUsersChanged }) => {
   );
 
   const applyStatusChange = (row, nextIsActive) => {
-    setStatusOverrides((prev) => ({ ...prev, [row.id]: nextIsActive ? "Active" : "Inactive" }));
+    setStatusOverrides((prev) => ({
+      ...prev,
+      [row.id]: nextIsActive ? "Active" : "Inactive",
+    }));
   };
 
   const handleToggleStatus = (row) => {
@@ -149,7 +255,10 @@ const UsersTab = ({ users = null, loading = false, onUsersChanged }) => {
             >
               {getInitials(value)}
             </Avatar>
-            <Typography variant="body2" sx={{ color: "#1C64F2", fontWeight: 500 }}>
+            <Typography
+              variant="body2"
+              sx={{ color: "#1C64F2", fontWeight: 500 }}
+            >
               {value}
             </Typography>
           </Box>
@@ -184,7 +293,9 @@ const UsersTab = ({ users = null, loading = false, onUsersChanged }) => {
           mb: 2,
         }}
       >
-        <Typography sx={{ fontWeight: 600, fontSize: "14px", color: "text.primary" }}>
+        <Typography
+          sx={{ fontWeight: 600, fontSize: "14px", color: "text.primary" }}
+        >
           List of Users ({userRows.length})
         </Typography>
         <AddButton onClick={() => setAddUserOpen(true)}>Add User</AddButton>
@@ -194,7 +305,9 @@ const UsersTab = ({ users = null, loading = false, onUsersChanged }) => {
         sx={{ flexGrow: 1, minHeight: 0 }}
         columns={userColumns}
         rows={paginatedUsers}
-        onRowClick={(row) => navigate(`/rbac/users/${row.id}`, { state: { user: row } })}
+        onRowClick={(row) =>
+          navigate(`/rbac/users/${row.id}`, { state: { user: row } })
+        }
         loading={loading}
         sortable
         emptyMessage="No users to display yet."
@@ -223,7 +336,10 @@ const UsersTab = ({ users = null, loading = false, onUsersChanged }) => {
         onClose={() => setDeactivateTarget(null)}
         onConfirm={() => {
           setStatusUpdating(true);
-          toggleUserStatus({ userId: Number(deactivateTarget.id), isActive: false })
+          toggleUserStatus({
+            userId: Number(deactivateTarget.id),
+            isActive: false,
+          })
             .then(() => applyStatusChange(deactivateTarget, false))
             .finally(() => {
               setStatusUpdating(false);
@@ -234,7 +350,8 @@ const UsersTab = ({ users = null, loading = false, onUsersChanged }) => {
         title="Are you sure?"
         message={
           <>
-            Do you really want to deactivate this user "<strong>{deactivateTarget?.name}</strong>"?
+            Do you really want to deactivate this user "
+            <strong>{deactivateTarget?.name}</strong>"?
           </>
         }
         confirmLabel="Deactivate"
@@ -247,7 +364,10 @@ const UsersTab = ({ users = null, loading = false, onUsersChanged }) => {
         onClose={() => setActivateTarget(null)}
         onConfirm={() => {
           setStatusUpdating(true);
-          toggleUserStatus({ userId: Number(activateTarget.id), isActive: true })
+          toggleUserStatus({
+            userId: Number(activateTarget.id),
+            isActive: true,
+          })
             .then(() => applyStatusChange(activateTarget, true))
             .finally(() => {
               setStatusUpdating(false);
@@ -258,7 +378,8 @@ const UsersTab = ({ users = null, loading = false, onUsersChanged }) => {
         title="Are you sure?"
         message={
           <>
-            Do you really want to activate this user "<strong>{activateTarget?.name}</strong>"?
+            Do you really want to activate this user "
+            <strong>{activateTarget?.name}</strong>"?
           </>
         }
         confirmLabel="Activate"

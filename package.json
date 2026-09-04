@@ -19,9 +19,12 @@
     "@tailwindcss/vite": "^4.3.0",
     "axios": "^1.18.1",
     "dayjs": "^1.11.21",
+    "docx-preview": "^0.4.0",
+    "mammoth": "^1.12.2",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
-    "react-router-dom": "^7.15.1"
+    "react-router-dom": "^7.15.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
